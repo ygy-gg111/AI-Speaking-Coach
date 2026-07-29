@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ConversationStatus {
+  ACTIVE
+  COMPLETED
+  ABANDONED
+}
+
+enum MessageRole {
+  USER
+  ASSISTANT
+  SYSTEM
+}
+
+enum RealtimeSessionStatus {
+  CREATED
+  CONNECTED
+  COMPLETED
+  FAILED
+}
+
+enum AnalysisStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+model User {
+  id           String         @id @default(cuid())
+  email        String         @unique
+  passwordHash String
+  locale       String         @default("zh-CN")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  profile      UserProfile?
+  conversations Conversation[]
+
+  @@map("users")
+}
+
+model UserProfile {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  displayName      String?
+  nativeLanguage   String   @default("zh-CN")
+  targetLanguage   String   @default("en")
+  level            String   @default("A2")
+  dailyGoalMinutes Int      @default(10)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model Scene {
+  id           String         @id @default(cuid())
+  slug         String         @unique
+  titleKey     String
+  descriptionKey String
+  systemPrompt String
+  isActive     Boolean        @default(true)
+  sortOrder    Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  conversations Conversation[]
+
+  @@map("scenes")
+}
+
+model Conversation {
+  id              String             @id @default(cuid())
+  userId          String
+  sceneId         String?
+  status          ConversationStatus @default(ACTIVE)
+  startedAt       DateTime           @default(now())
+  endedAt         DateTime?
+  durationSeconds Int?
+  summary         String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scene           Scene?             @relation(fields: [sceneId], references: [id], onDelete: SetNull)
+  messages        Message[]
+  realtimeSessions RealtimeSession[]
+  analysisJobs    AnalysisJob[]
+
+  @@index([userId, createdAt])
+  @@index([sceneId])
+  @@map("conversations")
+}
+
+model Message {
+  id             String      @id @default(cuid())
+  conversationId String
+  role           MessageRole
+  content        String
+  transcript     String?
+  sequence       Int
+  createdAt      DateTime    @default(now())
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@unique([conversationId, sequence])
+  @@index([conversationId, createdAt])
+  @@map("messages")
+}
+
+model RealtimeSession {
+  id                String                @id @default(cuid())
+  conversationId    String
+  providerSessionId String?
+  status            RealtimeSessionStatus @default(CREATED)
+  configuration     Json?
+  startedAt         DateTime              @default(now())
+  endedAt           DateTime?
+  conversation      Conversation          @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@map("realtime_sessions")
+}
+
+model AnalysisJob {
+  id             String         @id @default(cuid())
+  conversationId String
+  type           String
+  status         AnalysisStatus @default(PENDING)
+  result         Json?
+  errorMessage   String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  conversation   Conversation   @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, status])
+  @@map("analysis_jobs")
+}

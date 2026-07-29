@@ -1,0 +1,64 @@
+.record {
+  display: grid;
+  grid-template-columns: 76px minmax(150px, 1.2fr) minmax(180px, 1fr) auto auto;
+  align-items: center;
+  gap: 14px;
+  min-height: 78px;
+  padding: 8px 14px 8px 8px;
+  border: 1px solid var(--app-border);
+  border-radius: 13px;
+  background: var(--app-surface);
+}
+
+.record > :first-child {
+  width: 76px;
+  min-height: 58px;
+  flex-basis: 76px;
+}
+
+.primary strong,
+.primary span,
+.stats span {
+  display: block;
+}
+
+.primary strong {
+  font-size: 13px;
+}
+
+.primary span,
+.record time,
+.stats {
+  color: var(--app-muted);
+  font-size: 11px;
+}
+
+.primary span {
+  margin-top: 4px;
+}
+
+.stats {
+  display: flex;
+  gap: 18px;
+}
+
+.arrow {
+  color: #aaa9b5;
+}
+
+@media (max-width: 767px) {
+  .record {
+    grid-template-columns: 66px minmax(0, 1fr) auto;
+  }
+
+  .record > :first-child {
+    width: 66px;
+    min-height: 54px;
+    flex-basis: 66px;
+  }
+
+  .stats,
+  .record time {
+    display: none;
+  }
+}

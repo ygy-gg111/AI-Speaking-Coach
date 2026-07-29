@@ -1,0 +1,109 @@
+.cover {
+  position: relative;
+  min-height: 126px;
+  overflow: hidden;
+  border-radius: 14px 14px 0 0;
+  isolation: isolate;
+}
+
+.cover::before,
+.cover::after {
+  position: absolute;
+  content: "";
+}
+
+.cover::before {
+  inset: auto -8% -30% 30%;
+  height: 68%;
+  transform: skewX(-18deg);
+  border-radius: 60% 0 0;
+  background: rgba(255, 255, 255, 0.24);
+}
+
+.cover::after {
+  inset: 18% auto auto 12%;
+  width: 42%;
+  height: 12%;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.38);
+  box-shadow: 24px 17px 0 rgba(255, 255, 255, 0.14);
+}
+
+.cover[data-tone="coffee"] {
+  background: linear-gradient(145deg, #704d37, #c18c55 55%, #e8b979);
+}
+
+.cover[data-tone="airport"] {
+  background: linear-gradient(145deg, #82bce2, #c5e6f6 52%, #ddd5be);
+}
+
+.cover[data-tone="meeting"] {
+  background: linear-gradient(145deg, #4c6476, #8ca0a9 55%, #c6a57b);
+}
+
+.cover[data-tone="restaurant"] {
+  background: linear-gradient(145deg, #9a3f25, #dc7c3c 56%, #f5bd69);
+}
+
+.cover[data-tone="shopping"] {
+  background: linear-gradient(145deg, #c77b75, #e5b89d 55%, #f4dcc7);
+}
+
+.cover[data-tone="metro"] {
+  background: linear-gradient(145deg, #3d5d78, #6a9aba 55%, #d6e1e5);
+}
+
+.cover[data-tone="hotel"] {
+  background: linear-gradient(145deg, #8c7667, #c1b1a3 55%, #e4dacf);
+}
+
+.cover[data-tone="presentation"] {
+  background: linear-gradient(145deg, #334d5d, #5f7e82 52%, #d0a77d);
+}
+
+.mark {
+  position: absolute;
+  right: 17px;
+  bottom: 12px;
+  z-index: 2;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 42px;
+  font-weight: 800;
+  line-height: 1;
+  text-shadow: 0 8px 18px rgba(28, 24, 39, 0.18);
+}
+
+.orbOne,
+.orbTwo {
+  position: absolute;
+  z-index: -1;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.orbOne {
+  width: 90px;
+  height: 90px;
+  right: -25px;
+  top: -28px;
+}
+
+.orbTwo {
+  width: 52px;
+  height: 52px;
+  left: 12px;
+  bottom: -25px;
+}
+
+.compact {
+  width: 96px;
+  min-height: 64px;
+  flex: 0 0 96px;
+  border-radius: 10px;
+}
+
+.compact .mark {
+  right: 10px;
+  bottom: 7px;
+  font-size: 25px;
+}

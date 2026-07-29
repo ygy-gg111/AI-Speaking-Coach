@@ -1,0 +1,172 @@
+.page {
+  width: min(1040px, 100%);
+  margin: 0 auto;
+  padding: 46px 44px 72px;
+}
+
+.welcome {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.eyebrow,
+.sectionEyebrow {
+  color: var(--app-primary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.welcome h1 {
+  margin: 8px 0 5px;
+  font-size: clamp(28px, 3.2vw, 39px);
+  line-height: 1.2;
+}
+
+.welcome h1 span {
+  display: inline-block;
+  transform: rotate(-10deg);
+  font-size: 0.8em;
+}
+
+.welcome p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 13px;
+}
+
+.metricGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 30px;
+}
+
+.metricGrid b {
+  color: var(--app-success);
+}
+
+.section {
+  margin-top: 36px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 14px;
+}
+
+.sectionHeader h2 {
+  margin: 4px 0 0;
+  font-size: 18px;
+}
+
+.sectionHeader > a {
+  color: #8b8999;
+  font-size: 12px;
+}
+
+.sectionHeader > a:hover {
+  color: var(--app-primary);
+}
+
+.recommendedGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.mobileStreak {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .page {
+    padding-inline: 30px;
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding: 24px 16px 36px;
+  }
+
+  .welcome {
+    align-items: flex-start;
+  }
+
+  .welcome h1 {
+    font-size: 26px;
+  }
+
+  .welcome > a {
+    display: none;
+  }
+
+  .metricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 22px;
+  }
+
+  .metricGrid > :nth-child(3) {
+    display: none;
+  }
+
+  .section {
+    margin-top: 30px;
+  }
+
+  .sectionHeader h2 {
+    font-size: 17px;
+  }
+
+  .recommendedGrid {
+    display: block;
+  }
+
+  .recommendedGrid > :not(:first-child) {
+    display: none;
+  }
+
+  .recentSection {
+    display: none;
+  }
+
+  .mobileStreak {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    margin-top: 24px;
+    padding: 15px;
+    border: 1px solid #eeeafc;
+    border-radius: 15px;
+    background: #fff;
+  }
+
+  .fireIcon {
+    display: grid;
+    width: 44px;
+    height: 44px;
+    place-items: center;
+    border-radius: 13px;
+    color: #f69c19;
+    background: #fff4db;
+    font-size: 21px;
+  }
+
+  .mobileStreak strong {
+    font-size: 14px;
+  }
+
+  .mobileStreak p {
+    margin: 3px 0 0;
+    color: var(--app-muted);
+    font-size: 11px;
+  }
+}

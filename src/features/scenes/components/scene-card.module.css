@@ -1,0 +1,163 @@
+.card {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 15px;
+  background: var(--app-surface);
+  box-shadow: 0 8px 24px rgba(48, 43, 79, 0.05);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--app-shadow);
+}
+
+.body {
+  padding: 15px;
+}
+
+.titleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.titleRow h3 {
+  margin: 0;
+  color: var(--app-text);
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+.titleRow p {
+  min-height: 38px;
+  margin: 6px 0 0;
+  color: var(--app-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.favorite {
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #f4a21e;
+  background: transparent;
+  cursor: pointer;
+}
+
+.favorite:hover {
+  background: #fff8e8;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 13px 0;
+  color: #8a8b99;
+  font-size: 11px;
+}
+
+.stars {
+  display: flex;
+  gap: 2px;
+  color: #f3a21c;
+  font-size: 11px;
+}
+
+.startButton {
+  height: 36px;
+  background: linear-gradient(90deg, #8067f6, #684ee6);
+}
+
+.recommended .titleRow p {
+  display: none;
+}
+
+.recommended .body {
+  padding-top: 13px;
+}
+
+.compact {
+  display: flex;
+  align-items: stretch;
+  min-height: 86px;
+  border-radius: 12px;
+}
+
+.compact:hover {
+  transform: none;
+}
+
+.compact .body {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  padding: 11px 13px;
+}
+
+.compact .meta {
+  justify-content: flex-start;
+  margin: 6px 0 0;
+}
+
+.compact .favorite {
+  position: relative;
+  z-index: 2;
+}
+
+.compactLink {
+  position: absolute;
+  inset: 0;
+}
+
+@media (max-width: 767px) {
+  .grid {
+    display: flex;
+    align-items: stretch;
+    min-height: 100px;
+  }
+
+  .grid > :first-child {
+    width: 118px;
+    min-height: 100px;
+    flex: 0 0 118px;
+    border-radius: 14px 0 0 14px;
+  }
+
+  .grid .body {
+    min-width: 0;
+    flex: 1;
+    padding: 12px;
+  }
+
+  .grid .titleRow p {
+    display: none;
+  }
+
+  .grid .meta {
+    justify-content: flex-start;
+    margin: 7px 0;
+  }
+
+  .grid .startButton {
+    width: auto;
+    min-width: 96px;
+    height: 30px;
+    font-size: 12px;
+  }
+}
