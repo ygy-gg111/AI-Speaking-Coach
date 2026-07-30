@@ -616,7 +616,7 @@ src/
 | Realtime 临时凭证 | `POST /api/v1/realtime/session` |
 | 保存消息事件 | `POST /api/v1/conversations/:id/messages` |
 | 结束练习 | `POST /api/v1/conversations/:id/complete` |
-| AI 评估 | `GET /api/v1/conversations/:id/review` |
+| AI 评估 | `POST /api/v1/conversations/:id/review` |
 | 我的场景 | `GET /api/v1/my-scenes` |
 | 收藏场景 | `POST /api/v1/scenes/:id/favorite` |
 | 取消收藏 | `DELETE /api/v1/scenes/:id/favorite` |

@@ -117,6 +117,14 @@
   },
   "Evaluation": {
     "title": "AI Coach",
+    "analysis": {
+      "idle": "Sample feedback",
+      "loading": "Analyzing",
+      "ready": "AI analyzed",
+      "fallback": "Local fallback",
+      "error": "Analysis failed"
+    },
+    "retryAnalysis": "Retry analysis",
     "yourExpression": "Your expression",
     "naturalExpression": "A more natural expression",
     "reason": "Why",

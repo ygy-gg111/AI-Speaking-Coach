@@ -5,6 +5,7 @@ import {
   CloseCircleFilled,
   HeartFilled,
   HeartOutlined,
+  LoadingOutlined,
   ReloadOutlined,
   StarFilled,
   StarOutlined,
@@ -24,12 +25,16 @@ type CoachEvaluationPanelProps = {
   evaluation: ConversationEvaluation;
   showStats?: boolean;
   onRetry?: () => void;
+  analysisStatus?: "idle" | "loading" | "ready" | "fallback" | "error";
+  onAnalysisRetry?: () => void;
 };
 
 export function CoachEvaluationPanel({
   evaluation,
   showStats = true,
   onRetry,
+  analysisStatus = "idle",
+  onAnalysisRetry,
 }: CoachEvaluationPanelProps) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("Evaluation");
@@ -43,7 +48,25 @@ export function CoachEvaluationPanel({
             <ThunderboltFilled />
           </span>
           <h2>{t("title")}</h2>
+          <span
+            className={`${styles.analysisStatus} ${styles[analysisStatus]}`}
+            role="status"
+          >
+            {analysisStatus === "loading" && <LoadingOutlined spin />}
+            {t(`analysis.${analysisStatus}`)}
+          </span>
         </header>
+
+        {analysisStatus === "error" && onAnalysisRetry && (
+          <Button
+            className={styles.analysisRetry}
+            type="link"
+            size="small"
+            onClick={onAnalysisRetry}
+          >
+            {t("retryAnalysis")}
+          </Button>
+        )}
 
         <div className={styles.expression}>
           <span>{t("yourExpression")}</span>

@@ -25,6 +25,40 @@
   font-size: 16px;
 }
 
+.analysisStatus {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 3px 7px;
+  border-radius: 999px;
+  color: var(--app-muted);
+  background: #f3f2f8;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.analysisStatus.ready {
+  color: #277849;
+  background: #eaf8ef;
+}
+
+.analysisStatus.fallback {
+  color: #98630a;
+  background: #fff4dc;
+}
+
+.analysisStatus.error {
+  color: #b93342;
+  background: #fff0f2;
+}
+
+.analysisRetry {
+  margin: 6px 12px -6px;
+  padding-inline: 6px;
+  font-size: 10px;
+}
+
 .coachIcon {
   color: #f1a11e;
 }

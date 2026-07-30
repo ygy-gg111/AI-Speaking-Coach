@@ -117,6 +117,14 @@
   },
   "Evaluation": {
     "title": "AI 小老师",
+    "analysis": {
+      "idle": "示例反馈",
+      "loading": "正在分析",
+      "ready": "AI 已分析",
+      "fallback": "本地降级",
+      "error": "分析失败"
+    },
+    "retryAnalysis": "重新分析",
     "yourExpression": "你的表达",
     "naturalExpression": "更自然的表达",
     "reason": "原因",

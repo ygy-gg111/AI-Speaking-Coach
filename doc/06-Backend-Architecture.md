@@ -1131,6 +1131,28 @@ DataChannel：字幕、VAD、打断、错误与会话事件
 
 # 7.25 文字降级模式与 SSE
 
+在进入文字流式降级前，结构化学习评估使用独立接口：
+
+```text
+POST /api/v1/conversations/:id/review
+```
+
+请求包含场景、学习等级、练习时长和最多 50 条最终消息。服务端使用 Responses API Structured Outputs 与 Zod Schema 生成：
+
+```text
+原始表达
+自然表达
+中英文原因
+难度
+新表达数量
+纠错数量
+练习时长
+```
+
+Realtime 回复不直接作为结构化评估。没有 API Key 或上游分析失败时，接口返回 `source: fallback` 的基础分析，保证练习结束和复盘页面仍可使用。
+
+------
+
 SSE 只用于文字输入降级模式和异步纠错卡片更新，不承担实时音频传输。
 
 ```

@@ -8,9 +8,10 @@ import {
 } from "@ant-design/icons";
 import { Alert, Button } from "antd";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CoachEvaluationPanel } from "@/features/correction/components/coach-evaluation-panel";
+import { useConversationReview } from "@/features/correction/hooks/use-conversation-review";
 import { useRealtimeSession } from "@/features/realtime/hooks/use-realtime-session";
 import { SceneCover } from "@/features/scenes/components/scene-cover";
 import { mockScenes } from "@/features/scenes/mock-scenes";
@@ -23,7 +24,11 @@ import { ConversationTimeline } from "./conversation-timeline";
 import { VoiceControlBar } from "../../realtime/components/voice-control-bar";
 import styles from "./practice-session.module.css";
 
-export function PracticeSession() {
+type PracticeSessionProps = {
+  conversationId: string;
+};
+
+export function PracticeSession({ conversationId }: PracticeSessionProps) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("Practice");
   const router = useRouter();
@@ -31,17 +36,26 @@ export function PracticeSession() {
   const transcript = useRealtimeStore((store) => store.transcript);
   const resetRealtime = useRealtimeStore((store) => store.reset);
   const [hint, setHint] = useState<string | null>(null);
+  const [isEnding, setIsEnding] = useState(false);
+  const startedAtRef = useRef<number | null>(null);
+  const lastAnalyzedTurnRef = useRef("");
   const scene = mockScenes[1];
   const realtimeOptions = useMemo(
     () => ({
-      conversationId: "practice-demo",
+      conversationId,
       sceneName: scene.title.en,
       learnerLevel: "A2",
     }),
-    [scene.title.en],
+    [conversationId, scene.title.en],
   );
   const { connect, disconnect, error, sendText, toggleMicrophone } =
     useRealtimeSession(realtimeOptions);
+  const {
+    analyze,
+    error: analysisError,
+    isAnalyzing,
+    review,
+  } = useConversationReview(realtimeOptions);
   const messages = useMemo(
     () => [
       ...mockConversationMessages,
@@ -54,10 +68,51 @@ export function PracticeSession() {
     ],
     [transcript],
   );
+  const reviewMessages = useMemo(
+    () =>
+      messages.map((message) => ({
+        role: message.role,
+        text: message.text.en,
+      })),
+    [messages],
+  );
+  const completedUserTurns = useMemo(
+    () =>
+      transcript
+        .filter((item) => item.role === "user" && item.final)
+        .map((item) => `${item.id}:${item.text}`)
+        .join("|"),
+    [transcript],
+  );
+
+  const analyzeCurrentConversation = useCallback(
+    () => {
+      const startedAt = startedAtRef.current ?? Date.now();
+      return analyze(
+        reviewMessages,
+        Math.max(1, Math.round((Date.now() - startedAt) / 1_000)),
+      );
+    },
+    [analyze, reviewMessages],
+  );
 
   useEffect(() => {
+    startedAtRef.current = Date.now();
     resetRealtime();
   }, [resetRealtime]);
+
+  useEffect(() => {
+    if (
+      state !== "listening" ||
+      !completedUserTurns ||
+      completedUserTurns === lastAnalyzedTurnRef.current
+    ) {
+      return;
+    }
+
+    lastAnalyzedTurnRef.current = completedUserTurns;
+    void analyzeCurrentConversation().catch(() => undefined);
+  }, [analyzeCurrentConversation, completedUserTurns, state]);
 
   function handleMicrophone() {
     toggleMicrophone();
@@ -69,9 +124,16 @@ export function PracticeSession() {
     }
   }
 
-  function endPractice() {
+  async function endPractice() {
+    setIsEnding(true);
     disconnect();
-    router.push("/practice/demo/review");
+    try {
+      await analyzeCurrentConversation();
+    } catch {
+      // The review route still has the local fallback already shown in the UI.
+    } finally {
+      router.push(`/practice/${conversationId}/review`);
+    }
   }
 
   return (
@@ -94,7 +156,8 @@ export function PracticeSession() {
             type="text"
             danger
             icon={<CloseOutlined />}
-            onClick={endPractice}
+            loading={isEnding}
+            onClick={() => void endPractice()}
           >
             {t("endPractice")}
           </Button>
@@ -165,7 +228,21 @@ export function PracticeSession() {
 
         <aside className={styles.evaluationColumn}>
           <CoachEvaluationPanel
-            evaluation={mockEvaluation}
+            evaluation={review?.evaluation ?? mockEvaluation}
+            analysisStatus={
+              isAnalyzing
+                ? "loading"
+                : analysisError
+                  ? "error"
+                  : review?.source === "ai"
+                    ? "ready"
+                    : review
+                      ? "fallback"
+                      : "idle"
+            }
+            onAnalysisRetry={() =>
+              void analyzeCurrentConversation().catch(() => undefined)
+            }
             onRetry={() => setHint("I want to go to Japan.")}
           />
         </aside>

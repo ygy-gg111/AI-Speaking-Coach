@@ -77,6 +77,11 @@ UI 原型对应的页面、公共组件和开发顺序见：
 OPENAI_API_KEY="..."
 OPENAI_REALTIME_MODEL="gpt-realtime-2.1"
 OPENAI_REALTIME_VOICE="marin"
+OPENAI_TEXT_MODEL="gpt-5.6-sol"
 ```
 
 未配置密钥或麦克风权限被拒绝时，练习页会展示可重试的降级提示。生产环境必须使用 HTTPS，并为 Realtime 会话补充用户身份、分钟数配额和并发限制。
+
+## AI 评估说明
+
+`POST /api/v1/conversations/:conversationId/review` 使用 Responses API Structured Outputs 生成双语纠错、自然表达和本次学习统计。练习页与复盘页通过同一个会话评估对象展示结果；未配置 `OPENAI_API_KEY` 或上游分析失败时，会返回明确标记为 `fallback` 的本地基础分析，不影响结束练习。

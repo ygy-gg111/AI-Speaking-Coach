@@ -30,3 +30,16 @@ export type ConversationEvaluation = {
   corrections: number;
   durationMinutes: number;
 };
+
+export type ConversationReviewSource = "ai" | "fallback";
+
+export type ConversationReview = {
+  evaluation: ConversationEvaluation;
+  source: ConversationReviewSource;
+  generatedAt: string;
+};
+
+export type ReviewConversationMessage = {
+  role: ConversationRole;
+  text: string;
+};

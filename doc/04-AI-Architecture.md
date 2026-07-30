@@ -1937,6 +1937,8 @@ Realtime 模型的自然语音回复不能被当作可靠 JSON 解析。需要�
 
 无 Redis 时，最终转写到达后先创建 PostgreSQL 分析任务。短纠错可立即执行；失败或超时任务由定时任务重试。
 
+当前 MVP 实现使用 `OPENAI_TEXT_MODEL` 配置 Responses API 文本模型，默认值为 `gpt-5.6-sol`。短纠错在请求内完成，并使用 Structured Outputs 约束为会话评估 Schema；API Key 缺失或上游失败时返回带 `source: fallback` 标记的本地基础评估。进入数据库持久化阶段后，再将失败重试接入 `AnalysisJob`。
+
 ------
 
 ## 4.34 AI 调用日志
