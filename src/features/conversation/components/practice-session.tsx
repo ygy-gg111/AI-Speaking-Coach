@@ -14,23 +14,31 @@ import { CoachEvaluationPanel } from "@/features/correction/components/coach-eva
 import { useConversationReview } from "@/features/correction/hooks/use-conversation-review";
 import { useRealtimeSession } from "@/features/realtime/hooks/use-realtime-session";
 import { SceneCover } from "@/features/scenes/components/scene-cover";
-import { mockScenes } from "@/features/scenes/mock-scenes";
+import { findScene, mockScenes } from "@/features/scenes/mock-scenes";
+import { getSceneDetail } from "@/features/scenes/scene-detail-data";
 import { createMistakeFromEvaluation } from "@/features/mistakes/mistake-data";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { useRealtimeStore } from "@/stores/realtime-store";
 import { useLearningStore } from "@/stores/learning-store";
 
-import { mockConversationMessages, mockEvaluation } from "../mock-conversation";
+import {
+  createMockConversationMessages,
+  mockEvaluation,
+} from "../mock-conversation";
 import { ConversationTimeline } from "./conversation-timeline";
 import { VoiceControlBar } from "../../realtime/components/voice-control-bar";
 import styles from "./practice-session.module.css";
 
 type PracticeSessionProps = {
   conversationId: string;
+  sceneIdentifier?: string;
 };
 
-export function PracticeSession({ conversationId }: PracticeSessionProps) {
+export function PracticeSession({
+  conversationId,
+  sceneIdentifier,
+}: PracticeSessionProps) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("Practice");
   const router = useRouter();
@@ -45,7 +53,17 @@ export function PracticeSession({ conversationId }: PracticeSessionProps) {
   const [isEnding, setIsEnding] = useState(false);
   const startedAtRef = useRef<number | null>(null);
   const lastAnalyzedTurnRef = useRef("");
-  const scene = mockScenes[1];
+  const scene = findScene(sceneIdentifier ?? "") ?? mockScenes[1];
+  const sceneDetail = getSceneDetail(scene.id);
+  const openingExpression = sceneDetail.phrases[0].expression;
+  const initialMessages = useMemo(
+    () =>
+      createMockConversationMessages({
+        partnerName: sceneDetail.partner,
+        openingExpression,
+      }),
+    [openingExpression, sceneDetail.partner],
+  );
   const realtimeOptions = useMemo(
     () => ({
       conversationId,
@@ -64,7 +82,7 @@ export function PracticeSession({ conversationId }: PracticeSessionProps) {
   } = useConversationReview(realtimeOptions);
   const messages = useMemo(
     () => [
-      ...mockConversationMessages,
+      ...initialMessages,
       ...transcript.map((item) => ({
         id: item.id,
         role: item.role,
@@ -72,7 +90,7 @@ export function PracticeSession({ conversationId }: PracticeSessionProps) {
         audioAvailable: item.role === "assistant",
       })),
     ],
-    [transcript],
+    [initialMessages, transcript],
   );
   const reviewMessages = useMemo(
     () =>
@@ -159,7 +177,9 @@ export function PracticeSession({ conversationId }: PracticeSessionProps) {
       addMistake(
         createMistakeFromEvaluation(conversationId, scene.id, evaluation),
       );
-      router.push(`/practice/${conversationId}/review`);
+      router.push(
+        `/practice/${conversationId}/review?scene=${encodeURIComponent(scene.slug)}`,
+      );
     }
   }
 
@@ -199,7 +219,7 @@ export function PracticeSession({ conversationId }: PracticeSessionProps) {
             </div>
             <div>
               <strong>Sarah</strong>
-              <span>{t("airportStaff")}</span>
+              <span>{sceneDetail.partner[locale]}</span>
             </div>
             <div className={styles.sceneMini}>
               <SceneCover
@@ -247,8 +267,8 @@ export function PracticeSession({ conversationId }: PracticeSessionProps) {
             sendLabel={t("send")}
             microphoneLabel={t("microphone")}
             onMicrophone={handleMicrophone}
-            onCantSay={() => setHint("I am traveling for vacation.")}
-            onHint={() => setHint("business / vacation")}
+            onCantSay={() => setHint(openingExpression)}
+            onHint={() => setHint(sceneDetail.phrases[1].expression)}
             onSend={handleSend}
           />
         </section>

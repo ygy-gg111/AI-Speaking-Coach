@@ -77,9 +77,43 @@
   font-size: 11px;
 }
 
+.actions {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 8px;
+}
+
+.detailButton,
 .startButton {
+  display: inline-flex;
   height: 36px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.detailButton {
+  padding: 0 10px;
+  border: 1px solid var(--app-border);
+  color: var(--app-muted);
+  background: #fff;
+}
+
+.detailButton:hover {
+  color: var(--app-primary);
+  border-color: #cfc6fb;
+}
+
+.startButton {
+  color: #fff;
   background: linear-gradient(90deg, #8067f6, #684ee6);
+}
+
+.startButton:hover {
+  color: #fff;
+  background: linear-gradient(90deg, #7157f5, #5940db);
 }
 
 .recommended .titleRow p {
@@ -155,9 +189,11 @@
   }
 
   .grid .startButton {
-    width: auto;
-    min-width: 96px;
     height: 30px;
     font-size: 12px;
+  }
+
+  .grid .detailButton {
+    height: 30px;
   }
 }

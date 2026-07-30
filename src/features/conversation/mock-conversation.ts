@@ -3,47 +3,49 @@ import type {
   ConversationMessage,
 } from "./types";
 
-export const mockConversationMessages: ConversationMessage[] = [
-  {
-    id: "message-1",
-    role: "assistant",
-    text: {
-      "zh-CN": "Hello! Welcome. May I see your passport?",
-      en: "Hello! Welcome. May I see your passport?",
+type MockConversationInput = {
+  partnerName: { "zh-CN": string; en: string };
+  openingExpression: string;
+};
+
+export function createMockConversationMessages({
+  partnerName,
+  openingExpression,
+}: MockConversationInput): ConversationMessage[] {
+  const greeting = `Hello! I'm your ${partnerName.en.toLowerCase()} today. How can I help?`;
+
+  return [
+    {
+      id: "message-1",
+      role: "assistant",
+      text: { "zh-CN": greeting, en: greeting },
+      translation: {
+        "zh-CN": `你好！今天我会扮演${partnerName["zh-CN"]}。需要我怎么帮助你？`,
+        en: `你好！今天我会扮演${partnerName["zh-CN"]}。需要我怎么帮助你？`,
+      },
+      audioAvailable: true,
     },
-    translation: {
-      "zh-CN": "你好，欢迎。可以看一下你的护照吗？",
-      en: "你好，欢迎。可以看一下你的护照吗？",
+    {
+      id: "message-2",
+      role: "user",
+      text: { "zh-CN": openingExpression, en: openingExpression },
+      audioAvailable: true,
     },
-    audioAvailable: true,
-  },
-  {
-    id: "message-2",
-    role: "user",
-    text: {
-      "zh-CN": "I want go Japan.",
-      en: "I want go Japan.",
+    {
+      id: "message-3",
+      role: "assistant",
+      text: {
+        "zh-CN": "Of course. Let me confirm a few details with you.",
+        en: "Of course. Let me confirm a few details with you.",
+      },
+      translation: {
+        "zh-CN": "当然可以。我再和你确认几个细节。",
+        en: "当然可以。我再和你确认几个细节。",
+      },
+      audioAvailable: true,
     },
-    audioAvailable: true,
-    correction: {
-      original: "I want go Japan.",
-      improved: "I want to go to Japan.",
-    },
-  },
-  {
-    id: "message-3",
-    role: "assistant",
-    text: {
-      "zh-CN": "Great! Are you traveling for business or vacation?",
-      en: "Great! Are you traveling for business or vacation?",
-    },
-    translation: {
-      "zh-CN": "很好！你是商务出行还是度假？",
-      en: "很好！你是商务出行还是度假？",
-    },
-    audioAvailable: true,
-  },
-];
+  ];
+}
 
 export const mockEvaluation: ConversationEvaluation = {
   original: "I want go Japan.",

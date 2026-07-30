@@ -130,3 +130,9 @@ export const mockScenes: Scene[] = [
     favorite: false,
   },
 ];
+
+export function findScene(identifier: string) {
+  return mockScenes.find(
+    (scene) => scene.id === identifier || scene.slug === identifier,
+  );
+}

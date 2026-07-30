@@ -7,7 +7,6 @@ import {
   StarFilled,
   StarOutlined,
 } from "@ant-design/icons";
-import { Button } from "antd";
 import { useLocale, useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
@@ -32,23 +31,37 @@ export function SceneCard({ scene, variant = "grid" }: SceneCardProps) {
   const toggleFavorite = useLearningStore((store) => store.toggleFavorite);
   const title = scene.title[locale];
   const compact = variant === "compact";
+  const detailHref = `/scenes/${scene.id}` as const;
+  const practiceHref = `/practice/${scene.slug}?scene=${scene.slug}` as const;
 
   return (
     <article
       className={`${styles.card} ${styles[variant]}`}
       data-variant={variant}
     >
-      <SceneCover
-        label={title}
-        mark={scene.coverMark}
-        tone={scene.coverTone}
-        compact={compact}
-      />
+      {compact ? (
+        <SceneCover
+          label={title}
+          mark={scene.coverMark}
+          tone={scene.coverTone}
+          compact
+        />
+      ) : (
+        <Link href={detailHref} aria-label={t("viewDetails")}>
+          <SceneCover
+            label={title}
+            mark={scene.coverMark}
+            tone={scene.coverTone}
+          />
+        </Link>
+      )}
 
       <div className={styles.body}>
         <div className={styles.titleRow}>
           <div>
-            <h3>{title}</h3>
+            <h3>
+              {compact ? title : <Link href={detailHref}>{title}</Link>}
+            </h3>
             {!compact && <p>{scene.subtitle[locale]}</p>}
           </div>
           <button
@@ -78,16 +91,19 @@ export function SceneCard({ scene, variant = "grid" }: SceneCardProps) {
 
         {compact ? (
           <Link
-            href={`/practice/demo?scene=${scene.slug}`}
+            href={practiceHref}
             className={styles.compactLink}
             aria-label={t("startScene", { title })}
           />
         ) : (
-          <Link href={`/practice/demo?scene=${scene.slug}`}>
-            <Button type="primary" block className={styles.startButton}>
+          <div className={styles.actions}>
+            <Link href={detailHref} className={styles.detailButton}>
+              {t("viewDetails")}
+            </Link>
+            <Link href={practiceHref} className={styles.startButton}>
               {t("start")}
-            </Button>
-          </Link>
+            </Link>
+          </div>
         )}
       </div>
     </article>
