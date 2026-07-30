@@ -1,0 +1,124 @@
+.page {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 34px 20px;
+}
+
+.card {
+  position: relative;
+  width: 100%;
+  max-width: 540px;
+  padding: 48px 38px;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: var(--app-shadow);
+  text-align: center;
+}
+
+.code {
+  position: absolute;
+  top: -38px;
+  left: 50%;
+  color: #f3f1fd;
+  font-size: 130px;
+  font-weight: 900;
+  line-height: 1;
+  transform: translateX(-50%);
+  user-select: none;
+}
+
+.icon {
+  position: relative;
+  display: grid;
+  width: 58px;
+  height: 58px;
+  margin: 25px auto 20px;
+  place-items: center;
+  border-radius: 17px;
+  color: var(--app-primary);
+  background: var(--app-primary-soft);
+  font-size: 25px;
+}
+
+.card h1 {
+  position: relative;
+  margin: 0 0 8px;
+  font-size: clamp(25px, 4vw, 34px);
+}
+
+.card p {
+  max-width: 410px;
+  margin: 0 auto;
+  color: var(--app-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+.action {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 16px;
+  line-height: 1.5;
+  transition:
+    color 160ms ease,
+    border-color 160ms ease,
+    background 160ms ease;
+}
+
+.primaryAction {
+  color: #fff;
+  background: var(--app-primary);
+}
+
+.primaryAction:hover {
+  color: #fff;
+  background: var(--app-primary-dark);
+}
+
+.secondaryAction {
+  border-color: #d9d9d9;
+  background: #fff;
+}
+
+.secondaryAction:hover {
+  color: var(--app-primary);
+  border-color: var(--app-primary);
+}
+
+@media (max-width: 767px) {
+  .page {
+    min-height: calc(100vh - 126px);
+  }
+
+  .card {
+    padding: 42px 20px 32px;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .actions > a {
+    width: 100%;
+    min-height: 48px;
+  }
+}

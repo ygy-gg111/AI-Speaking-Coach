@@ -19,7 +19,9 @@
     "settings": "Settings",
     "streak": "Learning streak",
     "days": "days",
-    "switchLanguage": "Switch to Chinese"
+    "switchLanguage": "Switch to Chinese",
+    "skipToContent": "Skip to main content",
+    "streakValue": "{count}-day learning streak"
   },
   "Home": {
     "eyebrow": "Daily speaking practice",
@@ -382,6 +384,13 @@
     "reference": "Reference: {value}",
     "retry": "Try again",
     "home": "Back to home"
+  },
+  "RouteStates": {
+    "loading": "Loading page content",
+    "notFoundTitle": "This page is not here",
+    "notFoundDescription": "The link may be outdated, or the page may have moved. Return home or choose a speaking scene.",
+    "backHome": "Back to home",
+    "browseScenes": "Browse scenes"
   },
   "Placeholder": {
     "practiceTitle": "AI realtime practice",

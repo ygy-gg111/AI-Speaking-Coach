@@ -64,6 +64,9 @@ export function AppShell({ children }: AppShellProps) {
 
   return (
     <div className={styles.shell}>
+      <a href="#main-content" className={styles.skipLink}>
+        {t("skipToContent")}
+      </a>
       <aside className={styles.sidebar}>
         <Link href="/" className={styles.logo}>
           <span className={styles.logoMark}>
@@ -84,6 +87,7 @@ export function AppShell({ children }: AppShellProps) {
                 href={item.href}
                 key={item.key}
                 className={`${styles.navItem} ${active ? styles.active : ""}`}
+                aria-current={active ? "page" : undefined}
               >
                 <Icon />
                 <span>{t(item.key)}</span>
@@ -102,17 +106,21 @@ export function AppShell({ children }: AppShellProps) {
           <strong>{t("switchLanguage")}</strong>
         </Link>
 
-        <div className={styles.streakCard}>
+        <div
+          className={styles.streakCard}
+          role="status"
+          aria-label={t("streakValue", { count: 15 })}
+        >
           <span>{t("streak")}</span>
           <strong>
             <FireFilled /> 15 {t("days")}
           </strong>
-          <div className={styles.weekLabels}>
+          <div className={styles.weekLabels} aria-hidden="true">
             {["S", "M", "T", "W", "T", "F", "S"].map((day, index) => (
               <span key={`${day}-${index}`}>{day}</span>
             ))}
           </div>
-          <div className={styles.weekDots}>
+          <div className={styles.weekDots} aria-hidden="true">
             {[0, 1, 2, 3, 4, 5, 6].map((day) => (
               <i key={day} className={day < 6 ? styles.checked : ""} />
             ))}
@@ -129,7 +137,11 @@ export function AppShell({ children }: AppShellProps) {
             <strong>AI Coach</strong>
           </Link>
           <Tooltip title={t("switchLanguage")}>
-            <Link href={pathname} locale={locale === "zh-CN" ? "en" : "zh-CN"}>
+            <Link
+              href={pathname}
+              locale={locale === "zh-CN" ? "en" : "zh-CN"}
+              aria-label={t("switchLanguage")}
+            >
               <Button type="text" size="small">
                 {locale === "zh-CN" ? "EN" : "中"}
               </Button>
@@ -137,7 +149,9 @@ export function AppShell({ children }: AppShellProps) {
           </Tooltip>
         </header>
 
-        <div className={styles.content}>{children}</div>
+        <div id="main-content" className={styles.content} tabIndex={-1}>
+          {children}
+        </div>
       </div>
 
       <nav className={styles.mobileNav} aria-label={t("mobileNavigation")}>
@@ -151,6 +165,7 @@ export function AppShell({ children }: AppShellProps) {
               className={`${styles.mobileNavItem} ${
                 active ? styles.mobileActive : ""
               }`}
+              aria-current={active ? "page" : undefined}
             >
               <Icon />
               <span>{t(item.key)}</span>

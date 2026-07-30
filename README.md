@@ -97,3 +97,7 @@ OPENAI_TEXT_MODEL="gpt-5.6-sol"
 ## 错误监控
 
 服务端认证、Realtime 和 AI 评估错误统一输出结构化 JSON 日志，客户端路由错误由 Next.js 错误边界恢复并上报到 `POST /api/v1/telemetry/client-errors`。日志层会递归脱敏密码、Cookie、Authorization、Token、API Key 和数据库连接密码。当前默认输出到服务端日志；正式部署时可在同一传输层接入 Sentry、OpenTelemetry 或云日志平台。
+
+## 可访问性
+
+应用框架支持键盘跳到主要内容、当前页面语义、全局清晰焦点和不少于 48px 的移动端导航触控区域。加载状态通过 `role="status"` 提供文字提示；系统开启“减少动态效果”时会关闭非必要动画。Locale 路由还提供中英文 404、页面错误恢复和全局兜底页面。

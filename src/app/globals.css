@@ -48,7 +48,23 @@ textarea {
   font: inherit;
 }
 
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 3px solid rgba(113, 87, 245, 0.42);
+  outline-offset: 3px;
+}
+
 ::selection {
   color: #fff;
   background: var(--app-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

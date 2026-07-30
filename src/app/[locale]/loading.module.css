@@ -1,0 +1,134 @@
+.page {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  padding: 48px 40px 72px;
+}
+
+.line,
+.card,
+.largeCard,
+.sideCard {
+  position: relative;
+  overflow: hidden;
+  background: #ecebf2;
+}
+
+.line::after,
+.card::after,
+.largeCard::after,
+.sideCard::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.7),
+    transparent
+  );
+  content: "";
+  transform: translateX(-100%);
+  animation: shimmer 1.4s infinite;
+}
+
+.line {
+  height: 12px;
+  border-radius: 999px;
+}
+
+.eyebrow {
+  width: 92px;
+}
+
+.title {
+  width: min(310px, 74%);
+  height: 38px;
+  margin-top: 14px;
+}
+
+.subtitle {
+  width: min(470px, 90%);
+  margin-top: 12px;
+}
+
+.metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.card {
+  height: 88px;
+  border-radius: 15px;
+}
+
+.contentGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(260px, 0.8fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.largeCard,
+.sideCard {
+  height: 360px;
+  border-radius: 18px;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@keyframes shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@media (max-width: 899px) {
+  .metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .contentGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .sideCard {
+    height: 220px;
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding: 28px 16px 38px;
+  }
+
+  .title {
+    height: 31px;
+  }
+
+  .card {
+    height: 76px;
+  }
+
+  .largeCard {
+    height: 310px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .line::after,
+  .card::after,
+  .largeCard::after,
+  .sideCard::after {
+    animation: none;
+  }
+}
