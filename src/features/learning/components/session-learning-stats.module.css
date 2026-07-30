@@ -1,0 +1,42 @@
+.stats {
+  padding: 16px 18px;
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 9px 28px rgba(47, 42, 88, 0.05);
+}
+
+.stats h2 {
+  margin: 0 0 12px;
+  font-size: 14px;
+}
+
+.stats > div {
+  display: grid;
+  gap: 10px;
+}
+
+.stats article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 26px;
+}
+
+.stats article span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #666778;
+  font-size: 11px;
+}
+
+.stats article span :global(.anticon) {
+  color: var(--app-primary);
+}
+
+.stats article strong {
+  color: #333445;
+  font-size: 12px;
+}

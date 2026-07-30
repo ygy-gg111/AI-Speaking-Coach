@@ -1,0 +1,55 @@
+.timeline {
+  display: flex;
+  min-height: 410px;
+  flex-direction: column;
+  gap: 22px;
+  padding: 28px 24px;
+  overflow-y: auto;
+}
+
+.thinking {
+  display: flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: 4px;
+  margin-left: 49px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  color: #9695a4;
+  background: #f0f0f5;
+  font-size: 10px;
+}
+
+.thinking i {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #aaa8b7;
+  animation: pulse 900ms ease-in-out infinite alternate;
+}
+
+.thinking i:nth-child(2) {
+  animation-delay: 150ms;
+}
+
+.thinking i:nth-child(3) {
+  animation-delay: 300ms;
+}
+
+.thinking span {
+  margin-left: 5px;
+}
+
+@keyframes pulse {
+  to {
+    transform: translateY(-3px);
+    opacity: 0.45;
+  }
+}
+
+@media (max-width: 767px) {
+  .timeline {
+    min-height: 360px;
+    padding: 20px 15px;
+  }
+}

@@ -1,0 +1,134 @@
+.page {
+  width: min(920px, 100%);
+  margin: 0 auto;
+  padding: 46px 42px 70px;
+}
+
+.page > header > span {
+  color: var(--app-primary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.page > header h1 {
+  margin: 8px 0 6px;
+  font-size: clamp(29px, 4vw, 40px);
+}
+
+.page > header p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 13px;
+}
+
+.continueCard {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.85fr) minmax(280px, 1fr);
+  margin-top: 30px;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: var(--app-shadow);
+}
+
+.continueCard > :first-child {
+  min-height: 270px;
+  border-radius: 0;
+}
+
+.continueBody {
+  align-self: center;
+  padding: 30px;
+}
+
+.continueBody > span {
+  color: var(--app-primary);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.continueBody h2 {
+  margin: 7px 0;
+  font-size: 24px;
+}
+
+.continueBody p {
+  margin: 0 0 18px;
+  color: var(--app-muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.progress {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 99px;
+  background: #ecebf2;
+}
+
+.progress i {
+  display: block;
+  width: 65%;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #8a6bf9, #6549df);
+}
+
+.continueBody small {
+  display: block;
+  margin: 7px 0 18px;
+  color: #9291a0;
+}
+
+.quickScenes {
+  margin-top: 34px;
+}
+
+.sectionHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.sectionHeader h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.sectionHeader a {
+  color: var(--app-primary);
+  font-size: 11px;
+}
+
+.sceneList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding: 25px 16px 38px;
+  }
+
+  .continueCard {
+    grid-template-columns: 1fr;
+    margin-top: 22px;
+  }
+
+  .continueCard > :first-child {
+    min-height: 170px;
+  }
+
+  .continueBody {
+    padding: 20px;
+  }
+
+  .sceneList {
+    grid-template-columns: 1fr;
+  }
+}

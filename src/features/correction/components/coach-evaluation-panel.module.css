@@ -1,0 +1,108 @@
+.wrapper {
+  display: grid;
+  gap: 18px;
+}
+
+.panel {
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 9px 28px rgba(47, 42, 88, 0.05);
+}
+
+.panel header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px 18px 13px;
+  border-bottom: 1px solid #f0eef5;
+}
+
+.panel header h2 {
+  margin: 0;
+  color: #dc8c13;
+  font-size: 16px;
+}
+
+.coachIcon {
+  color: #f1a11e;
+}
+
+.expression,
+.reason,
+.difficulty {
+  padding: 13px 18px 0;
+}
+
+.expression > span,
+.reason > span,
+.difficulty > span {
+  color: #4d4e60;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.expression p {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  margin: 7px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.original {
+  color: #333445;
+}
+
+.original :global(.anticon) {
+  margin-top: 3px;
+  color: var(--app-danger);
+}
+
+.improved {
+  color: #333445;
+  font-weight: 600;
+}
+
+.improved :global(.anticon) {
+  margin-top: 3px;
+  color: var(--app-success);
+}
+
+.reason p {
+  margin: 7px 0 0;
+  color: #666778;
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.difficulty {
+  padding-bottom: 16px;
+}
+
+.difficulty div {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  color: var(--app-warning);
+  font-size: 14px;
+}
+
+.panel footer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border-top: 1px solid #f0eef5;
+}
+
+.panel footer > button {
+  height: 42px;
+  border-radius: 0;
+  color: var(--app-primary);
+  font-size: 11px;
+}
+
+.panel footer > button + button {
+  border-left: 1px solid #f0eef5;
+}

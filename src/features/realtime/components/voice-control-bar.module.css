@@ -1,0 +1,148 @@
+.controls {
+  padding: 15px 22px 20px;
+  border-top: 1px solid var(--app-border);
+  background: #fff;
+}
+
+.actionRow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 18px;
+  max-width: 520px;
+  margin: 0 auto 13px;
+}
+
+.helpButton {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 999px;
+  color: #98691a;
+  background: #fff6e7;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.helpButton:last-child {
+  color: #80622c;
+  background: #f6f2e9;
+}
+
+.microphoneGroup {
+  display: grid;
+  justify-items: center;
+  gap: 5px;
+}
+
+.microphoneGroup > span {
+  min-height: 14px;
+  color: #8d8c9b;
+  font-size: 9px;
+  white-space: nowrap;
+}
+
+.microphone {
+  position: relative;
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  padding: 0;
+  border: 5px solid #eeeaff;
+  border-radius: 50%;
+  color: #fff;
+  background: linear-gradient(145deg, #8f69ff, #6245e1);
+  box-shadow: 0 9px 22px rgba(104, 77, 227, 0.28);
+  cursor: pointer;
+  font-size: 22px;
+}
+
+.microphoneLive {
+  box-shadow:
+    0 0 0 6px rgba(113, 87, 245, 0.12),
+    0 10px 25px rgba(104, 77, 227, 0.3);
+}
+
+.microphone i {
+  position: absolute;
+  inset: -7px;
+  border: 1px solid rgba(113, 87, 245, 0.28);
+  border-radius: 50%;
+  animation: voiceRing 1.4s ease-out infinite;
+}
+
+.microphone i:nth-child(2) {
+  animation-delay: 500ms;
+}
+
+.microphoneLoading :global(.anticon) {
+  animation: loadingPulse 700ms ease-in-out infinite alternate;
+}
+
+.textInput {
+  display: flex;
+  max-width: 620px;
+  height: 40px;
+  align-items: center;
+  margin: 0 auto;
+  padding: 0 5px 0 10px;
+  border-radius: 999px;
+  background: #f1f1f6;
+}
+
+.textInput button {
+  display: grid;
+  width: 31px;
+  height: 31px;
+  place-items: center;
+  flex: 0 0 31px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #fff;
+  background: var(--app-primary);
+  cursor: pointer;
+}
+
+@keyframes voiceRing {
+  to {
+    inset: -18px;
+    opacity: 0;
+  }
+}
+
+@keyframes loadingPulse {
+  to {
+    opacity: 0.35;
+  }
+}
+
+@media (max-width: 767px) {
+  .controls {
+    position: sticky;
+    bottom: 0;
+    z-index: 8;
+    padding: 12px 12px 13px;
+  }
+
+  .actionRow {
+    gap: 8px;
+  }
+
+  .helpButton {
+    min-height: 32px;
+    padding: 0 10px;
+    font-size: 10px;
+  }
+
+  .microphone {
+    width: 54px;
+    height: 54px;
+  }
+}

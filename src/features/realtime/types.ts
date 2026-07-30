@@ -1,8 +1,12 @@
 export type RealtimeConnectionState =
   | "idle"
-  | "requesting-microphone"
+  | "requesting-permission"
   | "connecting"
   | "connected"
+  | "listening"
+  | "user-speaking"
+  | "ai-thinking"
+  | "ai-speaking"
   | "reconnecting"
   | "ended"
   | "error";
@@ -12,4 +16,5 @@ export type RealtimeTranscriptItem = {
   role: "user" | "assistant";
   text: string;
   final: boolean;
+  createdAt?: string;
 };

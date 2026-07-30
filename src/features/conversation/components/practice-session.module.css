@@ -1,0 +1,181 @@
+.page {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+  padding: 24px 34px 54px;
+}
+
+.topBar {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.backButton {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 10px;
+  color: #555668;
+  background: #fff;
+}
+
+.sceneTitle strong,
+.sceneTitle span {
+  display: block;
+}
+
+.sceneTitle strong {
+  font-size: 15px;
+}
+
+.sceneTitle span {
+  margin-top: 3px;
+  color: var(--app-primary);
+  font-size: 10px;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+}
+
+.headerActions button {
+  font-size: 11px;
+}
+
+.practiceGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 300px;
+  align-items: start;
+  gap: 20px;
+}
+
+.conversationCard {
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: 17px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(47, 42, 88, 0.06);
+}
+
+.coachHeader {
+  display: flex;
+  min-height: 74px;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 18px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.coachAvatar {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 50%;
+  color: #315369;
+  background: linear-gradient(145deg, #d7e7ee, #f6d2ba);
+  font-size: 17px;
+}
+
+.coachHeader strong,
+.coachHeader span {
+  display: block;
+}
+
+.coachHeader strong {
+  font-size: 13px;
+}
+
+.coachHeader span {
+  margin-top: 3px;
+  color: var(--app-muted);
+  font-size: 10px;
+}
+
+.sceneMini {
+  margin-left: auto;
+}
+
+.sceneMini > div {
+  width: 80px;
+  min-height: 48px;
+  flex-basis: 80px;
+}
+
+.hint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  margin: 0 22px 10px;
+  padding: 9px 12px;
+  border: 1px solid #f3dfb8;
+  border-radius: 10px;
+  color: #765b2b;
+  background: #fff9ed;
+  font-size: 11px;
+}
+
+.hint span {
+  color: #c98719;
+}
+
+.evaluationColumn {
+  position: sticky;
+  top: 20px;
+}
+
+@media (max-width: 1023px) {
+  .page {
+    padding-inline: 24px;
+  }
+
+  .practiceGrid {
+    grid-template-columns: minmax(0, 1fr) 270px;
+  }
+}
+
+@media (max-width: 899px) {
+  .practiceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .evaluationColumn {
+    display: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding: 10px 0 0;
+  }
+
+  .topBar {
+    padding: 0 12px;
+  }
+
+  .headerActions > a,
+  .headerActions button span {
+    display: none;
+  }
+
+  .conversationCard {
+    border-right: 0;
+    border-left: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .sceneMini {
+    display: none;
+  }
+
+  .coachHeader {
+    min-height: 66px;
+    padding-inline: 15px;
+  }
+}

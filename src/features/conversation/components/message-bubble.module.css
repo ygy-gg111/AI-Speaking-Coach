@@ -1,0 +1,134 @@
+.message {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  max-width: 78%;
+}
+
+.assistant {
+  align-self: flex-start;
+}
+
+.user {
+  align-self: flex-end;
+}
+
+.avatar {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  flex: 0 0 38px;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  color: #315369;
+  background: linear-gradient(145deg, #d7e7ee, #f6d2ba);
+  box-shadow: 0 5px 13px rgba(34, 47, 64, 0.12);
+}
+
+.messageColumn {
+  min-width: 0;
+}
+
+.author {
+  display: block;
+  margin: 0 0 5px 4px;
+  color: #55566a;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.bubble {
+  position: relative;
+  min-width: 150px;
+  padding: 13px 42px 13px 15px;
+  border-radius: 15px 15px 15px 4px;
+  background: #f0f0f5;
+}
+
+.user .bubble {
+  border-radius: 15px 15px 4px 15px;
+  color: #5c41d7;
+  background: linear-gradient(145deg, #eee9ff, #e4ddff);
+}
+
+.bubble p {
+  margin: 0;
+  white-space: pre-line;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.audioButton {
+  position: absolute;
+  top: 11px;
+  right: 12px;
+  display: grid;
+  width: 24px;
+  height: 24px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #8c8c9b;
+  background: transparent;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.audioButton:hover {
+  color: var(--app-primary);
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.translationToggle {
+  margin: 6px 0 0 4px;
+  padding: 0;
+  border: 0;
+  color: #9a99a7;
+  background: transparent;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.translation {
+  margin: 5px 4px 0;
+  color: #858494;
+  font-size: 11px;
+}
+
+.correction {
+  display: grid;
+  gap: 5px;
+  margin-top: 7px;
+  padding: 8px 10px;
+  border: 1px solid #ebe7ff;
+  border-radius: 10px;
+  background: #faf9ff;
+  font-size: 10px;
+}
+
+.correction span {
+  color: var(--app-warning);
+}
+
+.correction strong {
+  color: var(--app-success);
+  font-weight: 600;
+}
+
+@media (max-width: 767px) {
+  .message {
+    max-width: 90%;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+
+  .bubble p {
+    font-size: 12px;
+  }
+}
