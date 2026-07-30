@@ -4,7 +4,9 @@ import {
   buildCalendarMonth,
   createSeedLearningRecords,
   getLearningStreak,
+  getLearningRecordsForDate,
   getSceneMastery,
+  isValidLocalDateKey,
   summarizeLearningByDate,
 } from "./learning-data";
 
@@ -32,5 +34,31 @@ describe("learning data", () => {
   it("calculates scene mastery and current streak", () => {
     expect(getSceneMastery(records, "scene-airport")).toBe(70);
     expect(getLearningStreak(records, reference)).toBe(2);
+  });
+
+  it("validates calendar route dates", () => {
+    expect(isValidLocalDateKey("2026-07-30")).toBe(true);
+    expect(isValidLocalDateKey("2024-02-29")).toBe(true);
+    expect(isValidLocalDateKey("2026-02-29")).toBe(false);
+    expect(isValidLocalDateKey("2026-13-01")).toBe(false);
+    expect(isValidLocalDateKey("07-30-2026")).toBe(false);
+  });
+
+  it("returns records for a day in latest-first order", () => {
+    const sameDayRecords = [
+      ...records,
+      {
+        ...records[0],
+        id: "practice-airport-later",
+        conversationId: "practice-airport-later",
+        completedAt: new Date(2026, 6, 30, 18, 30).toISOString(),
+      },
+    ];
+
+    expect(
+      getLearningRecordsForDate(sameDayRecords, "2026-07-30").map(
+        (record) => record.id,
+      ),
+    ).toEqual(["practice-airport-later", "practice-airport-1"]);
   });
 });

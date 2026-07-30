@@ -1,6 +1,10 @@
 "use client";
 
-import { ArrowLeftOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  ArrowLeftOutlined,
+  ReloadOutlined,
+  ShareAltOutlined,
+} from "@ant-design/icons";
 import { Button } from "antd";
 import { useTranslations } from "next-intl";
 import { useParams, useSearchParams } from "next/navigation";
@@ -56,6 +60,14 @@ export default function PracticeReviewPage() {
         <Link href={practiceHref} className={styles.retry}>
           <Button type="primary" size="large" icon={<ReloadOutlined />} block>
             {t("retryScene")}
+          </Button>
+        </Link>
+        <Link
+          href={`/practice/${conversationId}/share?scene=${scene.slug}`}
+          className={styles.retry}
+        >
+          <Button size="large" icon={<ShareAltOutlined />} block>
+            {t("share")}
           </Button>
         </Link>
       </div>

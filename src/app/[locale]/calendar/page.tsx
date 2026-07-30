@@ -14,6 +14,7 @@ import { useSearchParams } from "next/navigation";
 
 import {
   buildCalendarMonth,
+  getLearningRecordsForDate,
   summarizeLearningByDate,
   toLocalDateKey,
 } from "@/features/learning/learning-data";
@@ -78,14 +79,7 @@ function CalendarContent() {
   );
   const selectedSummary = summaries.get(selectedDate) ?? null;
   const selectedRecords = useMemo(
-    () =>
-      records
-        .filter((record) => toLocalDateKey(record.completedAt) === selectedDate)
-        .sort(
-          (left, right) =>
-            new Date(right.completedAt).getTime() -
-            new Date(left.completedAt).getTime(),
-        ),
+    () => getLearningRecordsForDate(records, selectedDate),
     [records, selectedDate],
   );
   const monthLabel = new Intl.DateTimeFormat(locale, {
@@ -214,7 +208,7 @@ function CalendarContent() {
                     mockScenes[0];
                   return (
                     <Link
-                      href={`/practice/${record.conversationId}/review`}
+                      href={`/practice/${record.conversationId}/review?scene=${encodeURIComponent(scene.slug)}`}
                       key={record.id}
                     >
                       <SceneCover
@@ -237,6 +231,13 @@ function CalendarContent() {
                   );
                 })}
               </div>
+              <Link
+                href={`/calendar/${selectedDate}`}
+                className={styles.viewDay}
+              >
+                {t("viewDayDetails")}
+                <RightOutlined aria-hidden="true" />
+              </Link>
             </>
           ) : (
             <Empty

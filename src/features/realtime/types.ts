@@ -11,6 +11,12 @@ export type RealtimeConnectionState =
   | "ended"
   | "error";
 
+export type RealtimeSessionErrorCode =
+  | "not-configured"
+  | "permission-denied"
+  | "playback-blocked"
+  | "connection-failed";
+
 export type RealtimeTranscriptItem = {
   id: string;
   role: "user" | "assistant";

@@ -178,6 +178,9 @@ export default function MistakesPage() {
                       <Link href={practiceHref}>
                         <Button type="primary">{t("practiceAgain")}</Button>
                       </Link>
+                      <Link href={`/mistakes/${mistake.id}`}>
+                        <Button>{t("viewDetail")}</Button>
+                      </Link>
                     </div>
                   </footer>
                 </article>

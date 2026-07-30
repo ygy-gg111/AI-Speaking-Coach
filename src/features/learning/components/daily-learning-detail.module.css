@@ -1,0 +1,472 @@
+.page {
+  width: min(1080px, 100%);
+  margin: 0 auto;
+  padding: 34px 42px 72px;
+}
+
+.back {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 8px;
+  color: var(--app-muted);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.back:hover {
+  color: var(--app-primary);
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-top: 14px;
+}
+
+.header > div > span,
+.sectionHeading > div > span,
+.goalCard > span,
+.insightCard > span {
+  color: var(--app-primary);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.header h1 {
+  margin: 7px 0 5px;
+  font-size: clamp(27px, 3.5vw, 39px);
+  line-height: 1.2;
+}
+
+.header p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 13px;
+}
+
+.dateBadge {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 14px;
+  border: 1px solid var(--app-border);
+  border-radius: 999px;
+  color: #626376;
+  background: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.dateBadge :global(.anticon) {
+  color: var(--app-primary);
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 27px;
+}
+
+.summary article {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+  padding: 15px;
+  border: 1px solid var(--app-border);
+  border-radius: 15px;
+  background: #fff;
+}
+
+.metricIcon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  flex: 0 0 40px;
+  border-radius: 12px;
+  color: var(--app-primary);
+  background: var(--app-primary-soft);
+  font-size: 17px;
+}
+
+.summary article > div > span,
+.summary article > div > strong {
+  display: block;
+}
+
+.summary article > div > span {
+  color: var(--app-muted);
+  font-size: 10px;
+}
+
+.summary article > div > strong {
+  margin-top: 3px;
+  font-size: 19px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  align-items: start;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.recordsColumn,
+.goalCard,
+.insightCard,
+.reportLink,
+.empty {
+  border: 1px solid var(--app-border);
+  border-radius: 17px;
+  background: #fff;
+}
+
+.recordsColumn {
+  overflow: hidden;
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 21px 23px;
+  border-bottom: 1px solid #f0eef5;
+}
+
+.sectionHeading h2 {
+  margin: 5px 0 0;
+  font-size: 20px;
+}
+
+.sectionHeading > span {
+  color: var(--app-muted);
+  font-size: 11px;
+}
+
+.records {
+  display: grid;
+}
+
+.record {
+  display: grid;
+  grid-template-columns: 55px 96px minmax(0, 1fr);
+  gap: 14px;
+  padding: 18px 22px;
+}
+
+.record + .record {
+  border-top: 1px solid #f0eef5;
+}
+
+.recordIndex {
+  padding-top: 3px;
+  text-align: center;
+}
+
+.recordIndex span,
+.recordIndex time {
+  display: block;
+}
+
+.recordIndex span {
+  color: #d4d1e3;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.recordIndex time {
+  margin-top: 5px;
+  color: var(--app-muted);
+  font-size: 9px;
+}
+
+.record > div:nth-child(2) {
+  width: 96px;
+  min-height: 72px;
+}
+
+.recordBody {
+  min-width: 0;
+}
+
+.recordBody > div:first-child > span {
+  color: var(--app-primary);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.recordBody h3 {
+  margin: 3px 0 0;
+  font-size: 15px;
+}
+
+.recordBody dl {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 13px 0 0;
+}
+
+.recordBody dl > div {
+  padding: 8px 9px;
+  border-radius: 9px;
+  background: #f8f7fb;
+}
+
+.recordBody dt {
+  color: var(--app-muted);
+  font-size: 8px;
+}
+
+.recordBody dd {
+  margin: 3px 0 0;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.recordActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.recordActions a {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  border-radius: 8px;
+  color: var(--app-primary-dark);
+  background: var(--app-primary-soft);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.recordActions a + a {
+  color: #626376;
+  background: #f2f2f6;
+}
+
+.insights {
+  display: grid;
+  gap: 12px;
+}
+
+.goalCard,
+.insightCard {
+  padding: 20px;
+}
+
+.goalCard > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 9px;
+}
+
+.goalCard strong {
+  font-size: 28px;
+}
+
+.goalCard :global(.anticon) {
+  color: var(--app-success);
+  font-size: 19px;
+}
+
+.goalCard > i {
+  display: block;
+  height: 7px;
+  margin-top: 9px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #ecebf3;
+}
+
+.goalCard > i > b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #8067f6, #54c78a);
+}
+
+.goalCard p,
+.insightCard p {
+  margin: 9px 0 0;
+  color: var(--app-muted);
+  font-size: 11px;
+  line-height: 1.65;
+}
+
+.insightCard strong {
+  display: block;
+  margin-top: 9px;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.reportLink {
+  display: flex;
+  min-height: 46px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  color: var(--app-primary-dark);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.reportLink:hover {
+  border-color: #cec5fb;
+  background: #faf9ff;
+}
+
+.empty {
+  display: grid;
+  min-height: 390px;
+  margin-top: 26px;
+  place-items: center;
+}
+
+.start {
+  display: inline-flex;
+  min-height: 42px;
+  align-items: center;
+  gap: 8px;
+  padding: 0 17px;
+  border-radius: 9px;
+  color: #fff;
+  background: var(--app-primary);
+  font-weight: 700;
+}
+
+.start:hover {
+  color: #fff;
+  background: var(--app-primary-dark);
+}
+
+@media (max-width: 1023px) {
+  .page {
+    padding-inline: 28px;
+  }
+
+  .summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .insights {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding: 20px 16px 36px;
+  }
+
+  .header {
+    align-items: flex-start;
+    margin-top: 10px;
+  }
+
+  .dateBadge {
+    display: none;
+  }
+
+  .header h1 {
+    font-size: 26px;
+  }
+
+  .summary {
+    gap: 8px;
+    margin-top: 20px;
+  }
+
+  .summary article {
+    gap: 9px;
+    padding: 12px;
+  }
+
+  .metricIcon {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
+  }
+
+  .summary article > div > strong {
+    font-size: 16px;
+  }
+
+  .layout {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .recordsColumn {
+    width: 100%;
+    order: 2;
+  }
+
+  .insights {
+    width: 100%;
+    grid-template-columns: 1fr 1fr;
+    order: 1;
+  }
+
+  .reportLink {
+    grid-column: 1 / -1;
+  }
+
+  .sectionHeading {
+    padding: 18px;
+  }
+
+  .record {
+    grid-template-columns: 68px minmax(0, 1fr);
+    gap: 11px;
+    padding: 16px;
+  }
+
+  .recordIndex {
+    display: none;
+  }
+
+  .record > div:nth-child(2) {
+    width: 68px;
+    min-height: 58px;
+  }
+
+  .recordBody dl {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .recordActions a {
+    min-height: 40px;
+  }
+}
+
+@media (max-width: 420px) {
+  .insights {
+    grid-template-columns: 1fr;
+  }
+
+  .reportLink {
+    grid-column: auto;
+  }
+}

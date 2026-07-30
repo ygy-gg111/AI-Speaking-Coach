@@ -48,7 +48,7 @@ export default function LoginPage() {
     mutationFn: register,
     onSuccess: (user) => {
       queryClient.setQueryData(["current-user"], user);
-      router.push("/settings");
+      router.push("/onboarding");
     },
     onError: (error) => {
       setErrorCode(

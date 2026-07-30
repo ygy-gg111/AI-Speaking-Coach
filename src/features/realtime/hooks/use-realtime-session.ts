@@ -5,7 +5,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRealtimeStore } from "@/stores/realtime-store";
 
 import { getRealtimeEventUpdate, parseRealtimeEvent } from "../events";
-import type { RealtimeConnectionState } from "../types";
+import type {
+  RealtimeConnectionState,
+  RealtimeSessionErrorCode,
+} from "../types";
 
 type RealtimeSessionOptions = {
   conversationId: string;
@@ -20,6 +23,22 @@ type RealtimeApiError = {
   };
 };
 
+type RealtimeAvailabilityResponse = {
+  success?: boolean;
+  data?: {
+    configured?: boolean;
+  };
+};
+
+class RealtimeClientError extends Error {
+  constructor(
+    readonly code: RealtimeSessionErrorCode,
+    message: string,
+  ) {
+    super(message);
+  }
+}
+
 const MAX_RECONNECT_ATTEMPTS = 2;
 
 function transitionTo(nextState: RealtimeConnectionState) {
@@ -31,6 +50,8 @@ function transitionTo(nextState: RealtimeConnectionState) {
 
 export function useRealtimeSession(options: RealtimeSessionOptions) {
   const [error, setError] = useState<string | null>(null);
+  const [errorCode, setErrorCode] =
+    useState<RealtimeSessionErrorCode | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const peerRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<RTCDataChannel | null>(null);
@@ -97,6 +118,7 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
     }
     if (update.kind === "error") {
       setError(update.message);
+      setErrorCode("connection-failed");
       transitionTo("error");
       return;
     }
@@ -121,6 +143,7 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
       cleanup();
       manualCloseRef.current = false;
       setError(null);
+      setErrorCode(null);
 
       try {
         if (!isReconnect) {
@@ -129,6 +152,28 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
             useRealtimeStore.getState().reset();
           }
           transitionTo("requesting-permission");
+
+          const availabilityResponse = await fetch(
+            "/api/v1/realtime/session",
+            {
+              method: "GET",
+              cache: "no-store",
+            },
+          );
+          const availability =
+            (await availabilityResponse.json().catch(() => null)) as
+              | RealtimeAvailabilityResponse
+              | null;
+          if (
+            !availabilityResponse.ok ||
+            !availability?.success ||
+            !availability.data?.configured
+          ) {
+            throw new RealtimeClientError(
+              "not-configured",
+              "Realtime voice is not configured. Add OPENAI_API_KEY on the server.",
+            );
+          }
         } else {
           transitionTo("connecting");
         }
@@ -155,6 +200,7 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
           remoteAudio.srcObject = event.streams[0];
           void remoteAudio.play().catch(() => {
             setError("Audio playback was blocked. Tap the microphone to retry.");
+            setErrorCode("playback-blocked");
           });
         };
 
@@ -174,6 +220,7 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
         });
         channel.addEventListener("error", () => {
           setError("The realtime event channel encountered an error.");
+          setErrorCode("connection-failed");
         });
 
         peer.addEventListener("connectionstatechange", () => {
@@ -198,6 +245,7 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
           ) {
             if (reconnectAttemptsRef.current >= MAX_RECONNECT_ATTEMPTS) {
               setError("Unable to restore the realtime connection.");
+              setErrorCode("connection-failed");
               transitionTo("error");
             }
             return;
@@ -234,7 +282,10 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
           const payload = (await response.json().catch(() => null)) as
             | RealtimeApiError
             | null;
-          throw new Error(
+          throw new RealtimeClientError(
+            payload?.error?.code === "REALTIME_NOT_CONFIGURED"
+              ? "not-configured"
+              : "connection-failed",
             payload?.error?.code === "REALTIME_NOT_CONFIGURED"
               ? "Realtime voice is not configured. Add OPENAI_API_KEY on the server."
               : (payload?.error?.message ??
@@ -246,9 +297,18 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
         await peer.setRemoteDescription({ type: "answer", sdp: answer });
       } catch (connectError) {
         cleanup();
-        setError(
+        const permissionDenied =
           connectError instanceof DOMException &&
-            connectError.name === "NotAllowedError"
+          connectError.name === "NotAllowedError";
+        setErrorCode(
+          connectError instanceof RealtimeClientError
+            ? connectError.code
+            : permissionDenied
+              ? "permission-denied"
+              : "connection-failed",
+        );
+        setError(
+          permissionDenied
             ? "Microphone permission was denied."
             : connectError instanceof Error
               ? connectError.message
@@ -282,6 +342,7 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
     const channel = channelRef.current;
     if (!channel || channel.readyState !== "open") {
       setError("Start the realtime session before sending a message.");
+      setErrorCode("connection-failed");
       return false;
     }
     channel.send(JSON.stringify(event));
@@ -364,6 +425,7 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
     connect,
     disconnect,
     error,
+    errorCode,
     interrupt,
     isMuted,
     sendText,

@@ -1,0 +1,273 @@
+.page {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 32px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.header span,
+.eyebrow {
+  color: #7157f5;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.header h1 {
+  margin: 6px 0;
+  color: #24202f;
+  font-size: clamp(28px, 4vw, 42px);
+}
+
+.header p {
+  max-width: 680px;
+  margin: 0;
+  color: #777283;
+  line-height: 1.7;
+}
+
+.card,
+.heroCard {
+  border: 1px solid #ebe8f2;
+  border-radius: 24px;
+  background: #fff;
+  box-shadow: 0 14px 40px rgb(43 35 74 / 7%);
+}
+
+.card {
+  padding: 24px;
+}
+
+.heroCard {
+  padding: clamp(24px, 5vw, 52px);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.choiceGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  margin: 28px 0;
+}
+
+.choice {
+  min-height: 112px;
+  padding: 18px;
+  border: 1px solid #e5e1ef;
+  border-radius: 18px;
+  background: #faf9fd;
+  color: #413a50;
+  cursor: pointer;
+  text-align: left;
+}
+
+.choice strong,
+.choice span {
+  display: block;
+}
+
+.choice span {
+  margin-top: 7px;
+  color: #817b8d;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.choiceActive {
+  border-color: #7157f5;
+  background: #f1edff;
+  box-shadow: inset 0 0 0 1px #7157f5;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.stepMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  color: #777283;
+}
+
+.list {
+  display: grid;
+  gap: 14px;
+}
+
+.listItem {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid #ebe8f2;
+  border-radius: 18px;
+  background: #fff;
+}
+
+.listItem h3,
+.listItem p {
+  margin: 0;
+}
+
+.listItem p {
+  margin-top: 6px;
+  color: #777283;
+}
+
+.phrase {
+  color: #2d2739;
+  font-size: 17px;
+  font-weight: 750;
+}
+
+.muted {
+  color: #817b8d;
+}
+
+.player {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px;
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 20px;
+  background: #2c2638;
+  color: #fff;
+}
+
+.player :global(.ant-slider) {
+  margin: 0;
+}
+
+.poster {
+  width: min(420px, 100%);
+  aspect-ratio: 3 / 4;
+  margin: 0 auto;
+  padding: 36px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 80% 15%, rgb(255 255 255 / 35%), transparent 26%),
+    linear-gradient(145deg, #7660f8, #b49cff 55%, #ffd8bd);
+  color: #fff;
+  box-shadow: 0 24px 70px rgb(75 55 148 / 24%);
+}
+
+.poster h2 {
+  margin: 24px 0 10px;
+  font-size: 34px;
+}
+
+.poster blockquote {
+  margin: 80px 0 24px;
+  font-size: 24px;
+  font-weight: 750;
+  line-height: 1.45;
+}
+
+.poster footer {
+  border-top: 1px solid rgb(255 255 255 / 45%);
+  padding-top: 18px;
+}
+
+.textPreview {
+  min-height: 280px;
+  white-space: pre-wrap;
+  line-height: 1.8;
+}
+
+.settingsGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.settingRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(160px, 240px);
+  align-items: center;
+  gap: 20px;
+  padding: 16px 0;
+  border-bottom: 1px solid #efedf4;
+}
+
+.settingRow:last-child {
+  border-bottom: 0;
+}
+
+.settingRow strong,
+.settingRow p {
+  margin: 0;
+}
+
+.settingRow p {
+  margin-top: 4px;
+  color: #817b8d;
+  font-size: 13px;
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding: 22px 16px 100px;
+  }
+
+  .header {
+    display: block;
+  }
+
+  .header :global(.ant-btn) {
+    margin-top: 16px;
+  }
+
+  .grid,
+  .choiceGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .choiceGrid {
+    gap: 10px;
+  }
+
+  .choice {
+    min-height: 86px;
+  }
+
+  .listItem,
+  .settingRow {
+    grid-template-columns: 1fr;
+  }
+
+  .player {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .player > :last-child {
+    grid-column: 1 / -1;
+  }
+
+  .poster {
+    padding: 28px;
+  }
+
+  .poster blockquote {
+    margin-top: 54px;
+  }
+}

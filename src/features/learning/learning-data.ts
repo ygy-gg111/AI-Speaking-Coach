@@ -15,6 +15,36 @@ export function toLocalDateKey(value: Date | string) {
   )}`;
 }
 
+export function isValidLocalDateKey(value: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) {
+    return false;
+  }
+
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (month < 1 || month > 12 || day < 1) {
+    return false;
+  }
+
+  const daysInMonth = new Date(Date.UTC(year, month, 0)).getUTCDate();
+  return day <= daysInMonth;
+}
+
+export function getLearningRecordsForDate(
+  records: PracticeRecord[],
+  date: string,
+) {
+  return records
+    .filter((record) => toLocalDateKey(record.completedAt) === date)
+    .sort(
+      (left, right) =>
+        new Date(right.completedAt).getTime() -
+        new Date(left.completedAt).getTime(),
+    );
+}
+
 export function createSeedLearningRecords(
   referenceDate = new Date(),
 ): PracticeRecord[] {

@@ -9,6 +9,7 @@ import {
   HomeFilled,
   HomeOutlined,
   LineChartOutlined,
+  ReadOutlined,
   SettingOutlined,
   SoundFilled,
   StarOutlined,
@@ -31,6 +32,7 @@ const desktopItems = [
   { href: "/practice", key: "practice", icon: AudioOutlined },
   { href: "/my-scenes", key: "myScenes", icon: StarOutlined },
   { href: "/mistakes", key: "mistakes", icon: BookOutlined },
+  { href: "/vocabulary", key: "vocabulary", icon: ReadOutlined },
   { href: "/calendar", key: "calendar", icon: CalendarOutlined },
   { href: "/reports", key: "reports", icon: LineChartOutlined },
   { href: "/settings", key: "settings", icon: SettingOutlined },
@@ -56,7 +58,7 @@ export function AppShell({ children }: AppShellProps) {
   const locale = useLocale();
   const t = useTranslations("Navigation");
   const isDocsPage = pathname === "/docs";
-  const isAuthPage = pathname === "/login";
+  const isAuthPage = pathname === "/login" || pathname === "/onboarding";
 
   if (isDocsPage || isAuthPage) {
     return <>{children}</>;

@@ -6,6 +6,7 @@ import {
   BookOutlined,
   CheckCircleFilled,
   ClockCircleOutlined,
+  CustomerServiceOutlined,
   HeartFilled,
   HeartOutlined,
   StarFilled,
@@ -114,6 +115,10 @@ export function SceneDetail({ scene }: SceneDetailProps) {
           <Link href={practiceHref} className={styles.start}>
             {t("start")}
             <ArrowRightOutlined aria-hidden="true" />
+          </Link>
+          <Link href={`/scenes/${scene.id}/replay`} className={styles.start}>
+            <CustomerServiceOutlined aria-hidden="true" />
+            {t("replay")}
           </Link>
         </div>
       </section>

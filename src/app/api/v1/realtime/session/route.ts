@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { createRealtimeSessionConfig } from "@/ai/realtime/session-config";
 import { reportServerError } from "@/infrastructure/observability/logger";
-import { fail } from "@/lib/api-response";
+import { fail, ok } from "@/lib/api-response";
 import { getServerEnv } from "@/lib/env";
 
 const requestSchema = z.object({
@@ -10,6 +10,17 @@ const requestSchema = z.object({
   sceneName: z.string().min(1).max(120),
   level: z.string().default("A2"),
 });
+
+export function GET() {
+  const env = getServerEnv();
+  const response = ok({
+    configured: Boolean(env.OPENAI_API_KEY),
+    model: env.OPENAI_REALTIME_MODEL,
+    voice: env.OPENAI_REALTIME_VOICE,
+  });
+  response.headers.set("Cache-Control", "no-store");
+  return response;
+}
 
 export async function POST(request: Request) {
   const contentType = request.headers.get("content-type");

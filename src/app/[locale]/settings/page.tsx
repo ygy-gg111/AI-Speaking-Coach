@@ -16,10 +16,12 @@ import {
   InputNumber,
   Select,
   Skeleton,
+  Slider,
+  Switch,
   message,
 } from "antd";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import {
   AuthApiError,
@@ -39,6 +41,16 @@ export default function SettingsPage() {
   const queryClient = useQueryClient();
   const [form] = Form.useForm<ProfileUpdateInput>();
   const [messageApi, contextHolder] = message.useMessage();
+  const [preferences, setPreferences] = useState({
+    voice: "marin",
+    speed: 1,
+    correctionFrequency: "balanced",
+    learningGoal: "daily",
+    showChinese: true,
+    autoPlay: true,
+    saveAudio: false,
+    saveConversation: true,
+  });
   const userQuery = useQuery({
     queryKey: ["current-user"],
     queryFn: getCurrentUser,
@@ -220,6 +232,180 @@ export default function SettingsPage() {
           </Form>
         </section>
       </section>
+
+      <section className={styles.preferenceGrid}>
+        <article className={styles.settingsCard}>
+          <div className={styles.sectionTitle}>
+            <span>{t("aiSection")}</span>
+            <h2>{t("aiTitle")}</h2>
+          </div>
+          <div className={styles.preferenceRow}>
+            <div>
+              <strong>{t("learningGoal")}</strong>
+              <p>{t("learningGoalDescription")}</p>
+            </div>
+            <Select
+              value={preferences.learningGoal}
+              onChange={(value) =>
+                setPreferences((current) => ({
+                  ...current,
+                  learningGoal: value,
+                }))
+              }
+              options={["travel", "work", "daily", "interview"].map(
+                (value) => ({
+                  value,
+                  label: t(`goal.${value}`),
+                }),
+              )}
+            />
+          </div>
+          <div className={styles.preferenceRow}>
+            <div>
+              <strong>{t("correctionFrequency")}</strong>
+              <p>{t("correctionDescription")}</p>
+            </div>
+            <Select
+              value={preferences.correctionFrequency}
+              onChange={(value) =>
+                setPreferences((current) => ({
+                  ...current,
+                  correctionFrequency: value,
+                }))
+              }
+              options={["gentle", "balanced", "detailed"].map((value) => ({
+                value,
+                label: t(`correction.${value}`),
+              }))}
+            />
+          </div>
+          <div className={styles.preferenceRow}>
+            <div>
+              <strong>{t("showChinese")}</strong>
+              <p>{t("showChineseDescription")}</p>
+            </div>
+            <Switch
+              checked={preferences.showChinese}
+              onChange={(checked) =>
+                setPreferences((current) => ({
+                  ...current,
+                  showChinese: checked,
+                }))
+              }
+            />
+          </div>
+        </article>
+
+        <article className={styles.settingsCard}>
+          <div className={styles.sectionTitle}>
+            <span>{t("voiceSection")}</span>
+            <h2>{t("voiceTitle")}</h2>
+          </div>
+          <div className={styles.preferenceRow}>
+            <div>
+              <strong>{t("voice")}</strong>
+              <p>{t("voiceDescription")}</p>
+            </div>
+            <Select
+              value={preferences.voice}
+              onChange={(value) =>
+                setPreferences((current) => ({ ...current, voice: value }))
+              }
+              options={[
+                { value: "marin", label: "Marin" },
+                { value: "cedar", label: "Cedar" },
+              ]}
+            />
+          </div>
+          <div className={styles.preferenceRow}>
+            <div>
+              <strong>{t("speechSpeed")}</strong>
+              <p>{t("speechSpeedDescription")}</p>
+            </div>
+            <Slider
+              min={0.75}
+              max={1.25}
+              step={0.25}
+              value={preferences.speed}
+              marks={{ 0.75: "0.75×", 1: "1×", 1.25: "1.25×" }}
+              onChange={(value) =>
+                setPreferences((current) => ({ ...current, speed: value }))
+              }
+            />
+          </div>
+          <div className={styles.preferenceRow}>
+            <div>
+              <strong>{t("autoPlay")}</strong>
+              <p>{t("autoPlayDescription")}</p>
+            </div>
+            <Switch
+              checked={preferences.autoPlay}
+              onChange={(checked) =>
+                setPreferences((current) => ({
+                  ...current,
+                  autoPlay: checked,
+                }))
+              }
+            />
+          </div>
+        </article>
+
+        <article className={styles.settingsCard}>
+          <div className={styles.sectionTitle}>
+            <span>{t("privacySection")}</span>
+            <h2>{t("privacyTitle")}</h2>
+          </div>
+          <div className={styles.preferenceRow}>
+            <div>
+              <strong>{t("saveAudio")}</strong>
+              <p>{t("saveAudioDescription")}</p>
+            </div>
+            <Switch
+              checked={preferences.saveAudio}
+              onChange={(checked) =>
+                setPreferences((current) => ({
+                  ...current,
+                  saveAudio: checked,
+                }))
+              }
+            />
+          </div>
+          <div className={styles.preferenceRow}>
+            <div>
+              <strong>{t("saveConversation")}</strong>
+              <p>{t("saveConversationDescription")}</p>
+            </div>
+            <Switch
+              checked={preferences.saveConversation}
+              onChange={(checked) =>
+                setPreferences((current) => ({
+                  ...current,
+                  saveConversation: checked,
+                }))
+              }
+            />
+          </div>
+          <Button danger disabled>
+            {t("deleteData")}
+          </Button>
+        </article>
+      </section>
+
+      <Button
+        className={styles.preferenceSave}
+        size="large"
+        type="primary"
+        icon={<SaveOutlined />}
+        onClick={() => {
+          localStorage.setItem(
+            "ai-speaking-preferences",
+            JSON.stringify(preferences),
+          );
+          void messageApi.success(t("preferencesSaved"));
+        }}
+      >
+        {t("savePreferences")}
+      </Button>
     </main>
   );
 }

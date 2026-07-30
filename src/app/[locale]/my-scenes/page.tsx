@@ -4,6 +4,7 @@ import {
   ArrowRightOutlined,
   BookOutlined,
   LineChartOutlined,
+  ReadOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
 import { Button, Empty, Progress, Tabs } from "antd";
@@ -104,7 +105,7 @@ export default function MyScenesPage() {
               />
             </div>
             <Link
-              href={`/practice/${record.conversationId}/review`}
+              href={`/practice/${record.conversationId}/review?scene=${encodeURIComponent(scene.slug)}`}
               className={styles.reviewLink}
               aria-label={t("viewReview", { title: scene.title[locale] })}
             >
@@ -119,6 +120,28 @@ export default function MyScenesPage() {
       image={Empty.PRESENTED_IMAGE_SIMPLE}
       description={t("emptyHistory")}
     />
+  );
+
+  const completedSceneIds = new Set(records.map((record) => record.sceneId));
+  const completedContent = completedSceneIds.size ? (
+    <div className={styles.savedGrid}>
+      {mockScenes
+        .filter((scene) => completedSceneIds.has(scene.id))
+        .map((scene) => (
+          <SceneCard key={scene.id} scene={scene} />
+        ))}
+    </div>
+  ) : (
+    <Empty description={t("emptyCompleted")} />
+  );
+
+  const customContent = (
+    <section className={styles.comingSoon}>
+      <span>{t("customEyebrow")}</span>
+      <h2>{t("customTitle")}</h2>
+      <p>{t("customDescription")}</p>
+      <Button disabled>{t("comingSoon")}</Button>
+    </section>
   );
 
   return (
@@ -158,6 +181,10 @@ export default function MyScenesPage() {
           <LineChartOutlined />
           <span>{t("tools.reports")}</span>
         </Link>
+        <Link href="/vocabulary">
+          <ReadOutlined />
+          <span>{t("tools.vocabulary")}</span>
+        </Link>
         <Link href="/settings">
           <SettingOutlined />
           <span>{t("tools.settings")}</span>
@@ -170,6 +197,12 @@ export default function MyScenesPage() {
         items={[
           { key: "saved", label: t("savedTab"), children: savedContent },
           { key: "history", label: t("historyTab"), children: historyContent },
+          {
+            key: "completed",
+            label: t("completedTab"),
+            children: completedContent,
+          },
+          { key: "custom", label: t("customTab"), children: customContent },
         ]}
       />
     </main>

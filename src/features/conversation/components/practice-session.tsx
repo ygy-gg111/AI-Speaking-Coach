@@ -72,7 +72,7 @@ export function PracticeSession({
     }),
     [conversationId, scene.title.en],
   );
-  const { connect, disconnect, error, sendText, toggleMicrophone } =
+  const { connect, disconnect, error, errorCode, sendText, toggleMicrophone } =
     useRealtimeSession(realtimeOptions);
   const {
     analyze,
@@ -241,8 +241,20 @@ export function PracticeSession({
               className={styles.realtimeAlert}
               type="warning"
               showIcon
-              message={t("connectionErrorTitle")}
-              description={t("connectionErrorDetail")}
+              title={t(
+                errorCode === "not-configured"
+                  ? "notConfiguredTitle"
+                  : errorCode === "permission-denied"
+                    ? "permissionDeniedTitle"
+                    : "connectionErrorTitle",
+              )}
+              description={t(
+                errorCode === "not-configured"
+                  ? "notConfiguredDetail"
+                  : errorCode === "permission-denied"
+                    ? "permissionDeniedDetail"
+                    : "connectionErrorDetail",
+              )}
               action={
                 <Button size="small" onClick={() => void connect()}>
                   {t("retryConnection")}
