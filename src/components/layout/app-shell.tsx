@@ -56,8 +56,9 @@ export function AppShell({ children }: AppShellProps) {
   const locale = useLocale();
   const t = useTranslations("Navigation");
   const isDocsPage = pathname === "/docs";
+  const isAuthPage = pathname === "/login";
 
-  if (isDocsPage) {
+  if (isDocsPage || isAuthPage) {
     return <>{children}</>;
   }
 

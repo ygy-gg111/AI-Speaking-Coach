@@ -15,9 +15,11 @@ import { useConversationReview } from "@/features/correction/hooks/use-conversat
 import { useRealtimeSession } from "@/features/realtime/hooks/use-realtime-session";
 import { SceneCover } from "@/features/scenes/components/scene-cover";
 import { mockScenes } from "@/features/scenes/mock-scenes";
+import { createMistakeFromEvaluation } from "@/features/mistakes/mistake-data";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { useRealtimeStore } from "@/stores/realtime-store";
+import { useLearningStore } from "@/stores/learning-store";
 
 import { mockConversationMessages, mockEvaluation } from "../mock-conversation";
 import { ConversationTimeline } from "./conversation-timeline";
@@ -35,6 +37,10 @@ export function PracticeSession({ conversationId }: PracticeSessionProps) {
   const state = useRealtimeStore((store) => store.state);
   const transcript = useRealtimeStore((store) => store.transcript);
   const resetRealtime = useRealtimeStore((store) => store.reset);
+  const addPracticeRecord = useLearningStore(
+    (store) => store.addPracticeRecord,
+  );
+  const addMistake = useLearningStore((store) => store.addMistake);
   const [hint, setHint] = useState<string | null>(null);
   const [isEnding, setIsEnding] = useState(false);
   const startedAtRef = useRef<number | null>(null);
@@ -127,11 +133,32 @@ export function PracticeSession({ conversationId }: PracticeSessionProps) {
   async function endPractice() {
     setIsEnding(true);
     disconnect();
+    let finalReview = review;
     try {
-      await analyzeCurrentConversation();
+      finalReview = await analyzeCurrentConversation();
     } catch {
       // The review route still has the local fallback already shown in the UI.
     } finally {
+      const evaluation = finalReview?.evaluation ?? mockEvaluation;
+      addPracticeRecord({
+        id: `practice-${conversationId}`,
+        conversationId,
+        sceneId: scene.id,
+        completedAt: new Date().toISOString(),
+        durationMinutes: evaluation.durationMinutes,
+        newExpressions: evaluation.newExpressions,
+        corrections: evaluation.corrections,
+        mastery: Math.max(
+          35,
+          Math.min(
+            95,
+            78 - evaluation.corrections * 4 + evaluation.newExpressions,
+          ),
+        ),
+      });
+      addMistake(
+        createMistakeFromEvaluation(conversationId, scene.id, evaluation),
+      );
       router.push(`/practice/${conversationId}/review`);
     }
   }

@@ -12,18 +12,50 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { MetricCard } from "@/features/dashboard/components/metric-card";
 import { PracticeRecord } from "@/features/dashboard/components/practice-record";
+import {
+  getLearningStreak,
+  toLocalDateKey,
+} from "@/features/learning/learning-data";
 import { SceneCard } from "@/features/scenes/components/scene-card";
 import { mockScenes } from "@/features/scenes/mock-scenes";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
+import { useLearningStore } from "@/stores/learning-store";
 
 import styles from "./page.module.css";
+
+const homeToday = new Date();
 
 export default function HomePage() {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("Home");
   const recommended = mockScenes.slice(0, 3);
-  const recentScene = mockScenes[1];
+  const records = useLearningStore((store) => store.records);
+  const sortedRecords = [...records].sort(
+    (left, right) =>
+      new Date(right.completedAt).getTime() -
+      new Date(left.completedAt).getTime(),
+  );
+  const recentRecord = sortedRecords[0];
+  const recentScene =
+    mockScenes.find((scene) => scene.id === recentRecord?.sceneId) ??
+    mockScenes[1];
+  const todayKey = toLocalDateKey(homeToday);
+  const todayMinutes = records
+    .filter((record) => toLocalDateKey(record.completedAt) === todayKey)
+    .reduce((sum, record) => sum + record.durationMinutes, 0);
+  const learnedScenes = new Set(records.map((record) => record.sceneId)).size;
+  const masteredExpressions = records.reduce(
+    (sum, record) => sum + record.newExpressions,
+    0,
+  );
+  const streak = getLearningStreak(records, homeToday);
+  const recentTime = new Intl.DateTimeFormat(locale, {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(recentRecord?.completedAt ?? homeToday));
 
   return (
     <main className={styles.page}>
@@ -48,14 +80,17 @@ export default function HomePage() {
           label={t("dailyGoal")}
           value={10}
           unit={t("minutes")}
-          detail={t("dailyProgress", { current: 0, total: 10 })}
-          progress={10}
+          detail={t("dailyProgress", {
+            current: Math.min(todayMinutes, 10),
+            total: 10,
+          })}
+          progress={Math.min(100, todayMinutes * 10)}
           tone="red"
         />
         <MetricCard
           icon={<BookOutlined />}
           label={t("learnedScenes")}
-          value={32}
+          value={learnedScenes}
           unit={t("countUnit")}
           detail={
             <>
@@ -68,7 +103,7 @@ export default function HomePage() {
         <MetricCard
           icon={<TrophyOutlined />}
           label={t("masteredExpressions")}
-          value={245}
+          value={masteredExpressions}
           unit={t("sentenceUnit")}
           detail={
             <>
@@ -103,10 +138,16 @@ export default function HomePage() {
         <PracticeRecord
           scene={recentScene}
           title={recentScene.title[locale]}
-          duration={t("recordDuration", { minutes: 12 })}
-          expressions={t("recordExpressions", { count: 8 })}
-          corrections={t("recordCorrections", { count: 5 })}
-          time={t("recordTime")}
+          duration={t("recordDuration", {
+            minutes: recentRecord?.durationMinutes ?? 12,
+          })}
+          expressions={t("recordExpressions", {
+            count: recentRecord?.newExpressions ?? 8,
+          })}
+          corrections={t("recordCorrections", {
+            count: recentRecord?.corrections ?? 5,
+          })}
+          time={recentTime}
         />
       </section>
 
@@ -115,7 +156,7 @@ export default function HomePage() {
           <FireFilled />
         </span>
         <div>
-          <strong>{t("streakDays", { count: 15 })}</strong>
+          <strong>{t("streakDays", { count: streak })}</strong>
           <p>{t("streakMessage")}</p>
         </div>
       </aside>

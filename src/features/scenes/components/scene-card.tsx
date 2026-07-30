@@ -9,10 +9,10 @@ import {
 } from "@ant-design/icons";
 import { Button } from "antd";
 import { useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
 
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
+import { useLearningStore } from "@/stores/learning-store";
 
 import type { Scene, SceneCardVariant } from "../types";
 import { SceneCover } from "./scene-cover";
@@ -26,7 +26,10 @@ type SceneCardProps = {
 export function SceneCard({ scene, variant = "grid" }: SceneCardProps) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("Scenes");
-  const [favorite, setFavorite] = useState(scene.favorite);
+  const favorite = useLearningStore((store) =>
+    store.favoriteSceneIds.includes(scene.id),
+  );
+  const toggleFavorite = useLearningStore((store) => store.toggleFavorite);
   const title = scene.title[locale];
   const compact = variant === "compact";
 
@@ -52,7 +55,7 @@ export function SceneCard({ scene, variant = "grid" }: SceneCardProps) {
             type="button"
             className={styles.favorite}
             aria-label={favorite ? t("removeFavorite") : t("addFavorite")}
-            onClick={() => setFavorite((current) => !current)}
+            onClick={() => toggleFavorite(scene.id)}
           >
             {favorite ? <HeartFilled /> : <HeartOutlined />}
           </button>

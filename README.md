@@ -85,3 +85,11 @@ OPENAI_TEXT_MODEL="gpt-5.6-sol"
 ## AI 评估说明
 
 `POST /api/v1/conversations/:conversationId/review` 使用 Responses API Structured Outputs 生成双语纠错、自然表达和本次学习统计。练习页与复盘页通过同一个会话评估对象展示结果；未配置 `OPENAI_API_KEY` 或上游分析失败时，会返回明确标记为 `fallback` 的本地基础分析，不影响结束练习。
+
+## 学习记录说明
+
+当前 MVP 已打通收藏场景、练习历史、场景熟练度、首页指标、学习日历和错题本。完成练习会同步更新学习记录并把本次纠错加入错题本；登录和数据库接口接入前，数据通过 Zustand persist 保存在当前浏览器的 `localStorage`，不代表跨设备云端数据。
+
+## 登录与用户资料
+
+登录、注册、退出登录和用户资料 API 已使用 Prisma、bcrypt 与 HttpOnly JWT Cookie 实现。运行认证功能前需要配置 `DATABASE_URL`、执行数据库迁移，并设置不少于 16 位的 `AUTH_SECRET`；登录令牌不会暴露给前端 JavaScript，也不会写入 `localStorage`。未登录用户仍可使用访客模式体验口语练习。

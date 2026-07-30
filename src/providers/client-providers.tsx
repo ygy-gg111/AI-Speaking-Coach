@@ -4,9 +4,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { App, ConfigProvider, theme } from "antd";
 import enUS from "antd/locale/en_US";
 import zhCN from "antd/locale/zh_CN";
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import type { AppLocale } from "@/i18n/routing";
+import { useLearningStore } from "@/stores/learning-store";
 
 type ClientProvidersProps = {
   children: ReactNode;
@@ -15,6 +16,10 @@ type ClientProvidersProps = {
 
 export function ClientProviders({ children, locale }: ClientProvidersProps) {
   const [queryClient] = useState(() => new QueryClient());
+
+  useEffect(() => {
+    void useLearningStore.persist.rehydrate();
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
