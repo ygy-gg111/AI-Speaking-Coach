@@ -1,19 +1,35 @@
 import { z } from "zod";
 
-import { fail, ok } from "@/lib/api-response";
+import { createRealtimeSessionConfig } from "@/ai/realtime/session-config";
+import { fail } from "@/lib/api-response";
 import { getServerEnv } from "@/lib/env";
 
 const requestSchema = z.object({
   conversationId: z.string().min(1),
-  sceneId: z.string().min(1).optional(),
+  sceneName: z.string().min(1).max(120),
   level: z.string().default("A2"),
 });
 
 export async function POST(request: Request) {
-  const parsed = requestSchema.safeParse(await request.json().catch(() => null));
+  const contentType = request.headers.get("content-type");
+  if (!contentType?.startsWith("application/sdp")) {
+    return fail("INVALID_CONTENT_TYPE", "Expected application/sdp.", 415);
+  }
+
+  const url = new URL(request.url);
+  const parsed = requestSchema.safeParse({
+    conversationId: url.searchParams.get("conversationId"),
+    sceneName: url.searchParams.get("sceneName"),
+    level: url.searchParams.get("level") ?? undefined,
+  });
 
   if (!parsed.success) {
     return fail("INVALID_REQUEST", "Realtime session parameters are invalid.");
+  }
+
+  const sdp = await request.text();
+  if (!sdp.trim() || sdp.length > 64_000) {
+    return fail("INVALID_SDP", "The SDP offer is empty or too large.");
   }
 
   const env = getServerEnv();
@@ -25,15 +41,54 @@ export async function POST(request: Request) {
     );
   }
 
-  return ok(
-    {
-      ...parsed.data,
-      model: env.OPENAI_REALTIME_MODEL,
-      voice: env.OPENAI_REALTIME_VOICE,
-      status: "contract-ready",
-      nextStep:
-        "Exchange this server-side request for an ephemeral Realtime client secret.",
-    },
-    202,
-  );
+  const session = createRealtimeSessionConfig({
+    sceneName: parsed.data.sceneName,
+    learnerLevel: parsed.data.level,
+  });
+  const formData = new FormData();
+  formData.set("sdp", sdp);
+  formData.set("session", JSON.stringify(session));
+
+  try {
+    const response = await fetch("https://api.openai.com/v1/realtime/calls", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${env.OPENAI_API_KEY}`,
+      },
+      body: formData,
+      signal: AbortSignal.timeout(20_000),
+      cache: "no-store",
+    });
+
+    const body = await response.text();
+    if (!response.ok) {
+      console.error("OpenAI Realtime session creation failed", {
+        status: response.status,
+        conversationId: parsed.data.conversationId,
+      });
+      return fail(
+        "REALTIME_UPSTREAM_ERROR",
+        "Unable to create the realtime voice session.",
+        response.status >= 500 ? 502 : response.status,
+      );
+    }
+
+    return new Response(body, {
+      status: 200,
+      headers: {
+        "Content-Type": "application/sdp",
+        "Cache-Control": "no-store",
+      },
+    });
+  } catch (error) {
+    console.error("OpenAI Realtime request failed", {
+      name: error instanceof Error ? error.name : "UnknownError",
+      conversationId: parsed.data.conversationId,
+    });
+    return fail(
+      "REALTIME_UPSTREAM_UNAVAILABLE",
+      "The realtime voice service is temporarily unavailable.",
+      502,
+    );
+  }
 }

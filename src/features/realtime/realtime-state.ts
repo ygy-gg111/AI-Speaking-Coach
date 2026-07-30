@@ -11,8 +11,14 @@ const allowedTransitions: Record<
   listening: ["connected", "user-speaking", "ai-thinking", "reconnecting", "ended", "error"],
   "user-speaking": ["listening", "ai-thinking", "reconnecting", "ended", "error"],
   "ai-thinking": ["ai-speaking", "listening", "reconnecting", "ended", "error"],
-  "ai-speaking": ["listening", "reconnecting", "ended", "error"],
-  reconnecting: ["connected", "listening", "error", "ended"],
+  "ai-speaking": [
+    "listening",
+    "user-speaking",
+    "reconnecting",
+    "ended",
+    "error",
+  ],
+  reconnecting: ["connecting", "connected", "listening", "error", "ended"],
   ended: ["idle", "connecting"],
   error: ["idle", "connecting"],
 };

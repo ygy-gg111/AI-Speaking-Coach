@@ -3,7 +3,7 @@ import { z } from "zod";
 const serverEnvSchema = z.object({
   DATABASE_URL: z.string().min(1).optional(),
   OPENAI_API_KEY: z.string().min(1).optional(),
-  OPENAI_REALTIME_MODEL: z.string().default("gpt-realtime"),
+  OPENAI_REALTIME_MODEL: z.string().default("gpt-realtime-2.1"),
   OPENAI_REALTIME_VOICE: z.string().default("marin"),
   AUTH_SECRET: z.string().min(16).optional(),
 });

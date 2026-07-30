@@ -1070,9 +1070,13 @@ GET
 ↓
 后端校验登录、场景权限、并发会话数和每日语音额度
 ↓
-后端使用正式 OpenAI API Key 创建短期客户端凭证
+浏览器创建 SDP offer，并以 application/sdp 发送到后端
 ↓
-浏览器使用临时凭证建立 RTCPeerConnection
+后端将 SDP 与服务端会话配置转发到 OpenAI Realtime Calls API
+↓
+后端将 SDP answer 原样返回浏览器
+↓
+浏览器完成 RTCPeerConnection
 ↓
 麦克风与 AI 音频通过 WebRTC 传输
 ↓
@@ -1087,18 +1091,9 @@ API：
 POST /api/v1/realtime/session
 ```
 
-返回：
+请求体为浏览器生成的 SDP offer，请求查询参数携带 `conversationId`、`sceneName` 和 `level`。成功响应的 `Content-Type` 为 `application/sdp`，响应体为 OpenAI 返回的 SDP answer。
 
-```json
-{
-"clientSecret":"short-lived-secret",
-"realtimeSessionId":"xxx",
-"conversationId":"xxx",
-"expiresAt":"<ISO-8601>"
-}
-```
-
-正式 OpenAI API Key 永远不能返回浏览器。`clientSecret` 只能创建一次短期连接，不写入数据库和日志。
+正式 OpenAI API Key 永远不能返回浏览器。后端只在与 OpenAI 建立会话时使用密钥，并且不得记录 SDP、Authorization header 或上游完整错误体。
 
 可选录音保存使用独立接口：
 
@@ -1125,7 +1120,7 @@ AudioTrack：用户音频输入与 AI 音频输出
 DataChannel：字幕、VAD、打断、错误与会话事件
 ```
 
-默认开启 VAD。检测到用户在 AI 说话期间重新发言时，系统必须取消当前响应并截断尚未播放的音频。连接中断时最多自动重连一次；仍失败则保留最终字幕并降级到文字模式。
+默认开启 VAD。检测到用户在 AI 说话期间重新发言时，WebRTC 会话自动取消当前响应并截断尚未播放的音频；用户主动打断时前端发送 `response.cancel` 与 `output_audio_buffer.clear`。连接中断时最多自动重连两次；仍失败则保留最终字幕并降级到文字模式。
 
 实现依据：
 

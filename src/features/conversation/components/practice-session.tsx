@@ -6,22 +6,19 @@ import {
   CustomerServiceOutlined,
   SwapOutlined,
 } from "@ant-design/icons";
-import { Button } from "antd";
+import { Alert, Button } from "antd";
 import { useLocale, useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { CoachEvaluationPanel } from "@/features/correction/components/coach-evaluation-panel";
+import { useRealtimeSession } from "@/features/realtime/hooks/use-realtime-session";
 import { SceneCover } from "@/features/scenes/components/scene-cover";
 import { mockScenes } from "@/features/scenes/mock-scenes";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { useRealtimeStore } from "@/stores/realtime-store";
 
-import {
-  mockConversationMessages,
-  mockEvaluation,
-} from "../mock-conversation";
-import type { ConversationMessage } from "../types";
+import { mockConversationMessages, mockEvaluation } from "../mock-conversation";
 import { ConversationTimeline } from "./conversation-timeline";
 import { VoiceControlBar } from "../../realtime/components/voice-control-bar";
 import styles from "./practice-session.module.css";
@@ -31,112 +28,49 @@ export function PracticeSession() {
   const t = useTranslations("Practice");
   const router = useRouter();
   const state = useRealtimeStore((store) => store.state);
-  const transitionTo = useRealtimeStore((store) => store.transitionTo);
+  const transcript = useRealtimeStore((store) => store.transcript);
   const resetRealtime = useRealtimeStore((store) => store.reset);
-  const [messages, setMessages] = useState<ConversationMessage[]>(
-    mockConversationMessages,
-  );
   const [hint, setHint] = useState<string | null>(null);
-  const timers = useRef<Array<ReturnType<typeof setTimeout>>>([]);
   const scene = mockScenes[1];
+  const realtimeOptions = useMemo(
+    () => ({
+      conversationId: "practice-demo",
+      sceneName: scene.title.en,
+      learnerLevel: "A2",
+    }),
+    [scene.title.en],
+  );
+  const { connect, disconnect, error, sendText, toggleMicrophone } =
+    useRealtimeSession(realtimeOptions);
+  const messages = useMemo(
+    () => [
+      ...mockConversationMessages,
+      ...transcript.map((item) => ({
+        id: item.id,
+        role: item.role,
+        text: { "zh-CN": item.text, en: item.text },
+        audioAvailable: item.role === "assistant",
+      })),
+    ],
+    [transcript],
+  );
 
   useEffect(() => {
     resetRealtime();
-    return () => {
-      timers.current.forEach(clearTimeout);
-      timers.current = [];
-    };
   }, [resetRealtime]);
 
-  function schedule(callback: () => void, delay: number) {
-    const timer = setTimeout(callback, delay);
-    timers.current.push(timer);
-  }
-
-  function startDemoConnection() {
-    const current = useRealtimeStore.getState().state;
-    if (current === "error" || current === "ended") {
-      resetRealtime();
-    }
-
-    useRealtimeStore.getState().transitionTo("requesting-permission");
-    schedule(() => {
-      useRealtimeStore.getState().transitionTo("connecting");
-    }, 350);
-    schedule(() => {
-      useRealtimeStore.getState().transitionTo("connected");
-      useRealtimeStore.getState().transitionTo("listening");
-    }, 1050);
-  }
-
   function handleMicrophone() {
-    if (state === "idle" || state === "error" || state === "ended") {
-      startDemoConnection();
-      return;
-    }
-
-    if (state === "connected") {
-      transitionTo("listening");
-      return;
-    }
-
-    if (
-      state === "listening" ||
-      state === "user-speaking" ||
-      state === "ai-speaking"
-    ) {
-      transitionTo("connected");
-    }
+    toggleMicrophone();
   }
 
   function handleSend(text: string) {
-    const userMessage: ConversationMessage = {
-      id: `message-user-${Date.now()}`,
-      role: "user",
-      text: { "zh-CN": text, en: text },
-      audioAvailable: false,
-    };
-    setMessages((current) => [...current, userMessage]);
-    setHint(null);
-
-    const currentState = useRealtimeStore.getState().state;
-    if (currentState === "listening") {
-      useRealtimeStore.getState().transitionTo("user-speaking");
-      useRealtimeStore.getState().transitionTo("ai-thinking");
-    } else if (currentState === "connected") {
-      useRealtimeStore.getState().transitionTo("ai-thinking");
+    if (sendText(text)) {
+      setHint(null);
     }
-
-    schedule(() => {
-      const assistantMessage: ConversationMessage = {
-        id: `message-assistant-${Date.now()}`,
-        role: "assistant",
-        text: {
-          "zh-CN": "Thanks. Do you have any bags to check in?",
-          en: "Thanks. Do you have any bags to check in?",
-        },
-        translation: {
-          "zh-CN": "谢谢。你有需要托运的行李吗？",
-          en: "谢谢。你有需要托运的行李吗？",
-        },
-        audioAvailable: true,
-      };
-      setMessages((current) => [...current, assistantMessage]);
-
-      if (useRealtimeStore.getState().state === "ai-thinking") {
-        useRealtimeStore.getState().transitionTo("ai-speaking");
-        schedule(() => {
-          useRealtimeStore.getState().transitionTo("listening");
-        }, 1400);
-      }
-    }, 700);
   }
 
   function endPractice() {
-    const currentState = useRealtimeStore.getState().state;
-    if (!["idle", "ended"].includes(currentState)) {
-      useRealtimeStore.getState().transitionTo("ended");
-    }
+    disconnect();
     router.push("/practice/demo/review");
   }
 
@@ -191,6 +125,21 @@ export function PracticeSession() {
             messages={messages}
             thinkingLabel={state === "ai-thinking" ? t("aiThinking") : undefined}
           />
+
+          {error && (
+            <Alert
+              className={styles.realtimeAlert}
+              type="warning"
+              showIcon
+              message={t("connectionErrorTitle")}
+              description={t("connectionErrorDetail")}
+              action={
+                <Button size="small" onClick={() => void connect()}>
+                  {t("retryConnection")}
+                </Button>
+              }
+            />
+          )}
 
           {hint && (
             <div className={styles.hint} role="status">

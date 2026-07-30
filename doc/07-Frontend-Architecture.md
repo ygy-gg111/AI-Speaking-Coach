@@ -889,10 +889,6 @@ RTCDataChannel
 
 ↓
 
-请求服务端创建短期 Realtime 凭证
-
-↓
-
 创建 RTCPeerConnection
 
 ↓
@@ -906,6 +902,18 @@ RTCDataChannel
 ↓
 
 建立 DataChannel 并监听字幕、VAD、打断和错误事件
+
+↓
+
+创建并设置本地 SDP offer
+
+↓
+
+将 SDP offer 发送到服务端 Session Endpoint
+
+↓
+
+使用服务端返回的 SDP answer 完成连接
 ```
 
 ------
@@ -929,6 +937,27 @@ pc.ontrack = event => {
 }
 
 const events = pc.createDataChannel("oai-events")
+
+const offer = await pc.createOffer()
+await pc.setLocalDescription(offer)
+
+const response = await fetch(
+  `/api/v1/realtime/session?${new URLSearchParams({
+    conversationId,
+    sceneName,
+    level,
+  })}`,
+  {
+    method: "POST",
+    headers: { "Content-Type": "application/sdp" },
+    body: offer.sdp,
+  },
+)
+
+await pc.setRemoteDescription({
+  type: "answer",
+  sdp: await response.text(),
+})
 ```
 
 组件卸载、结束练习或登录失效时，必须停止本地音轨、关闭 DataChannel 和 PeerConnection，并通知后端结束 `RealtimeSession`。

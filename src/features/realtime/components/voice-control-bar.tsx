@@ -47,7 +47,11 @@ export function VoiceControlBar({
     "ai-thinking",
     "ai-speaking",
   ].includes(state);
-  const isLoading = ["requesting-permission", "connecting"].includes(state);
+  const isLoading = [
+    "requesting-permission",
+    "connecting",
+    "reconnecting",
+  ].includes(state);
 
   function submit(event: FormEvent) {
     event.preventDefault();

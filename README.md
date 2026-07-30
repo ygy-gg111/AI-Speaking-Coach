@@ -10,7 +10,7 @@
 - TanStack Query + Zustand
 - Next.js Route Handlers + Zod
 - Prisma + PostgreSQL
-- WebRTC + OpenAI Realtime（接口骨架）
+- WebRTC + OpenAI Realtime（真实音频与事件通道）
 - Vitest + ESLint
 
 MVP 不依赖 Redis。后续只有在多实例扩展、跨实例会话状态或队列压力明确出现时再评估引入。
@@ -69,4 +69,14 @@ UI 原型对应的页面、公共组件和开发顺序见：
 
 ## Realtime 说明
 
-`POST /api/v1/realtime/session` 已定义请求校验、环境配置和响应契约。真正签发 OpenAI Realtime 临时凭证的服务端交换逻辑将在实时对话功能开发时接入，浏览器端不会直接持有 `OPENAI_API_KEY`。
+浏览器通过 WebRTC 传输麦克风和模型音频，通过 RTCDataChannel 接收 VAD、回复生命周期和实时字幕事件。`POST /api/v1/realtime/session` 在服务端携带 `OPENAI_API_KEY` 与 OpenAI 交换 SDP answer，密钥不会下发到浏览器。
+
+本地体验真实语音前，需要在 `.env` 中配置：
+
+```env
+OPENAI_API_KEY="..."
+OPENAI_REALTIME_MODEL="gpt-realtime-2.1"
+OPENAI_REALTIME_VOICE="marin"
+```
+
+未配置密钥或麦克风权限被拒绝时，练习页会展示可重试的降级提示。生产环境必须使用 HTTPS，并为 Realtime 会话补充用户身份、分钟数配额和并发限制。

@@ -10,6 +10,10 @@ describe("realtime connection state", () => {
     expect(canTransitionRealtimeState("listening", "user-speaking")).toBe(true);
     expect(canTransitionRealtimeState("user-speaking", "ai-thinking")).toBe(true);
     expect(canTransitionRealtimeState("ai-thinking", "ai-speaking")).toBe(true);
+    expect(canTransitionRealtimeState("ai-speaking", "user-speaking")).toBe(
+      true,
+    );
+    expect(canTransitionRealtimeState("reconnecting", "connecting")).toBe(true);
   });
 
   it("rejects an invalid direct transition", () => {

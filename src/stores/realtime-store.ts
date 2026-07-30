@@ -11,6 +11,7 @@ type RealtimeStore = {
   transcript: RealtimeTranscriptItem[];
   transitionTo: (state: RealtimeConnectionState) => boolean;
   appendTranscript: (item: RealtimeTranscriptItem) => void;
+  upsertTranscript: (item: RealtimeTranscriptItem) => void;
   updateTranscript: (id: string, text: string, final?: boolean) => void;
   reset: () => void;
 };
@@ -31,6 +32,19 @@ export const useRealtimeStore = create<RealtimeStore>((set) => ({
   },
   appendTranscript: (item) =>
     set((current) => ({ transcript: [...current.transcript, item] })),
+  upsertTranscript: (item) =>
+    set((current) => {
+      const index = current.transcript.findIndex(
+        (transcriptItem) => transcriptItem.id === item.id,
+      );
+      if (index === -1) {
+        return { transcript: [...current.transcript, item] };
+      }
+
+      const transcript = [...current.transcript];
+      transcript[index] = item;
+      return { transcript };
+    }),
   updateTranscript: (id, text, final = false) =>
     set((current) => ({
       transcript: current.transcript.map((item) =>

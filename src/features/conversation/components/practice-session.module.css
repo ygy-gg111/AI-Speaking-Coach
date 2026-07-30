@@ -120,6 +120,10 @@
   font-size: 11px;
 }
 
+.realtimeAlert {
+  margin: 0 22px 10px;
+}
+
 .hint span {
   color: #c98719;
 }
@@ -177,5 +181,9 @@
   .coachHeader {
     min-height: 66px;
     padding-inline: 15px;
+  }
+
+  .realtimeAlert {
+    margin-inline: 14px;
   }
 }
