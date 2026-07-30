@@ -7,6 +7,7 @@ import {
   conversationReviewSchema,
   createFallbackEvaluation,
 } from "@/ai/evaluation/conversation-review";
+import { reportServerError } from "@/infrastructure/observability/logger";
 import { fail, ok } from "@/lib/api-response";
 import { getServerEnv } from "@/lib/env";
 
@@ -99,10 +100,12 @@ export async function POST(request: Request, context: RouteContext) {
       generatedAt: new Date().toISOString(),
     });
   } catch (error) {
-    console.error("Conversation review generation failed", {
-      conversationId,
-      name: error instanceof Error ? error.name : "UnknownError",
-    });
+    reportServerError(
+      "ai.review_generation_failed",
+      "Conversation review generation failed.",
+      error,
+      { conversationId },
+    );
     return fallback();
   }
 }

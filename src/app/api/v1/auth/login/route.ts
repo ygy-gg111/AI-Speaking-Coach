@@ -4,6 +4,7 @@ import { setSession } from "@/features/auth/session";
 import { toCurrentUser } from "@/features/auth/user-mapper";
 import { loginSchema } from "@/features/auth/validation";
 import { getPrismaClient } from "@/infrastructure/database/prisma";
+import { reportServerError } from "@/infrastructure/observability/logger";
 import { fail, ok } from "@/lib/api-response";
 
 export const runtime = "nodejs";
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
     await setSession(user.id);
     return ok(toCurrentUser(user));
   } catch (error) {
-    console.error("Unable to log in user.", error);
+    reportServerError("auth.login_failed", "Unable to log in user.", error);
     return fail("AUTH_SERVICE_UNAVAILABLE", "Authentication is temporarily unavailable.", 503);
   }
 }

@@ -2,6 +2,7 @@ import { getSessionUserId } from "@/features/auth/session";
 import { toCurrentUser } from "@/features/auth/user-mapper";
 import { profileUpdateSchema } from "@/features/auth/validation";
 import { getPrismaClient } from "@/infrastructure/database/prisma";
+import { reportServerError } from "@/infrastructure/observability/logger";
 import { fail, ok } from "@/lib/api-response";
 
 export const runtime = "nodejs";
@@ -24,7 +25,11 @@ export async function GET() {
       ? ok(toCurrentUser(user))
       : fail("AUTH_UNAUTHORIZED", "Please log in to continue.", 401);
   } catch (error) {
-    console.error("Unable to load current user.", error);
+    reportServerError(
+      "profile.load_failed",
+      "Unable to load current user.",
+      error,
+    );
     return fail("AUTH_SERVICE_UNAVAILABLE", "Authentication is temporarily unavailable.", 503);
   }
 }
@@ -54,7 +59,11 @@ export async function PATCH(request: Request) {
     });
     return ok(toCurrentUser(user));
   } catch (error) {
-    console.error("Unable to update user profile.", error);
+    reportServerError(
+      "profile.update_failed",
+      "Unable to update user profile.",
+      error,
+    );
     return fail("AUTH_SERVICE_UNAVAILABLE", "Profile update is temporarily unavailable.", 503);
   }
 }

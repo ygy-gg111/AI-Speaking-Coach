@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { createRealtimeSessionConfig } from "@/ai/realtime/session-config";
+import { reportServerError } from "@/infrastructure/observability/logger";
 import { fail } from "@/lib/api-response";
 import { getServerEnv } from "@/lib/env";
 
@@ -62,10 +63,15 @@ export async function POST(request: Request) {
 
     const body = await response.text();
     if (!response.ok) {
-      console.error("OpenAI Realtime session creation failed", {
-        status: response.status,
-        conversationId: parsed.data.conversationId,
-      });
+      reportServerError(
+        "ai.realtime_upstream_error",
+        "OpenAI Realtime session creation failed.",
+        undefined,
+        {
+          status: response.status,
+          conversationId: parsed.data.conversationId,
+        },
+      );
       return fail(
         "REALTIME_UPSTREAM_ERROR",
         "Unable to create the realtime voice session.",
@@ -81,10 +87,12 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    console.error("OpenAI Realtime request failed", {
-      name: error instanceof Error ? error.name : "UnknownError",
-      conversationId: parsed.data.conversationId,
-    });
+    reportServerError(
+      "ai.realtime_request_failed",
+      "OpenAI Realtime request failed.",
+      error,
+      { conversationId: parsed.data.conversationId },
+    );
     return fail(
       "REALTIME_UPSTREAM_UNAVAILABLE",
       "The realtime voice service is temporarily unavailable.",

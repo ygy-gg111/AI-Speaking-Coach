@@ -1,0 +1,84 @@
+.page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 34px 20px;
+}
+
+.card {
+  width: min(520px, 100%);
+  padding: 42px;
+  border: 1px solid var(--app-border);
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: var(--app-shadow);
+  text-align: center;
+}
+
+.icon {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 20px;
+  place-items: center;
+  border-radius: 17px;
+  color: #a56c16;
+  background: #fff5d9;
+  font-size: 27px;
+}
+
+.eyebrow {
+  color: var(--app-primary);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.card h1 {
+  margin: 8px 0 8px;
+  font-size: clamp(25px, 4vw, 34px);
+}
+
+.card p {
+  max-width: 410px;
+  margin: 0 auto;
+  color: var(--app-muted);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.card small {
+  display: block;
+  margin-top: 14px;
+  color: #a6a5b2;
+  font-size: 9px;
+}
+
+.actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 25px;
+}
+
+@media (max-width: 767px) {
+  .page {
+    min-height: calc(100vh - 126px);
+  }
+
+  .card {
+    padding: 34px 20px;
+  }
+
+  .actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .actions > button,
+  .actions > a,
+  .actions > a button {
+    width: 100%;
+  }
+}

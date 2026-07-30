@@ -93,3 +93,7 @@ OPENAI_TEXT_MODEL="gpt-5.6-sol"
 ## 登录与用户资料
 
 登录、注册、退出登录和用户资料 API 已使用 Prisma、bcrypt 与 HttpOnly JWT Cookie 实现。运行认证功能前需要配置 `DATABASE_URL`、执行数据库迁移，并设置不少于 16 位的 `AUTH_SECRET`；登录令牌不会暴露给前端 JavaScript，也不会写入 `localStorage`。未登录用户仍可使用访客模式体验口语练习。
+
+## 错误监控
+
+服务端认证、Realtime 和 AI 评估错误统一输出结构化 JSON 日志，客户端路由错误由 Next.js 错误边界恢复并上报到 `POST /api/v1/telemetry/client-errors`。日志层会递归脱敏密码、Cookie、Authorization、Token、API Key 和数据库连接密码。当前默认输出到服务端日志；正式部署时可在同一传输层接入 Sentry、OpenTelemetry 或云日志平台。

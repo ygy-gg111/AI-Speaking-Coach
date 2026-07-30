@@ -375,6 +375,14 @@
       }
     }
   },
+  "ErrorBoundary": {
+    "eyebrow": "页面恢复",
+    "title": "这个页面需要重新加载",
+    "description": "问题已经记录，日志不会包含密码或会话信息。你可以重试当前页面，或返回首页。",
+    "reference": "问题编号：{value}",
+    "retry": "重新加载",
+    "home": "返回首页"
+  },
   "Placeholder": {
     "practiceTitle": "AI 实时练习",
     "practiceDescription": "实时对话界面将在下一阶段接入，先从场景库选择练习内容。",

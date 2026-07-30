@@ -375,6 +375,14 @@
       }
     }
   },
+  "ErrorBoundary": {
+    "eyebrow": "Recovery mode",
+    "title": "This page needs a fresh start",
+    "description": "The problem has been recorded without including your password or session details. Retry the page or return home.",
+    "reference": "Reference: {value}",
+    "retry": "Try again",
+    "home": "Back to home"
+  },
   "Placeholder": {
     "practiceTitle": "AI realtime practice",
     "practiceDescription": "The realtime conversation screen arrives next. Choose a scene to prepare.",

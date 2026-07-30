@@ -7,6 +7,7 @@ import {
   registrationSchema,
 } from "@/features/auth/validation";
 import { getPrismaClient } from "@/infrastructure/database/prisma";
+import { reportServerError } from "@/infrastructure/observability/logger";
 import { fail, ok } from "@/lib/api-response";
 
 export const runtime = "nodejs";
@@ -40,7 +41,11 @@ export async function POST(request: Request) {
     if (isUniqueConstraintError(error)) {
       return fail("AUTH_USER_EXISTS", "An account with this email already exists.", 409);
     }
-    console.error("Unable to register user.", error);
+    reportServerError(
+      "auth.register_failed",
+      "Unable to register user.",
+      error,
+    );
     return fail("AUTH_SERVICE_UNAVAILABLE", "Authentication is temporarily unavailable.", 503);
   }
 }

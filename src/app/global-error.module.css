@@ -1,0 +1,79 @@
+.body {
+  display: grid;
+  min-height: 100vh;
+  margin: 0;
+  place-items: center;
+  padding: 20px;
+  color: #202236;
+  background: #f7f8fc;
+  font-family: Inter, "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+}
+
+.card {
+  width: min(500px, 100%);
+  padding: 42px;
+  border: 1px solid #ebeaf2;
+  border-radius: 22px;
+  background: #fff;
+  box-shadow: 0 12px 32px rgba(47, 42, 88, 0.07);
+  text-align: center;
+}
+
+.card > span {
+  color: #7157f5;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.card h1 {
+  margin: 16px 0 8px;
+  font-size: 30px;
+}
+
+.card p,
+.card small {
+  color: #77798d;
+}
+
+.card small {
+  display: block;
+  margin-top: 12px;
+  font-size: 10px;
+}
+
+.card > div {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 24px;
+}
+
+.card button,
+.card a {
+  padding: 11px 18px;
+  border: 1px solid #7157f5;
+  border-radius: 10px;
+  cursor: pointer;
+  font: inherit;
+  text-decoration: none;
+}
+
+.card button {
+  color: #fff;
+  background: #7157f5;
+}
+
+.card a {
+  color: #7157f5;
+  background: #fff;
+}
+
+@media (max-width: 560px) {
+  .card {
+    padding: 34px 20px;
+  }
+
+  .card > div {
+    flex-direction: column;
+  }
+}
