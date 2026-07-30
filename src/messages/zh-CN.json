@@ -162,7 +162,13 @@
     "corrections": "纠正 {count} 个",
     "mastery": "场景熟练度",
     "masteryValue": "熟练度 {value}%",
-    "viewReview": "查看{title}复盘"
+    "viewReview": "查看{title}复盘",
+    "tools": {
+      "label": "更多学习工具",
+      "mistakes": "错题本",
+      "reports": "成长报告",
+      "settings": "设置"
+    }
   },
   "Calendar": {
     "eyebrow": "每日学习进度",
@@ -293,6 +299,80 @@
     "validation": {
       "nameRequired": "请输入昵称",
       "nameLength": "昵称不能超过 40 个字符"
+    }
+  },
+  "Reports": {
+    "eyebrow": "你的学习信号",
+    "title": "成长报告",
+    "subtitle": "查看练习节奏、能力信号，以及下一步最值得复习的内容。",
+    "periodLabel": "报告周期",
+    "period": {
+      "week": "近 7 天",
+      "month": "近 30 天"
+    },
+    "dateRange": "{start} – {end}",
+    "summaryLabel": "学习报告概览",
+    "duration": "练习时长",
+    "minutes": "分钟",
+    "activeDays": "学习天数",
+    "days": "天",
+    "practiceCount": "完成练习",
+    "sessions": "次",
+    "newExpressions": "新学表达",
+    "expressions": "句",
+    "firstComparison": "首个周期",
+    "viewCalendar": "查看日历",
+    "noData": "完成一次练习后即可查看",
+    "unknownScene": "练习场景",
+    "trend": {
+      "eyebrow": "练习节奏",
+      "title": "学习时长趋势",
+      "chartLabel": "每日口语练习分钟数"
+    },
+    "insight": {
+      "eyebrow": "周期洞察",
+      "title": "这段时间的进步",
+      "totalTime": "累计开口练习",
+      "firstPeriod": "这是第一个可统计的学习周期。",
+      "increased": "练习时长比上一周期增加 {value}%。",
+      "decreased": "练习时长比上一周期减少 {value}%。",
+      "topScene": "最常练习场景",
+      "averageMastery": "平均场景熟练度",
+      "corrections": "收到纠错"
+    },
+    "ability": {
+      "eyebrow": "能力信号",
+      "title": "当前能力画像",
+      "metric": {
+        "expressionCompleteness": "表达完整度",
+        "grammarAccuracy": "语法准确度",
+        "vocabularyRichness": "词汇丰富度",
+        "sceneCompletion": "场景完成度"
+      },
+      "metricValue": "{metric}：{value}%",
+      "source": "以上估算仅来自场景熟练度、纠错频率、新表达和场景覆盖；实时发音评估尚未纳入。"
+    },
+    "scenes": {
+      "eyebrow": "练习分布",
+      "title": "场景投入",
+      "detail": "{count} 次练习 · {minutes} 分钟"
+    },
+    "weakness": {
+      "eyebrow": "下一步重点",
+      "title": "待加强内容",
+      "pending": "{count} 条正在复习",
+      "review": "打开错题本",
+      "empty": "当前纠错已经全部掌握。",
+      "category": {
+        "grammar": "语法",
+        "vocabulary": "词汇",
+        "expression": "表达"
+      },
+      "tip": {
+        "grammar": "先复习句子结构，再把正确版本放进完整句子里说出来。",
+        "vocabulary": "把单词放回原来的场景中复习，不要只记孤立词义。",
+        "expression": "对比两个版本，把更自然的说法作为一个完整语块练习。"
+      }
     }
   },
   "Placeholder": {

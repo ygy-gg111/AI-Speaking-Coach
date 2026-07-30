@@ -1,0 +1,468 @@
+.page {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+  padding: 42px 40px 72px;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.header > div > span,
+.card header > div > span {
+  color: var(--app-primary);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.header h1 {
+  margin: 7px 0 5px;
+  font-size: clamp(28px, 3.4vw, 40px);
+}
+
+.header p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 13px;
+}
+
+.dateRange {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-top: 20px;
+  color: var(--app-muted);
+  font-size: 11px;
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.summary article {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--app-border);
+  border-radius: 15px;
+  background: #fff;
+}
+
+.metricIcon {
+  display: grid;
+  width: 38px;
+  height: 38px;
+  place-items: center;
+  flex: 0 0 38px;
+  border-radius: 11px;
+  color: var(--app-primary);
+  background: var(--app-primary-soft);
+}
+
+.summary article > div > span {
+  display: block;
+  color: var(--app-muted);
+  font-size: 10px;
+}
+
+.summary strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 22px;
+}
+
+.summary strong small,
+.highlight strong small {
+  margin-left: 3px;
+  color: var(--app-muted);
+  font-size: 9px;
+  font-weight: 500;
+}
+
+.positive,
+.negative,
+.noChange {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.positive {
+  color: #2f9663;
+}
+
+.negative {
+  color: var(--app-danger);
+}
+
+.noChange {
+  color: var(--app-muted);
+}
+
+.reportGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.65fr) minmax(270px, 0.85fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+
+.card {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--app-border);
+  border-radius: 17px;
+  background: #fff;
+  box-shadow: 0 10px 30px rgba(47, 42, 88, 0.04);
+}
+
+.card > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card header h2 {
+  margin: 4px 0 0;
+  font-size: 17px;
+}
+
+.card > header > a {
+  color: var(--app-primary);
+  font-size: 10px;
+}
+
+.chart {
+  display: grid;
+  height: 220px;
+  grid-template-columns: repeat(7, minmax(34px, 1fr));
+  align-items: end;
+  gap: 12px;
+  margin-top: 20px;
+  overflow-x: auto;
+}
+
+.monthChart {
+  grid-template-columns: repeat(30, minmax(14px, 1fr));
+  gap: 5px;
+}
+
+.barColumn {
+  display: grid;
+  height: 100%;
+  grid-template-rows: 17px 1fr 18px;
+  align-items: end;
+  color: var(--app-muted);
+  text-align: center;
+}
+
+.barColumn > span {
+  font-size: 8px;
+}
+
+.barTrack {
+  position: relative;
+  width: min(24px, 70%);
+  height: 100%;
+  margin: auto;
+  border-radius: 8px 8px 3px 3px;
+  background: #f3f1f8;
+}
+
+.monthChart .barTrack {
+  width: min(10px, 80%);
+}
+
+.barTrack i {
+  position: absolute;
+  inset: auto 0 0;
+  display: block;
+  min-height: 3px;
+  border-radius: 7px 7px 3px 3px;
+  background: #dfdbe9;
+}
+
+.barTrack i.activeBar {
+  background: linear-gradient(180deg, #947dff, #6c51ed);
+}
+
+.barColumn small {
+  align-self: end;
+  font-size: 8px;
+}
+
+.insightCard {
+  color: #fff;
+  background:
+    radial-gradient(circle at 90% 10%, rgba(255, 255, 255, 0.17), transparent 28%),
+    linear-gradient(145deg, #7650ef, #5434c6);
+}
+
+.insightCard header > div > span,
+.insightCard .cardEyebrow {
+  color: #cfc5ff;
+}
+
+.highlight {
+  padding: 25px 0 19px;
+}
+
+.highlight > span {
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 10px;
+}
+
+.highlight strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 36px;
+}
+
+.highlight strong small {
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.highlight p {
+  margin: 7px 0 0;
+  color: #b9f3d0;
+  font-size: 11px;
+}
+
+.insightList {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.insightList > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.insightList dt {
+  color: rgba(255, 255, 255, 0.67);
+  font-size: 10px;
+}
+
+.insightList dd {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.abilityList {
+  display: grid;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.abilityList > div > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.abilityList span,
+.abilityList strong {
+  font-size: 11px;
+}
+
+.abilityList :global(.ant-progress) {
+  margin-top: 5px;
+}
+
+.sourceNote {
+  margin: 16px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: var(--app-muted);
+  background: #f8f7fc;
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.sceneList {
+  display: grid;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.sceneList > div > div:first-child {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 11px;
+}
+
+.sceneBar {
+  height: 7px;
+  margin-top: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #efedf5;
+}
+
+.sceneBar i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #7157f5, #a58fff);
+}
+
+.sceneList small {
+  display: block;
+  margin-top: 5px;
+  color: var(--app-muted);
+  font-size: 8px;
+}
+
+.weaknessFocus {
+  margin: 18px 0 14px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #fff8e8;
+}
+
+.weaknessFocus span {
+  color: #a66b14;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.weaknessFocus strong {
+  display: block;
+  margin-top: 5px;
+  font-size: 16px;
+}
+
+.weaknessFocus p {
+  margin: 7px 0 0;
+  color: #7a6a50;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.weaknessBars {
+  display: grid;
+  gap: 9px;
+  margin-bottom: 17px;
+}
+
+.weaknessBars > div {
+  display: grid;
+  grid-template-columns: 52px 1fr 20px;
+  align-items: center;
+  gap: 8px;
+  font-size: 9px;
+}
+
+.weaknessBars i {
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #f0eef5;
+}
+
+.weaknessBars b {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #f4a21e;
+}
+
+.weaknessBars strong {
+  text-align: right;
+}
+
+.empty {
+  margin: 24px 0 8px;
+  color: var(--app-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 899px) {
+  .summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .reportGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .insightCard {
+    grid-row: 1;
+  }
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding: 24px 16px 38px;
+  }
+
+  .header {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .header :global(.ant-segmented) {
+    width: 100%;
+  }
+
+  .header :global(.ant-segmented-item) {
+    flex: 1;
+  }
+
+  .dateRange {
+    margin-top: 14px;
+  }
+
+  .summary {
+    gap: 8px;
+  }
+
+  .summary article {
+    align-items: flex-start;
+    padding: 13px;
+  }
+
+  .metricIcon {
+    width: 32px;
+    height: 32px;
+    flex-basis: 32px;
+  }
+
+  .summary strong {
+    font-size: 19px;
+  }
+
+  .card {
+    padding: 17px;
+  }
+
+  .chart {
+    gap: 6px;
+  }
+
+  .monthChart {
+    grid-template-columns: repeat(30, 13px);
+  }
+}

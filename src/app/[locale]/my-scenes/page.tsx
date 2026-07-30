@@ -1,6 +1,11 @@
 "use client";
 
-import { ArrowRightOutlined } from "@ant-design/icons";
+import {
+  ArrowRightOutlined,
+  BookOutlined,
+  LineChartOutlined,
+  SettingOutlined,
+} from "@ant-design/icons";
 import { Button, Empty, Progress, Tabs } from "antd";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
@@ -143,6 +148,21 @@ export default function MyScenesPage() {
           <strong>{new Set(records.map((record) => record.sceneId)).size}</strong>
         </article>
       </section>
+
+      <nav className={styles.mobileTools} aria-label={t("tools.label")}>
+        <Link href="/mistakes">
+          <BookOutlined />
+          <span>{t("tools.mistakes")}</span>
+        </Link>
+        <Link href="/reports">
+          <LineChartOutlined />
+          <span>{t("tools.reports")}</span>
+        </Link>
+        <Link href="/settings">
+          <SettingOutlined />
+          <span>{t("tools.settings")}</span>
+        </Link>
+      </nav>
 
       <Tabs
         className={styles.tabs}

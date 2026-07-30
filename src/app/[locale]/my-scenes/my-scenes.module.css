@@ -63,6 +63,10 @@
   margin-bottom: 18px;
 }
 
+.mobileTools {
+  display: none;
+}
+
 .savedGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -174,6 +178,32 @@
 
   .summary strong {
     font-size: 20px;
+  }
+
+  .mobileTools {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin: 12px 0 18px;
+  }
+
+  .mobileTools a {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 11px 7px;
+    border: 1px solid var(--app-border);
+    border-radius: 11px;
+    color: #5f6072;
+    background: #fff;
+    font-size: 10px;
+  }
+
+  .mobileTools :global(.anticon) {
+    color: var(--app-primary);
+    font-size: 15px;
   }
 
   .savedGrid {

@@ -162,7 +162,13 @@
     "corrections": "{count} corrections",
     "mastery": "Scene mastery",
     "masteryValue": "{value}% mastery",
-    "viewReview": "View {title} review"
+    "viewReview": "View {title} review",
+    "tools": {
+      "label": "More learning tools",
+      "mistakes": "Mistakes",
+      "reports": "Reports",
+      "settings": "Settings"
+    }
   },
   "Calendar": {
     "eyebrow": "Daily progress",
@@ -293,6 +299,80 @@
     "validation": {
       "nameRequired": "Enter a display name",
       "nameLength": "Use no more than 40 characters"
+    }
+  },
+  "Reports": {
+    "eyebrow": "Your learning signals",
+    "title": "Progress report",
+    "subtitle": "See your practice rhythm, ability signals, and the next area worth reviewing.",
+    "periodLabel": "Report period",
+    "period": {
+      "week": "7 days",
+      "month": "30 days"
+    },
+    "dateRange": "{start} – {end}",
+    "summaryLabel": "Learning report summary",
+    "duration": "Practice time",
+    "minutes": "min",
+    "activeDays": "Active days",
+    "days": "days",
+    "practiceCount": "Practice sessions",
+    "sessions": "sessions",
+    "newExpressions": "New expressions",
+    "expressions": "items",
+    "firstComparison": "First period",
+    "viewCalendar": "View calendar",
+    "noData": "Complete a practice to see data",
+    "unknownScene": "Practice scene",
+    "trend": {
+      "eyebrow": "Practice rhythm",
+      "title": "Learning time trend",
+      "chartLabel": "Daily practice minutes"
+    },
+    "insight": {
+      "eyebrow": "Period insight",
+      "title": "Your progress",
+      "totalTime": "Total speaking practice",
+      "firstPeriod": "This is your first comparable report period.",
+      "increased": "{value}% more practice time than the previous period.",
+      "decreased": "{value}% less practice time than the previous period.",
+      "topScene": "Most practiced scene",
+      "averageMastery": "Average scene mastery",
+      "corrections": "Corrections received"
+    },
+    "ability": {
+      "eyebrow": "Ability signals",
+      "title": "Current profile",
+      "metric": {
+        "expressionCompleteness": "Expression completeness",
+        "grammarAccuracy": "Grammar accuracy",
+        "vocabularyRichness": "Vocabulary richness",
+        "sceneCompletion": "Scene completion"
+      },
+      "metricValue": "{metric}: {value}%",
+      "source": "These estimates come only from your scene mastery, correction frequency, new expressions, and scene coverage. Pronunciation is not included yet."
+    },
+    "scenes": {
+      "eyebrow": "Practice distribution",
+      "title": "Scene focus",
+      "detail": "{count, plural, one {# session} other {# sessions}} · {minutes} min"
+    },
+    "weakness": {
+      "eyebrow": "Next focus",
+      "title": "Needs review",
+      "pending": "{count, plural, one {# item reviewing} other {# items reviewing}}",
+      "review": "Open mistake book",
+      "empty": "All current corrections are mastered.",
+      "category": {
+        "grammar": "Grammar",
+        "vocabulary": "Vocabulary",
+        "expression": "Expression"
+      },
+      "tip": {
+        "grammar": "Review sentence structure first, then say the corrected version aloud in a full sentence.",
+        "vocabulary": "Put each word back into its original scene instead of memorizing it alone.",
+        "expression": "Compare the two versions and practice the more natural phrase as one complete chunk."
+      }
     }
   },
   "Placeholder": {
