@@ -16,6 +16,7 @@ type LearningStore = {
   toggleFavorite: (sceneId: string) => void;
   setFavorite: (sceneId: string, favorite: boolean) => void;
   replaceFavoriteSceneIds: (sceneIds: string[]) => void;
+  replacePracticeRecords: (records: PracticeRecord[]) => void;
   addPracticeRecord: (record: PracticeRecord) => void;
   addMistake: (mistake: MistakeRecord) => void;
   reviewMistake: (mistakeId: string) => void;
@@ -43,6 +44,7 @@ export const useLearningStore = create<LearningStore>()(
         })),
       replaceFavoriteSceneIds: (sceneIds) =>
         set({ favoriteSceneIds: Array.from(new Set(sceneIds)) }),
+      replacePracticeRecords: (records) => set({ records }),
       addPracticeRecord: (record) =>
         set((current) => ({
           records: [

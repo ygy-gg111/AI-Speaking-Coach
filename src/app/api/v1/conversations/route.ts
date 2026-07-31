@@ -1,4 +1,7 @@
-import { createConversationSchema } from "@/features/conversation/server-contracts";
+import {
+  conversationListQuerySchema,
+  createConversationSchema,
+} from "@/features/conversation/server-contracts";
 import {
   getRequiredUserId,
   toDomainErrorResponse,
@@ -11,6 +14,43 @@ import { PrismaSceneRepository } from "@/repositories/scene.repository";
 import { ConversationService } from "@/services/conversations/conversation.service";
 
 export const runtime = "nodejs";
+
+export async function GET(request: Request) {
+  const userId = await getRequiredUserId();
+  if (typeof userId !== "string") {
+    return userId;
+  }
+  const input = conversationListQuerySchema.safeParse({
+    limit: new URL(request.url).searchParams.get("limit") ?? undefined,
+  });
+  if (!input.success) {
+    return fail(
+      "CONVERSATION_LIST_INVALID_INPUT",
+      "Conversation list parameters are invalid.",
+    );
+  }
+
+  try {
+    const prisma = getPrismaClient();
+    const service = new ConversationService(
+      new PrismaConversationRepository(prisma),
+      new PrismaSceneRepository(prisma),
+    );
+    return ok(await service.listHistory(userId, input.data.limit));
+  } catch (error) {
+    reportServerError(
+      "conversation.list_failed",
+      "Unable to list conversations.",
+      error,
+      { userId },
+    );
+    return fail(
+      "CONVERSATION_SERVICE_UNAVAILABLE",
+      "Conversation history is temporarily unavailable.",
+      503,
+    );
+  }
+}
 
 export async function POST(request: Request) {
   const userId = await getRequiredUserId();

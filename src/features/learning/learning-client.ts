@@ -1,4 +1,5 @@
 import { requestApi } from "@/lib/api-client";
+import type { PracticeRecord } from "@/features/learning/types";
 
 import {
   mapSceneApiItem,
@@ -24,4 +25,14 @@ export function saveFavoriteScene(sceneId: string, favorite: boolean) {
     `/api/v1/scenes/${encodeURIComponent(sceneId)}/favorite`,
     { method: favorite ? "POST" : "DELETE" },
   );
+}
+
+export async function getPracticeHistory(limit = 30) {
+  const records = await requestApi<PracticeRecord[]>(
+    `/api/v1/conversations?limit=${limit}`,
+  );
+  return records.map((record) => ({
+    ...record,
+    completedAt: new Date(record.completedAt).toISOString(),
+  }));
 }

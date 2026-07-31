@@ -111,20 +111,21 @@ POST /api/v1/scenes/:sceneId/favorite
 DELETE /api/v1/scenes/:sceneId/favorite
 GET  /api/v1/my-scenes
 POST /api/v1/conversations
+GET  /api/v1/conversations?limit=30
 GET  /api/v1/conversations/:conversationId
 POST /api/v1/conversations/:conversationId/messages
 POST /api/v1/conversations/:conversationId/complete
 POST /api/v1/conversations/:conversationId/review
 ```
 
-场景查询为公开接口；收藏、我的场景以及创建、查询、保存和完成练习需要登录。游客收藏继续保存在浏览器本地，登录用户的收藏会同步到 PostgreSQL。消息接口支持 `clientEventId` 幂等键，Realtime 重连或客户端重试不会重复保存同一个事件。初始化本地数据库：
+场景查询为公开接口；收藏、我的场景以及创建、查询、保存和完成练习需要登录。游客收藏与练习历史继续保存在浏览器本地，登录用户的数据会同步到 PostgreSQL；重新登录后，“我的场景”可以恢复云端练习历史。消息接口支持 `clientEventId` 幂等键，Realtime 重连或客户端重试不会重复保存同一个事件。初始化本地数据库：
 
 ```bash
 pnpm prisma:deploy
 pnpm prisma:seed
 ```
 
-迁移会建立用户、场景、收藏、对话、消息、Realtime 会话和分析任务表，种子脚本会写入前端当前使用的 8 个基础场景。
+迁移会建立用户、场景、收藏、对话、消息、Realtime 会话和分析任务表，并为已完成会话保存新表达数、纠错数和熟练度；种子脚本会写入前端当前使用的 8 个基础场景。
 
 ## 错误监控
 

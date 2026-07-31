@@ -7,6 +7,7 @@ import {
   SwapOutlined,
 } from "@ant-design/icons";
 import { Alert, Button } from "antd";
+import { useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
@@ -47,6 +48,7 @@ export function PracticeSession({
   const locale = useLocale() as AppLocale;
   const t = useTranslations("Practice");
   const router = useRouter();
+  const queryClient = useQueryClient();
   const state = useRealtimeStore((store) => store.state);
   const transcript = useRealtimeStore((store) => store.transcript);
   const resetRealtime = useRealtimeStore((store) => store.reset);
@@ -204,12 +206,27 @@ export function PracticeSession({
       // The review route still has the local fallback already shown in the UI.
     } finally {
       const evaluation = finalReview?.evaluation ?? mockEvaluation;
+      const mastery = Math.max(
+        35,
+        Math.min(
+          95,
+          78 - evaluation.corrections * 4 + evaluation.newExpressions,
+        ),
+      );
       if (!isGuestConversation(conversationId)) {
         await Promise.allSettled([...pendingSavesRef.current]);
-        await completeConversation(conversationId, {
+        const completed = await completeConversation(conversationId, {
           durationSeconds,
           summary: evaluation.improved,
-        }).catch(() => undefined);
+          newExpressions: evaluation.newExpressions,
+          corrections: evaluation.corrections,
+          mastery,
+        }).catch(() => null);
+        if (completed) {
+          void queryClient.invalidateQueries({
+            queryKey: ["practice-history"],
+          });
+        }
       }
       addPracticeRecord({
         id: `practice-${conversationId}`,
@@ -219,13 +236,7 @@ export function PracticeSession({
         durationMinutes: evaluation.durationMinutes,
         newExpressions: evaluation.newExpressions,
         corrections: evaluation.corrections,
-        mastery: Math.max(
-          35,
-          Math.min(
-            95,
-            78 - evaluation.corrections * 4 + evaluation.newExpressions,
-          ),
-        ),
+        mastery,
       });
       addMistake(
         createMistakeFromEvaluation(conversationId, scene.id, evaluation),

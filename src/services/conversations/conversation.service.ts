@@ -57,7 +57,13 @@ export class ConversationService {
   async complete(
     userId: string,
     conversationId: string,
-    input: { durationSeconds?: number; summary?: string },
+    input: {
+      durationSeconds?: number;
+      summary?: string;
+      newExpressions?: number;
+      corrections?: number;
+      mastery?: number;
+    },
   ) {
     const conversation = await this.get(userId, conversationId);
     if (conversation.status === "COMPLETED") {
@@ -83,6 +89,11 @@ export class ConversationService {
       userId,
       durationSeconds,
       input.summary,
+      {
+        newExpressions: input.newExpressions,
+        corrections: input.corrections,
+        mastery: input.mastery,
+      },
     );
     if (!completed) {
       throw new DomainError(
@@ -92,5 +103,23 @@ export class ConversationService {
       );
     }
     return completed;
+  }
+
+  async listHistory(userId: string, limit: number) {
+    return (await this.conversations.listCompleted(userId, limit)).map(
+      (conversation) => ({
+        id: `practice-${conversation.id}`,
+        conversationId: conversation.id,
+        sceneId: conversation.sceneId!,
+        completedAt: conversation.endedAt!,
+        durationMinutes: Math.max(
+          1,
+          Math.round((conversation.durationSeconds ?? 0) / 60),
+        ),
+        newExpressions: conversation.newExpressions,
+        corrections: conversation.corrections,
+        mastery: conversation.mastery ?? 50,
+      }),
+    );
   }
 }

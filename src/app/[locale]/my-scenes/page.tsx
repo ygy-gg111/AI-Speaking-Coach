@@ -12,7 +12,10 @@ import { Button, Empty, Progress, Tabs } from "antd";
 import { useLocale, useTranslations } from "next-intl";
 import { useEffect, useMemo } from "react";
 
-import { getMyScenes } from "@/features/learning/learning-client";
+import {
+  getMyScenes,
+  getPracticeHistory,
+} from "@/features/learning/learning-client";
 import { getSceneMastery } from "@/features/learning/learning-data";
 import { SceneCard } from "@/features/scenes/components/scene-card";
 import { SceneCover } from "@/features/scenes/components/scene-cover";
@@ -33,9 +36,18 @@ export default function MyScenesPage() {
   const replaceFavoriteSceneIds = useLearningStore(
     (store) => store.replaceFavoriteSceneIds,
   );
+  const replacePracticeRecords = useLearningStore(
+    (store) => store.replacePracticeRecords,
+  );
   const myScenesQuery = useQuery({
     queryKey: ["my-scenes"],
     queryFn: getMyScenes,
+    retry: false,
+    staleTime: 60 * 1_000,
+  });
+  const historyQuery = useQuery({
+    queryKey: ["practice-history", 30],
+    queryFn: () => getPracticeHistory(30),
     retry: false,
     staleTime: 60 * 1_000,
   });
@@ -46,6 +58,11 @@ export default function MyScenesPage() {
       );
     }
   }, [myScenesQuery.data, replaceFavoriteSceneIds]);
+  useEffect(() => {
+    if (historyQuery.data) {
+      replacePracticeRecords(historyQuery.data);
+    }
+  }, [historyQuery.data, replacePracticeRecords]);
   const favoriteScenes = mockScenes.filter((scene) =>
     favoriteSceneIds.includes(scene.id),
   );

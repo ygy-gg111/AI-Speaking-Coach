@@ -1,0 +1,4 @@
+ALTER TABLE "conversations"
+ADD COLUMN "newExpressions" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN "corrections" INTEGER NOT NULL DEFAULT 0,
+ADD COLUMN "mastery" INTEGER;

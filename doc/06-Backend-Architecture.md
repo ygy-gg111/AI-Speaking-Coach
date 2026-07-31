@@ -470,6 +470,7 @@ POST /api/v1/scenes/:sceneId/favorite
 DELETE /api/v1/scenes/:sceneId/favorite
 GET  /api/v1/my-scenes
 POST /api/v1/conversations
+GET  /api/v1/conversations?limit=30
 GET  /api/v1/conversations/:conversationId
 POST /api/v1/conversations/:conversationId/messages
 POST /api/v1/conversations/:conversationId/complete
@@ -481,13 +482,15 @@ POST /api/v1/conversations/:conversationId/complete
 - 场景详情不会返回服务端 `systemPrompt`。
 - 收藏写入按用户和场景保持唯一，重复收藏不会生成重复数据。
 - “我的场景”只返回当前登录用户收藏的有效场景。
+- 会话历史只返回当前用户已完成的练习，支持 1 到 100 条的数量限制。
+- 完成会话时同步保存新表达数、纠错数和熟练度，用于跨设备恢复学习记录。
 - 会话数据按登录用户隔离，其他用户无法读取或写入。
 - 消息只允许客户端写入 `USER` 和 `ASSISTANT`，禁止写入 `SYSTEM`。
 - `clientEventId` 用作消息幂等键，避免重连重复入库。
 - 完成会话操作可重复调用，已完成会话不会再次改变结束状态。
 - 单次练习时长限制为最多 60 分钟。
 
-数据库初始化使用 `prisma/migrations/20260731090000_init`，收藏表由 `prisma/migrations/20260731103000_add_favorite_scenes` 增量创建，基础场景通过 `pnpm prisma:seed` 显式写入。Prisma 7 不再在迁移后自动执行种子脚本，因此部署流程需要分别执行迁移与种子命令。
+数据库初始化使用 `prisma/migrations/20260731090000_init`，收藏表由 `prisma/migrations/20260731103000_add_favorite_scenes` 增量创建，会话学习指标由 `prisma/migrations/20260731120000_add_conversation_learning_metrics` 增量创建，基础场景通过 `pnpm prisma:seed` 显式写入。Prisma 7 不再在迁移后自动执行种子脚本，因此部署流程需要分别执行迁移与种子命令。
 
 ------
 

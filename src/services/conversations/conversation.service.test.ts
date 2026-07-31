@@ -25,6 +25,9 @@ const conversation: ConversationRecord = {
   endedAt: null,
   durationSeconds: null,
   summary: null,
+  newExpressions: 0,
+  corrections: 0,
+  mastery: null,
   createdAt: startedAt,
   updatedAt: startedAt,
   scene: {
@@ -74,6 +77,18 @@ function createRepositories() {
       durationSeconds,
       summary: summary ?? null,
     })),
+    listCompleted: vi.fn(async () => [
+      {
+        id: conversation.id,
+        sceneId: conversation.sceneId,
+        endedAt: new Date("2026-07-31T08:10:00.000Z"),
+        durationSeconds: 600,
+        newExpressions: 4,
+        corrections: 2,
+        mastery: 74,
+        scene: conversation.scene,
+      },
+    ]),
   };
   const scenes: SceneRepository = {
     list: vi.fn(async () => [scene]),
@@ -136,7 +151,35 @@ describe("ConversationService", () => {
       "user-1",
       3_600,
       "Completed airport check-in.",
+      {
+        newExpressions: undefined,
+        corrections: undefined,
+        mastery: undefined,
+      },
     );
+  });
+
+  it("maps completed conversations to learning history", async () => {
+    const repositories = createRepositories();
+    const service = new ConversationService(
+      repositories.conversations,
+      repositories.scenes,
+    );
+
+    const result = await service.listHistory("user-1", 20);
+
+    expect(repositories.conversations.listCompleted).toHaveBeenCalledWith(
+      "user-1",
+      20,
+    );
+    expect(result[0]).toMatchObject({
+      conversationId: conversation.id,
+      sceneId: "scene-airport",
+      durationMinutes: 10,
+      newExpressions: 4,
+      corrections: 2,
+      mastery: 74,
+    });
   });
 
   it("treats completing an already completed conversation as idempotent", async () => {

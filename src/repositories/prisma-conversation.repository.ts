@@ -20,6 +20,9 @@ export type ConversationRecord = {
   endedAt: Date | null;
   durationSeconds: number | null;
   summary: string | null;
+  newExpressions: number;
+  corrections: number;
+  mastery: number | null;
   createdAt: Date;
   updatedAt: Date;
   scene: {
@@ -32,6 +35,18 @@ export type ConversationRecord = {
   } | null;
   messages: MessageRecord[];
 };
+
+export type ConversationHistoryRecord = Pick<
+  ConversationRecord,
+  | "id"
+  | "sceneId"
+  | "endedAt"
+  | "durationSeconds"
+  | "newExpressions"
+  | "corrections"
+  | "mastery"
+  | "scene"
+>;
 
 export type MessageRecord = {
   id: string;
@@ -60,7 +75,16 @@ export interface ConversationRepository {
     userId: string,
     durationSeconds: number,
     summary?: string,
+    metrics?: {
+      newExpressions?: number;
+      corrections?: number;
+      mastery?: number;
+    },
   ): Promise<ConversationRecord | null>;
+  listCompleted(
+    userId: string,
+    limit: number,
+  ): Promise<ConversationHistoryRecord[]>;
 }
 
 export class PrismaConversationRepository
@@ -143,6 +167,11 @@ export class PrismaConversationRepository
     userId: string,
     durationSeconds: number,
     summary?: string,
+    metrics?: {
+      newExpressions?: number;
+      corrections?: number;
+      mastery?: number;
+    },
   ) {
     const existing = await this.prisma.conversation.findFirst({
       where: { id: conversationId, userId },
@@ -166,9 +195,35 @@ export class PrismaConversationRepository
         endedAt: new Date(),
         durationSeconds,
         summary,
+        newExpressions: metrics?.newExpressions,
+        corrections: metrics?.corrections,
+        mastery: metrics?.mastery,
       },
     });
     return this.findOwnedById(conversationId, userId);
+  }
+
+  listCompleted(userId: string, limit: number) {
+    return this.prisma.conversation.findMany({
+      where: {
+        userId,
+        status: ConversationStatus.COMPLETED,
+        endedAt: { not: null },
+        sceneId: { not: null },
+      },
+      orderBy: { endedAt: "desc" },
+      take: limit,
+      select: {
+        id: true,
+        sceneId: true,
+        endedAt: true,
+        durationSeconds: true,
+        newExpressions: true,
+        corrections: true,
+        mastery: true,
+        scene: { select: sceneSummarySelect },
+      },
+    });
   }
 }
 

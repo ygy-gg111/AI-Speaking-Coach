@@ -16,6 +16,9 @@ type MessageInput = {
 type CompleteConversationInput = {
   durationSeconds?: number;
   summary?: string;
+  newExpressions?: number;
+  corrections?: number;
+  mastery?: number;
 };
 
 export function createConversation(sceneId: string) {
