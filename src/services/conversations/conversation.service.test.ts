@@ -89,6 +89,18 @@ function createRepositories() {
         scene: conversation.scene,
       },
     ]),
+    listCompletedBetween: vi.fn(async () => [
+      {
+        id: conversation.id,
+        sceneId: conversation.sceneId,
+        endedAt: new Date("2026-07-31T08:10:00.000Z"),
+        durationSeconds: 600,
+        newExpressions: 4,
+        corrections: 2,
+        mastery: 74,
+        scene: conversation.scene,
+      },
+    ]),
   };
   const scenes: SceneRepository = {
     list: vi.fn(async () => [scene]),
@@ -180,6 +192,29 @@ describe("ConversationService", () => {
       corrections: 2,
       mastery: 74,
     });
+  });
+
+  it("loads calendar history within the requested range", async () => {
+    const repositories = createRepositories();
+    const service = new ConversationService(
+      repositories.conversations,
+      repositories.scenes,
+    );
+    const start = new Date("2026-07-01T00:00:00.000Z");
+    const end = new Date("2026-08-01T00:00:00.000Z");
+
+    const result = await service.listHistoryBetween(
+      "user-1",
+      start,
+      end,
+    );
+
+    expect(
+      repositories.conversations.listCompletedBetween,
+    ).toHaveBeenCalledWith("user-1", start, end);
+    expect(result[0].completedAt).toEqual(
+      new Date("2026-07-31T08:10:00.000Z"),
+    );
   });
 
   it("treats completing an already completed conversation as idempotent", async () => {

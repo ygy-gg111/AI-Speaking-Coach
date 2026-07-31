@@ -8,6 +8,7 @@ import {
   RightOutlined,
 } from "@ant-design/icons";
 import { Button, Empty } from "antd";
+import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { Suspense, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
@@ -18,6 +19,7 @@ import {
   summarizeLearningByDate,
   toLocalDateKey,
 } from "@/features/learning/learning-data";
+import { getCalendarMonth } from "@/features/learning/learning-client";
 import { SceneCover } from "@/features/scenes/components/scene-cover";
 import { mockScenes } from "@/features/scenes/mock-scenes";
 import { Link } from "@/i18n/navigation";
@@ -60,8 +62,26 @@ function CalendarContent() {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("Calendar");
   const searchParams = useSearchParams();
-  const records = useLearningStore((store) => store.records);
+  const localRecords = useLearningStore((store) => store.records);
   const visible = parseMonth(searchParams.get("month"));
+  const timezoneOffset = new Date().getTimezoneOffset();
+  const calendarQuery = useQuery({
+    queryKey: [
+      "calendar",
+      visible.year,
+      visible.month + 1,
+      timezoneOffset,
+    ],
+    queryFn: () =>
+      getCalendarMonth(
+        visible.year,
+        visible.month + 1,
+        timezoneOffset,
+      ),
+    retry: false,
+    staleTime: 60 * 1_000,
+  });
+  const records = calendarQuery.data?.records ?? localRecords;
   const selectedDate = searchParams.get("date") ?? initialDate;
   const days = useMemo(
     () =>

@@ -12,6 +12,7 @@ import {
   StarFilled,
 } from "@ant-design/icons";
 import { Empty } from "antd";
+import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo } from "react";
 
@@ -19,6 +20,7 @@ import {
   getLearningRecordsForDate,
   summarizeLearningByDate,
 } from "@/features/learning/learning-data";
+import { getCalendarDate } from "@/features/learning/learning-client";
 import { SceneCover } from "@/features/scenes/components/scene-cover";
 import { findScene, mockScenes } from "@/features/scenes/mock-scenes";
 import { Link } from "@/i18n/navigation";
@@ -36,7 +38,15 @@ const dailyGoalMinutes = 10;
 export function DailyLearningDetail({ date }: DailyLearningDetailProps) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("CalendarDay");
-  const records = useLearningStore((store) => store.records);
+  const localRecords = useLearningStore((store) => store.records);
+  const timezoneOffset = new Date().getTimezoneOffset();
+  const dateQuery = useQuery({
+    queryKey: ["calendar-date", date, timezoneOffset],
+    queryFn: () => getCalendarDate(date, timezoneOffset),
+    retry: false,
+    staleTime: 60 * 1_000,
+  });
+  const records = dateQuery.data?.records ?? localRecords;
   const dayRecords = useMemo(
     () => getLearningRecordsForDate(records, date),
     [date, records],

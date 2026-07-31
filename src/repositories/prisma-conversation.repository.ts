@@ -85,6 +85,11 @@ export interface ConversationRepository {
     userId: string,
     limit: number,
   ): Promise<ConversationHistoryRecord[]>;
+  listCompletedBetween(
+    userId: string,
+    start: Date,
+    end: Date,
+  ): Promise<ConversationHistoryRecord[]>;
 }
 
 export class PrismaConversationRepository
@@ -213,16 +218,20 @@ export class PrismaConversationRepository
       },
       orderBy: { endedAt: "desc" },
       take: limit,
-      select: {
-        id: true,
-        sceneId: true,
-        endedAt: true,
-        durationSeconds: true,
-        newExpressions: true,
-        corrections: true,
-        mastery: true,
-        scene: { select: sceneSummarySelect },
+      select: conversationHistorySelect,
+    });
+  }
+
+  listCompletedBetween(userId: string, start: Date, end: Date) {
+    return this.prisma.conversation.findMany({
+      where: {
+        userId,
+        status: ConversationStatus.COMPLETED,
+        endedAt: { gte: start, lt: end },
+        sceneId: { not: null },
       },
+      orderBy: { endedAt: "desc" },
+      select: conversationHistorySelect,
     });
   }
 }
@@ -234,4 +243,15 @@ const sceneSummarySelect = {
   descriptionKey: true,
   category: true,
   difficulty: true,
+} as const;
+
+const conversationHistorySelect = {
+  id: true,
+  sceneId: true,
+  endedAt: true,
+  durationSeconds: true,
+  newExpressions: true,
+  corrections: true,
+  mastery: true,
+  scene: { select: sceneSummarySelect },
 } as const;

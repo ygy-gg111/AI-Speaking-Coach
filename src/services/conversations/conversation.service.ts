@@ -107,19 +107,37 @@ export class ConversationService {
 
   async listHistory(userId: string, limit: number) {
     return (await this.conversations.listCompleted(userId, limit)).map(
-      (conversation) => ({
-        id: `practice-${conversation.id}`,
-        conversationId: conversation.id,
-        sceneId: conversation.sceneId!,
-        completedAt: conversation.endedAt!,
-        durationMinutes: Math.max(
-          1,
-          Math.round((conversation.durationSeconds ?? 0) / 60),
-        ),
-        newExpressions: conversation.newExpressions,
-        corrections: conversation.corrections,
-        mastery: conversation.mastery ?? 50,
-      }),
+      toPracticeRecord,
     );
   }
+
+  async listHistoryBetween(
+    userId: string,
+    start: Date,
+    end: Date,
+  ) {
+    return (
+      await this.conversations.listCompletedBetween(userId, start, end)
+    ).map(toPracticeRecord);
+  }
+}
+
+function toPracticeRecord(
+  conversation: Awaited<
+    ReturnType<ConversationRepository["listCompleted"]>
+  >[number],
+) {
+  return {
+    id: `practice-${conversation.id}`,
+    conversationId: conversation.id,
+    sceneId: conversation.sceneId!,
+    completedAt: conversation.endedAt!,
+    durationMinutes: Math.max(
+      1,
+      Math.round((conversation.durationSeconds ?? 0) / 60),
+    ),
+    newExpressions: conversation.newExpressions,
+    corrections: conversation.corrections,
+    mastery: conversation.mastery ?? 50,
+  };
 }
