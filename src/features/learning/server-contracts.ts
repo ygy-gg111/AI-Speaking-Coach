@@ -14,6 +14,10 @@ export const calendarDateParamsSchema = z.object({
   timezoneOffset: z.coerce.number().int().min(-840).max(840).default(0),
 });
 
+export const dashboardQuerySchema = z.object({
+  timezoneOffset: z.coerce.number().int().min(-840).max(840).default(0),
+});
+
 export function getLocalMonthRange(
   year: number,
   month: number,

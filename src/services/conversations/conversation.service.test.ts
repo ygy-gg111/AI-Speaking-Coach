@@ -212,9 +212,7 @@ describe("ConversationService", () => {
     expect(
       repositories.conversations.listCompletedBetween,
     ).toHaveBeenCalledWith("user-1", start, end);
-    expect(result[0].completedAt).toEqual(
-      new Date("2026-07-31T08:10:00.000Z"),
-    );
+    expect(result[0].completedAt).toBe("2026-07-31T08:10:00.000Z");
   });
 
   it("treats completing an already completed conversation as idempotent", async () => {

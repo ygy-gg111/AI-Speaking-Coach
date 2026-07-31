@@ -7,15 +7,14 @@ import {
   FireFilled,
   TrophyOutlined,
 } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "antd";
 import { useLocale, useTranslations } from "next-intl";
 
 import { MetricCard } from "@/features/dashboard/components/metric-card";
 import { PracticeRecord } from "@/features/dashboard/components/practice-record";
-import {
-  getLearningStreak,
-  toLocalDateKey,
-} from "@/features/learning/learning-data";
+import { getDashboard } from "@/features/dashboard/dashboard-client";
+import { buildDashboardSummary } from "@/features/dashboard/dashboard-data";
 import { SceneCard } from "@/features/scenes/components/scene-card";
 import { mockScenes } from "@/features/scenes/mock-scenes";
 import { Link } from "@/i18n/navigation";
@@ -31,25 +30,20 @@ export default function HomePage() {
   const t = useTranslations("Home");
   const recommended = mockScenes.slice(0, 3);
   const records = useLearningStore((store) => store.records);
-  const sortedRecords = [...records].sort(
-    (left, right) =>
-      new Date(right.completedAt).getTime() -
-      new Date(left.completedAt).getTime(),
-  );
-  const recentRecord = sortedRecords[0];
+  const timezoneOffset = homeToday.getTimezoneOffset();
+  const dashboardQuery = useQuery({
+    queryKey: ["dashboard", timezoneOffset],
+    queryFn: () => getDashboard(timezoneOffset),
+    retry: false,
+    staleTime: 60 * 1_000,
+  });
+  const summary =
+    dashboardQuery.data ??
+    buildDashboardSummary(records, homeToday, timezoneOffset);
+  const recentRecord = summary.recentRecord;
   const recentScene =
     mockScenes.find((scene) => scene.id === recentRecord?.sceneId) ??
     mockScenes[1];
-  const todayKey = toLocalDateKey(homeToday);
-  const todayMinutes = records
-    .filter((record) => toLocalDateKey(record.completedAt) === todayKey)
-    .reduce((sum, record) => sum + record.durationMinutes, 0);
-  const learnedScenes = new Set(records.map((record) => record.sceneId)).size;
-  const masteredExpressions = records.reduce(
-    (sum, record) => sum + record.newExpressions,
-    0,
-  );
-  const streak = getLearningStreak(records, homeToday);
   const recentTime = new Intl.DateTimeFormat(locale, {
     month: "short",
     day: "numeric",
@@ -81,20 +75,20 @@ export default function HomePage() {
           value={10}
           unit={t("minutes")}
           detail={t("dailyProgress", {
-            current: Math.min(todayMinutes, 10),
+            current: Math.min(summary.todayMinutes, 10),
             total: 10,
           })}
-          progress={Math.min(100, todayMinutes * 10)}
+          progress={Math.min(100, summary.todayMinutes * 10)}
           tone="red"
         />
         <MetricCard
           icon={<BookOutlined />}
           label={t("learnedScenes")}
-          value={learnedScenes}
+          value={summary.learnedScenes}
           unit={t("countUnit")}
           detail={
             <>
-              {t("yesterday")} <b>+2</b>
+              {t("yesterday")} <b>+{summary.yesterdayScenes}</b>
             </>
           }
           progress={64}
@@ -103,11 +97,11 @@ export default function HomePage() {
         <MetricCard
           icon={<TrophyOutlined />}
           label={t("masteredExpressions")}
-          value={masteredExpressions}
+          value={summary.masteredExpressions}
           unit={t("sentenceUnit")}
           detail={
             <>
-              {t("yesterday")} <b>+12</b>
+              {t("yesterday")} <b>+{summary.yesterdayExpressions}</b>
             </>
           }
           progress={78}
@@ -156,7 +150,7 @@ export default function HomePage() {
           <FireFilled />
         </span>
         <div>
-          <strong>{t("streakDays", { count: streak })}</strong>
+          <strong>{t("streakDays", { count: summary.streak })}</strong>
           <p>{t("streakMessage")}</p>
         </div>
       </aside>

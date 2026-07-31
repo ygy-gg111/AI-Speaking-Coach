@@ -131,7 +131,7 @@ function toPracticeRecord(
     id: `practice-${conversation.id}`,
     conversationId: conversation.id,
     sceneId: conversation.sceneId!,
-    completedAt: conversation.endedAt!,
+    completedAt: conversation.endedAt!.toISOString(),
     durationMinutes: Math.max(
       1,
       Math.round((conversation.durationSeconds ?? 0) / 60),

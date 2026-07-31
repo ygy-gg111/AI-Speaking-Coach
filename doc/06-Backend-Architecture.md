@@ -471,6 +471,7 @@ DELETE /api/v1/scenes/:sceneId/favorite
 GET  /api/v1/my-scenes
 GET  /api/v1/calendar?year=&month=&timezoneOffset=
 GET  /api/v1/calendar/:date?timezoneOffset=
+GET  /api/v1/dashboard?timezoneOffset=
 POST /api/v1/conversations
 GET  /api/v1/conversations?limit=30
 GET  /api/v1/conversations/:conversationId
@@ -487,6 +488,7 @@ POST /api/v1/conversations/:conversationId/complete
 - 会话历史只返回当前用户已完成的练习，支持 1 到 100 条的数量限制。
 - 完成会话时同步保存新表达数、纠错数和熟练度，用于跨设备恢复学习记录。
 - 月历和日期详情按浏览器时区偏移计算 UTC 查询边界，避免跨午夜记录归属错误。
+- Dashboard 聚合今日分钟、累计场景和表达、昨日增量、连续学习天数与最近练习。
 - 会话数据按登录用户隔离，其他用户无法读取或写入。
 - 消息只允许客户端写入 `USER` 和 `ASSISTANT`，禁止写入 `SYSTEM`。
 - `clientEventId` 用作消息幂等键，避免重连重复入库。

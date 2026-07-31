@@ -112,6 +112,7 @@ DELETE /api/v1/scenes/:sceneId/favorite
 GET  /api/v1/my-scenes
 GET  /api/v1/calendar?year=2026&month=7&timezoneOffset=-480
 GET  /api/v1/calendar/:date?timezoneOffset=-480
+GET  /api/v1/dashboard?timezoneOffset=-480
 POST /api/v1/conversations
 GET  /api/v1/conversations?limit=30
 GET  /api/v1/conversations/:conversationId
@@ -120,7 +121,7 @@ POST /api/v1/conversations/:conversationId/complete
 POST /api/v1/conversations/:conversationId/review
 ```
 
-场景查询为公开接口；收藏、我的场景、学习日历以及创建、查询、保存和完成练习需要登录。游客收藏、练习历史和日历继续使用浏览器本地数据，登录用户的数据会从 PostgreSQL 恢复。日历接口接收浏览器时区偏移，确保本地日期统计准确。消息接口支持 `clientEventId` 幂等键，Realtime 重连或客户端重试不会重复保存同一个事件。初始化本地数据库：
+场景查询为公开接口；Dashboard、收藏、我的场景、学习日历以及创建、查询、保存和完成练习需要登录。游客首页、收藏、练习历史和日历继续使用浏览器本地数据，登录用户的数据会从 PostgreSQL 恢复。Dashboard 和日历接口接收浏览器时区偏移，确保今日指标与本地日期统计准确。消息接口支持 `clientEventId` 幂等键，Realtime 重连或客户端重试不会重复保存同一个事件。初始化本地数据库：
 
 ```bash
 pnpm prisma:deploy
