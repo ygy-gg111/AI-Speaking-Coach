@@ -459,6 +459,33 @@ DELETE 删除
 
 ------
 
+# 7.11 当前第一阶段实现
+
+当前代码已经按 Controller → Service → Repository 分层完成第一批业务接口：
+
+```text
+GET  /api/v1/scenes
+GET  /api/v1/scenes/:sceneId
+POST /api/v1/conversations
+GET  /api/v1/conversations/:conversationId
+POST /api/v1/conversations/:conversationId/messages
+POST /api/v1/conversations/:conversationId/complete
+```
+
+实现边界：
+
+- 场景列表支持分类、难度和关键词筛选。
+- 场景详情不会返回服务端 `systemPrompt`。
+- 会话数据按登录用户隔离，其他用户无法读取或写入。
+- 消息只允许客户端写入 `USER` 和 `ASSISTANT`，禁止写入 `SYSTEM`。
+- `clientEventId` 用作消息幂等键，避免重连重复入库。
+- 完成会话操作可重复调用，已完成会话不会再次改变结束状态。
+- 单次练习时长限制为最多 60 分钟。
+
+数据库初始化使用 `prisma/migrations/20260731090000_init`，基础场景通过 `pnpm prisma:seed` 显式写入。Prisma 7 不再在迁移后自动执行种子脚本，因此部署流程需要分别执行迁移与种子命令。
+
+------
+
 # 7.11 错误码设计
 
 格式：

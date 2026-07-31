@@ -33,13 +33,13 @@ enum AnalysisStatus {
 }
 
 model User {
-  id           String         @id @default(cuid())
-  email        String         @unique
-  passwordHash String
-  locale       String         @default("zh-CN")
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  profile      UserProfile?
+  id            String         @id @default(cuid())
+  email         String         @unique
+  passwordHash  String
+  locale        String         @default("zh-CN")
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  profile       UserProfile?
   conversations Conversation[]
 
   @@map("users")
@@ -61,36 +61,45 @@ model UserProfile {
 }
 
 model Scene {
-  id           String         @id @default(cuid())
-  slug         String         @unique
-  titleKey     String
-  descriptionKey String
-  systemPrompt String
-  isActive     Boolean        @default(true)
-  sortOrder    Int            @default(0)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  conversations Conversation[]
+  id               String         @id @default(cuid())
+  slug             String         @unique
+  titleKey         String
+  descriptionKey   String
+  searchText       String
+  systemPrompt     String
+  category         String
+  coverTone        String
+  coverMark        String
+  difficulty       Int
+  estimatedMinutes Int
+  lessonCount      Int
+  content          Json?
+  isActive         Boolean        @default(true)
+  sortOrder        Int            @default(0)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+  conversations    Conversation[]
 
+  @@index([category, isActive, sortOrder])
   @@map("scenes")
 }
 
 model Conversation {
-  id              String             @id @default(cuid())
-  userId          String
-  sceneId         String?
-  status          ConversationStatus @default(ACTIVE)
-  startedAt       DateTime           @default(now())
-  endedAt         DateTime?
-  durationSeconds Int?
-  summary         String?
-  createdAt       DateTime           @default(now())
-  updatedAt       DateTime           @updatedAt
-  user            User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-  scene           Scene?             @relation(fields: [sceneId], references: [id], onDelete: SetNull)
-  messages        Message[]
+  id               String             @id @default(cuid())
+  userId           String
+  sceneId          String?
+  status           ConversationStatus @default(ACTIVE)
+  startedAt        DateTime           @default(now())
+  endedAt          DateTime?
+  durationSeconds  Int?
+  summary          String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime           @updatedAt
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scene            Scene?             @relation(fields: [sceneId], references: [id], onDelete: SetNull)
+  messages         Message[]
   realtimeSessions RealtimeSession[]
-  analysisJobs    AnalysisJob[]
+  analysisJobs     AnalysisJob[]
 
   @@index([userId, createdAt])
   @@index([sceneId])
@@ -98,16 +107,18 @@ model Conversation {
 }
 
 model Message {
-  id             String      @id @default(cuid())
+  id             String       @id @default(cuid())
   conversationId String
+  clientEventId  String?
   role           MessageRole
   content        String
   transcript     String?
   sequence       Int
-  createdAt      DateTime    @default(now())
+  createdAt      DateTime     @default(now())
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
   @@unique([conversationId, sequence])
+  @@unique([conversationId, clientEventId])
   @@index([conversationId, createdAt])
   @@map("messages")
 }

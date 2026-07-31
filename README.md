@@ -40,6 +40,8 @@ pnpm test
 pnpm build
 pnpm prisma:validate
 pnpm prisma:generate
+pnpm prisma:deploy
+pnpm prisma:seed
 ```
 
 ## 目录说明
@@ -97,6 +99,29 @@ OPENAI_TEXT_MODEL="gpt-5.6-sol"
 ## 登录与用户资料
 
 登录、注册、退出登录和用户资料 API 已使用 Prisma、bcrypt 与 HttpOnly JWT Cookie 实现。运行认证功能前需要配置 `DATABASE_URL`、执行数据库迁移，并设置不少于 16 位的 `AUTH_SECRET`；登录令牌不会暴露给前端 JavaScript，也不会写入 `localStorage`。未登录用户仍可使用访客模式体验口语练习。
+
+## 后端核心接口
+
+当前已提供第一批数据库业务接口：
+
+```text
+GET  /api/v1/scenes
+GET  /api/v1/scenes/:sceneId
+POST /api/v1/conversations
+GET  /api/v1/conversations/:conversationId
+POST /api/v1/conversations/:conversationId/messages
+POST /api/v1/conversations/:conversationId/complete
+POST /api/v1/conversations/:conversationId/review
+```
+
+场景查询为公开接口；创建、查询、保存和完成练习需要登录。消息接口支持 `clientEventId` 幂等键，Realtime 重连或客户端重试不会重复保存同一个事件。初始化本地数据库：
+
+```bash
+pnpm prisma:deploy
+pnpm prisma:seed
+```
+
+首个迁移会建立用户、场景、对话、消息、Realtime 会话和分析任务表，种子脚本会写入前端当前使用的 8 个基础场景。
 
 ## 错误监控
 
