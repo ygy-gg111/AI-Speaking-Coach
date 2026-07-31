@@ -11,9 +11,9 @@ import { useLocale, useTranslations } from "next-intl";
 
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
-import { useLearningStore } from "@/stores/learning-store";
 
 import { StartPracticeButton } from "../../conversation/components/start-practice-button";
+import { useSceneFavorite } from "../hooks/use-scene-favorite";
 import type { Scene, SceneCardVariant } from "../types";
 import { SceneCover } from "./scene-cover";
 import styles from "./scene-card.module.css";
@@ -26,10 +26,7 @@ type SceneCardProps = {
 export function SceneCard({ scene, variant = "grid" }: SceneCardProps) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("Scenes");
-  const favorite = useLearningStore((store) =>
-    store.favoriteSceneIds.includes(scene.id),
-  );
-  const toggleFavorite = useLearningStore((store) => store.toggleFavorite);
+  const { favorite, isSyncing, toggle } = useSceneFavorite(scene.id);
   const title = scene.title[locale];
   const compact = variant === "compact";
   const detailHref = `/scenes/${scene.id}` as const;
@@ -68,7 +65,8 @@ export function SceneCard({ scene, variant = "grid" }: SceneCardProps) {
             type="button"
             className={styles.favorite}
             aria-label={favorite ? t("removeFavorite") : t("addFavorite")}
-            onClick={() => toggleFavorite(scene.id)}
+            aria-busy={isSyncing}
+            onClick={toggle}
           >
             {favorite ? <HeartFilled /> : <HeartOutlined />}
           </button>

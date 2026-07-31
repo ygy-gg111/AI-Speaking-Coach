@@ -22,6 +22,7 @@ import { useLearningStore } from "@/stores/learning-store";
 
 import { StartPracticeButton } from "../../conversation/components/start-practice-button";
 import { getSceneDetail } from "../scene-detail-data";
+import { useSceneFavorite } from "../hooks/use-scene-favorite";
 import type { Scene } from "../types";
 import { SceneCover } from "./scene-cover";
 import styles from "./scene-detail.module.css";
@@ -34,10 +35,7 @@ export function SceneDetail({ scene }: SceneDetailProps) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("SceneDetail");
   const sceneT = useTranslations("Scenes");
-  const favorite = useLearningStore((store) =>
-    store.favoriteSceneIds.includes(scene.id),
-  );
-  const toggleFavorite = useLearningStore((store) => store.toggleFavorite);
+  const { favorite, isSyncing, toggle } = useSceneFavorite(scene.id);
   const records = useLearningStore((store) => store.records);
   const detail = getSceneDetail(scene.id);
   const sceneRecords = records.filter((record) => record.sceneId === scene.id);
@@ -73,7 +71,8 @@ export function SceneDetail({ scene }: SceneDetailProps) {
                 favorite ? styles.favoriteActive : ""
               }`}
               aria-pressed={favorite}
-              onClick={() => toggleFavorite(scene.id)}
+              aria-busy={isSyncing}
+              onClick={toggle}
             >
               {favorite ? (
                 <HeartFilled aria-hidden="true" />

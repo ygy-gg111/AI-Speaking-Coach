@@ -33,14 +33,15 @@ enum AnalysisStatus {
 }
 
 model User {
-  id            String         @id @default(cuid())
-  email         String         @unique
-  passwordHash  String
-  locale        String         @default("zh-CN")
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  profile       UserProfile?
-  conversations Conversation[]
+  id             String          @id @default(cuid())
+  email          String          @unique
+  passwordHash   String
+  locale         String          @default("zh-CN")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  profile        UserProfile?
+  conversations  Conversation[]
+  favoriteScenes FavoriteScene[]
 
   @@map("users")
 }
@@ -61,8 +62,8 @@ model UserProfile {
 }
 
 model Scene {
-  id               String         @id @default(cuid())
-  slug             String         @unique
+  id               String          @id @default(cuid())
+  slug             String          @unique
   titleKey         String
   descriptionKey   String
   searchText       String
@@ -74,14 +75,28 @@ model Scene {
   estimatedMinutes Int
   lessonCount      Int
   content          Json?
-  isActive         Boolean        @default(true)
-  sortOrder        Int            @default(0)
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
+  isActive         Boolean         @default(true)
+  sortOrder        Int             @default(0)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
   conversations    Conversation[]
+  favoritedBy      FavoriteScene[]
 
   @@index([category, isActive, sortOrder])
   @@map("scenes")
+}
+
+model FavoriteScene {
+  id        String   @id @default(cuid())
+  userId    String
+  sceneId   String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scene     Scene    @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, sceneId])
+  @@index([userId, createdAt])
+  @@map("favorite_scenes")
 }
 
 model Conversation {

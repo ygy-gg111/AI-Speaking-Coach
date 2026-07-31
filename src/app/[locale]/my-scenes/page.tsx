@@ -7,10 +7,12 @@ import {
   ReadOutlined,
   SettingOutlined,
 } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import { Button, Empty, Progress, Tabs } from "antd";
 import { useLocale, useTranslations } from "next-intl";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
+import { getMyScenes } from "@/features/learning/learning-client";
 import { getSceneMastery } from "@/features/learning/learning-data";
 import { SceneCard } from "@/features/scenes/components/scene-card";
 import { SceneCover } from "@/features/scenes/components/scene-cover";
@@ -28,6 +30,22 @@ export default function MyScenesPage() {
     (store) => store.favoriteSceneIds,
   );
   const records = useLearningStore((store) => store.records);
+  const replaceFavoriteSceneIds = useLearningStore(
+    (store) => store.replaceFavoriteSceneIds,
+  );
+  const myScenesQuery = useQuery({
+    queryKey: ["my-scenes"],
+    queryFn: getMyScenes,
+    retry: false,
+    staleTime: 60 * 1_000,
+  });
+  useEffect(() => {
+    if (myScenesQuery.data) {
+      replaceFavoriteSceneIds(
+        myScenesQuery.data.favorites.map((scene) => scene.id),
+      );
+    }
+  }, [myScenesQuery.data, replaceFavoriteSceneIds]);
   const favoriteScenes = mockScenes.filter((scene) =>
     favoriteSceneIds.includes(scene.id),
   );

@@ -466,6 +466,9 @@ DELETE 删除
 ```text
 GET  /api/v1/scenes
 GET  /api/v1/scenes/:sceneId
+POST /api/v1/scenes/:sceneId/favorite
+DELETE /api/v1/scenes/:sceneId/favorite
+GET  /api/v1/my-scenes
 POST /api/v1/conversations
 GET  /api/v1/conversations/:conversationId
 POST /api/v1/conversations/:conversationId/messages
@@ -476,13 +479,15 @@ POST /api/v1/conversations/:conversationId/complete
 
 - 场景列表支持分类、难度和关键词筛选。
 - 场景详情不会返回服务端 `systemPrompt`。
+- 收藏写入按用户和场景保持唯一，重复收藏不会生成重复数据。
+- “我的场景”只返回当前登录用户收藏的有效场景。
 - 会话数据按登录用户隔离，其他用户无法读取或写入。
 - 消息只允许客户端写入 `USER` 和 `ASSISTANT`，禁止写入 `SYSTEM`。
 - `clientEventId` 用作消息幂等键，避免重连重复入库。
 - 完成会话操作可重复调用，已完成会话不会再次改变结束状态。
 - 单次练习时长限制为最多 60 分钟。
 
-数据库初始化使用 `prisma/migrations/20260731090000_init`，基础场景通过 `pnpm prisma:seed` 显式写入。Prisma 7 不再在迁移后自动执行种子脚本，因此部署流程需要分别执行迁移与种子命令。
+数据库初始化使用 `prisma/migrations/20260731090000_init`，收藏表由 `prisma/migrations/20260731103000_add_favorite_scenes` 增量创建，基础场景通过 `pnpm prisma:seed` 显式写入。Prisma 7 不再在迁移后自动执行种子脚本，因此部署流程需要分别执行迁移与种子命令。
 
 ------
 

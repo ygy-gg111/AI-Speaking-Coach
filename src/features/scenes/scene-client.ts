@@ -8,7 +8,7 @@ import type {
   SceneCoverTone,
 } from "./types";
 
-type SceneApiItem = {
+export type SceneApiItem = {
   id: string;
   slug: string;
   category: string;
