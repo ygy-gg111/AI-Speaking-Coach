@@ -13,6 +13,7 @@ import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { useLearningStore } from "@/stores/learning-store";
 
+import { StartPracticeButton } from "../../conversation/components/start-practice-button";
 import type { Scene, SceneCardVariant } from "../types";
 import { SceneCover } from "./scene-cover";
 import styles from "./scene-card.module.css";
@@ -32,7 +33,6 @@ export function SceneCard({ scene, variant = "grid" }: SceneCardProps) {
   const title = scene.title[locale];
   const compact = variant === "compact";
   const detailHref = `/scenes/${scene.id}` as const;
-  const practiceHref = `/practice/${scene.slug}?scene=${scene.slug}` as const;
 
   return (
     <article
@@ -90,8 +90,8 @@ export function SceneCard({ scene, variant = "grid" }: SceneCardProps) {
         </div>
 
         {compact ? (
-          <Link
-            href={practiceHref}
+          <StartPracticeButton
+            scene={scene}
             className={styles.compactLink}
             aria-label={t("startScene", { title })}
           />
@@ -100,9 +100,9 @@ export function SceneCard({ scene, variant = "grid" }: SceneCardProps) {
             <Link href={detailHref} className={styles.detailButton}>
               {t("viewDetails")}
             </Link>
-            <Link href={practiceHref} className={styles.startButton}>
+            <StartPracticeButton scene={scene} className={styles.startButton}>
               {t("start")}
-            </Link>
+            </StartPracticeButton>
           </div>
         )}
       </div>

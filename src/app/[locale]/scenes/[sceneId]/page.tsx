@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { SceneDetail } from "@/features/scenes/components/scene-detail";
+import { SceneDetailLoader } from "@/features/scenes/components/scene-detail-loader";
 import { findScene, mockScenes } from "@/features/scenes/mock-scenes";
 
 type SceneDetailPageProps = {
@@ -21,5 +21,5 @@ export default async function SceneDetailPage({
     notFound();
   }
 
-  return <SceneDetail scene={scene} />;
+  return <SceneDetailLoader fallback={scene} />;
 }

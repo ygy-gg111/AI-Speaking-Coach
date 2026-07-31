@@ -20,6 +20,7 @@ import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { useLearningStore } from "@/stores/learning-store";
 
+import { StartPracticeButton } from "../../conversation/components/start-practice-button";
 import { getSceneDetail } from "../scene-detail-data";
 import type { Scene } from "../types";
 import { SceneCover } from "./scene-cover";
@@ -41,7 +42,6 @@ export function SceneDetail({ scene }: SceneDetailProps) {
   const detail = getSceneDetail(scene.id);
   const sceneRecords = records.filter((record) => record.sceneId === scene.id);
   const mastery = getSceneMastery(records, scene.id);
-  const practiceHref = `/practice/${scene.slug}?scene=${scene.slug}` as const;
 
   return (
     <main className={styles.page}>
@@ -112,10 +112,10 @@ export function SceneDetail({ scene }: SceneDetailProps) {
 
           <p className={styles.context}>{detail.context[locale]}</p>
 
-          <Link href={practiceHref} className={styles.start}>
+          <StartPracticeButton scene={scene} className={styles.start}>
             {t("start")}
             <ArrowRightOutlined aria-hidden="true" />
-          </Link>
+          </StartPracticeButton>
           <Link href={`/scenes/${scene.id}/replay`} className={styles.start}>
             <CustomerServiceOutlined aria-hidden="true" />
             {t("replay")}

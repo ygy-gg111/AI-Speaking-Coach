@@ -83,6 +83,31 @@
   color: #9291a0;
 }
 
+.continueButton {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: var(--app-primary);
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.continueButton:hover {
+  background: var(--app-primary-dark);
+}
+
+.continueButton:disabled {
+  cursor: wait;
+  opacity: 0.72;
+}
+
 .quickScenes {
   margin-top: 34px;
 }

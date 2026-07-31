@@ -13,6 +13,7 @@ export default async function ConversationPage({
   const { scene } = await searchParams;
   return (
     <PracticeSession
+      key={conversationId}
       conversationId={conversationId}
       sceneIdentifier={scene}
     />

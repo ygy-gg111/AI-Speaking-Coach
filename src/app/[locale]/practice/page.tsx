@@ -1,9 +1,9 @@
 "use client";
 
 import { ArrowRightOutlined, AudioOutlined } from "@ant-design/icons";
-import { Button } from "antd";
 import { useLocale, useTranslations } from "next-intl";
 
+import { StartPracticeButton } from "@/features/conversation/components/start-practice-button";
 import { SceneCard } from "@/features/scenes/components/scene-card";
 import { SceneCover } from "@/features/scenes/components/scene-cover";
 import { mockScenes } from "@/features/scenes/mock-scenes";
@@ -39,15 +39,13 @@ export default function PracticePage() {
             <i />
           </div>
           <small>{t("progress", { value: 65 })}</small>
-          <Link href="/practice/demo">
-            <Button
-              type="primary"
-              size="large"
-              icon={<AudioOutlined />}
-            >
-              {t("continuePractice")}
-            </Button>
-          </Link>
+          <StartPracticeButton
+            scene={currentScene}
+            className={styles.continueButton}
+          >
+            <AudioOutlined />
+            {t("continuePractice")}
+          </StartPracticeButton>
         </div>
       </section>
 

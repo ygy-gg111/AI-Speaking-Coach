@@ -1,11 +1,13 @@
 "use client";
 
 import { SearchOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import { Empty, Input } from "antd";
 import { useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { SceneCard } from "@/features/scenes/components/scene-card";
+import { getScenes } from "@/features/scenes/scene-client";
 import { mockScenes } from "@/features/scenes/mock-scenes";
 import type { SceneCategory } from "@/features/scenes/types";
 
@@ -27,7 +29,18 @@ export default function ScenesPage() {
   const [category, setCategory] = useState<CategoryKey>("all");
   const [keyword, setKeyword] = useState("");
 
-  const scenes = useMemo(() => {
+  const sceneQuery = useQuery({
+    queryKey: ["scenes", category, keyword.trim()],
+    queryFn: () =>
+      getScenes({
+        category: category === "all" ? undefined : category,
+        query: keyword,
+      }),
+    retry: false,
+    staleTime: 5 * 60 * 1_000,
+  });
+
+  const fallbackScenes = useMemo(() => {
     const query = keyword.trim().toLocaleLowerCase();
     return mockScenes.filter((scene) => {
       const matchesCategory =
@@ -43,6 +56,7 @@ export default function ScenesPage() {
       return matchesCategory && matchesKeyword;
     });
   }, [category, keyword]);
+  const scenes = sceneQuery.data ?? fallbackScenes;
 
   return (
     <main className={styles.page}>

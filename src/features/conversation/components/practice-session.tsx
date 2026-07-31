@@ -26,6 +26,11 @@ import {
   createMockConversationMessages,
   mockEvaluation,
 } from "../mock-conversation";
+import {
+  completeConversation,
+  isGuestConversation,
+  saveConversationMessage,
+} from "../conversation-client";
 import { ConversationTimeline } from "./conversation-timeline";
 import { VoiceControlBar } from "../../realtime/components/voice-control-bar";
 import styles from "./practice-session.module.css";
@@ -53,6 +58,11 @@ export function PracticeSession({
   const [isEnding, setIsEnding] = useState(false);
   const startedAtRef = useRef<number | null>(null);
   const lastAnalyzedTurnRef = useRef("");
+  const persistedMessageIdsRef = useRef(new Set<string>());
+  const pendingSavesRef = useRef(new Set<Promise<void>>());
+  const initialTranscriptIdsRef = useRef(
+    new Set(useRealtimeStore.getState().transcript.map((item) => item.id)),
+  );
   const scene = findScene(sceneIdentifier ?? "") ?? mockScenes[1];
   const sceneDetail = getSceneDetail(scene.id);
   const openingExpression = sceneDetail.phrases[0].expression;
@@ -122,8 +132,39 @@ export function PracticeSession({
 
   useEffect(() => {
     startedAtRef.current = Date.now();
+    persistedMessageIdsRef.current.clear();
     resetRealtime();
   }, [resetRealtime]);
+
+  useEffect(() => {
+    if (isGuestConversation(conversationId)) {
+      return;
+    }
+
+    for (const item of transcript) {
+      if (
+        !item.final ||
+        !item.text.trim() ||
+        initialTranscriptIdsRef.current.has(item.id) ||
+        persistedMessageIdsRef.current.has(item.id)
+      ) {
+        continue;
+      }
+      persistedMessageIdsRef.current.add(item.id);
+      const pending = saveConversationMessage(conversationId, {
+        clientEventId: item.id,
+        role: item.role === "user" ? "USER" : "ASSISTANT",
+        content: item.text.trim(),
+        transcript: item.text.trim(),
+      })
+        .then(() => undefined)
+        .catch(() => {
+          persistedMessageIdsRef.current.delete(item.id);
+        });
+      pendingSavesRef.current.add(pending);
+      void pending.finally(() => pendingSavesRef.current.delete(pending));
+    }
+  }, [conversationId, transcript]);
 
   useEffect(() => {
     if (
@@ -152,12 +193,24 @@ export function PracticeSession({
     setIsEnding(true);
     disconnect();
     let finalReview = review;
+    const startedAt = startedAtRef.current ?? Date.now();
+    const durationSeconds = Math.max(
+      0,
+      Math.min(60 * 60, Math.round((Date.now() - startedAt) / 1_000)),
+    );
     try {
       finalReview = await analyzeCurrentConversation();
     } catch {
       // The review route still has the local fallback already shown in the UI.
     } finally {
       const evaluation = finalReview?.evaluation ?? mockEvaluation;
+      if (!isGuestConversation(conversationId)) {
+        await Promise.allSettled([...pendingSavesRef.current]);
+        await completeConversation(conversationId, {
+          durationSeconds,
+          summary: evaluation.improved,
+        }).catch(() => undefined);
+      }
       addPracticeRecord({
         id: `practice-${conversationId}`,
         conversationId,
