@@ -33,4 +33,31 @@ describe("learning report", () => {
       count: 2,
     });
   });
+
+  it("groups records using the learner timezone", () => {
+    const report = buildLearningReport(
+      [
+        {
+          id: "practice-timezone",
+          conversationId: "conversation-timezone",
+          sceneId: "scene-airport",
+          completedAt: "2026-07-30T16:30:00.000Z",
+          durationMinutes: 9,
+          newExpressions: 3,
+          corrections: 1,
+          mastery: 75,
+        },
+      ],
+      [],
+      7,
+      new Date("2026-07-31T04:00:00.000Z"),
+      -480,
+    );
+
+    expect(report.endDate).toBe("2026-07-31");
+    expect(report.trend.at(-1)).toMatchObject({
+      date: "2026-07-31",
+      durationMinutes: 9,
+    });
+  });
 });

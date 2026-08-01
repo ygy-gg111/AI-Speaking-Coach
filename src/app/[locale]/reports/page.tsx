@@ -10,11 +10,13 @@ import {
   RiseOutlined,
 } from "@ant-design/icons";
 import { Button, Progress, Segmented } from "antd";
+import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
 import { mockScenes } from "@/features/scenes/mock-scenes";
 import { buildLearningReport } from "@/features/reports/report-data";
+import { getLearningReport } from "@/features/reports/report-client";
 import type { ReportPeriod } from "@/features/reports/types";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
@@ -28,10 +30,20 @@ export default function ReportsPage() {
   const records = useLearningStore((store) => store.records);
   const mistakes = useLearningStore((store) => store.mistakes);
   const [period, setPeriod] = useState<ReportPeriod>(7);
-  const report = useMemo(
+  const timezoneOffset = new Date().getTimezoneOffset();
+  const localReport = useMemo(
     () => buildLearningReport(records, mistakes, period),
     [mistakes, period, records],
   );
+  const reportQuery = useQuery({
+    queryKey: ["reports", period, timezoneOffset],
+    queryFn: () => getLearningReport(period, timezoneOffset),
+    retry: false,
+    staleTime: 60 * 1_000,
+  });
+  const report = reportQuery.data
+    ? { ...reportQuery.data, weaknesses: localReport.weaknesses }
+    : localReport;
   const dateFormatter = useMemo(
     () =>
       new Intl.DateTimeFormat(locale, {

@@ -1,4 +1,3 @@
-import { toLocalDateKey } from "../learning/learning-data";
 import type { PracticeRecord } from "../learning/types";
 import type { MistakeRecord } from "../mistakes/types";
 
@@ -15,17 +14,28 @@ function clamp(value: number, minimum = 0, maximum = 100) {
   return Math.max(minimum, Math.min(maximum, Math.round(value)));
 }
 
-function addDays(date: Date, days: number) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+function addDays(date: string, days: number) {
+  const [year, month, day] = date.split("-").map(Number);
+  return new Date(Date.UTC(year, month - 1, day + days))
+    .toISOString()
+    .slice(0, 10);
+}
+
+function toOffsetDateKey(value: Date | string, timezoneOffset: number) {
+  const date = typeof value === "string" ? new Date(value) : value;
+  return new Date(date.getTime() - timezoneOffset * 60_000)
+    .toISOString()
+    .slice(0, 10);
 }
 
 function getRecordsBetween(
   records: PracticeRecord[],
   startDate: string,
   endDate: string,
+  timezoneOffset: number,
 ) {
   return records.filter((record) => {
-    const date = toLocalDateKey(record.completedAt);
+    const date = toOffsetDateKey(record.completedAt, timezoneOffset);
     return date >= startDate && date <= endDate;
   });
 }
@@ -39,13 +49,15 @@ function sum(
 
 function buildTrend(
   records: PracticeRecord[],
-  start: Date,
+  startDate: string,
   period: ReportPeriod,
+  timezoneOffset: number,
 ): ReportTrendDay[] {
   return Array.from({ length: period }, (_, index) => {
-    const date = toLocalDateKey(addDays(start, index));
+    const date = addDays(startDate, index);
     const dailyRecords = records.filter(
-      (record) => toLocalDateKey(record.completedAt) === date,
+      (record) =>
+        toOffsetDateKey(record.completedAt, timezoneOffset) === date,
     );
     return {
       date,
@@ -144,18 +156,23 @@ export function buildLearningReport(
   mistakes: MistakeRecord[],
   period: ReportPeriod,
   today = new Date(),
+  timezoneOffset = today.getTimezoneOffset(),
 ): LearningReport {
-  const end = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-  const start = addDays(end, -(period - 1));
-  const previousEnd = addDays(start, -1);
+  const endDate = toOffsetDateKey(today, timezoneOffset);
+  const startDate = addDays(endDate, -(period - 1));
+  const previousEnd = addDays(startDate, -1);
   const previousStart = addDays(previousEnd, -(period - 1));
-  const startDate = toLocalDateKey(start);
-  const endDate = toLocalDateKey(end);
-  const currentRecords = getRecordsBetween(records, startDate, endDate);
+  const currentRecords = getRecordsBetween(
+    records,
+    startDate,
+    endDate,
+    timezoneOffset,
+  );
   const previousRecords = getRecordsBetween(
     records,
-    toLocalDateKey(previousStart),
-    toLocalDateKey(previousEnd),
+    previousStart,
+    previousEnd,
+    timezoneOffset,
   );
   const durationMinutes = sum(currentRecords, "durationMinutes");
   const previousDuration = sum(previousRecords, "durationMinutes");
@@ -171,7 +188,9 @@ export function buildLearningReport(
     startDate,
     endDate,
     activeDays: new Set(
-      currentRecords.map((record) => toLocalDateKey(record.completedAt)),
+      currentRecords.map((record) =>
+        toOffsetDateKey(record.completedAt, timezoneOffset),
+      ),
     ).size,
     practiceCount: currentRecords.length,
     durationMinutes,
@@ -184,7 +203,7 @@ export function buildLearningReport(
             ((durationMinutes - previousDuration) / previousDuration) * 100,
           )
         : null,
-    trend: buildTrend(currentRecords, start, period),
+    trend: buildTrend(currentRecords, startDate, period, timezoneOffset),
     scenes: buildScenes(currentRecords),
     abilities: buildAbilities(currentRecords),
     weaknesses: buildWeaknesses(mistakes),

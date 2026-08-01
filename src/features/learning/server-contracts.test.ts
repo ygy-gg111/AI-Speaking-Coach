@@ -4,6 +4,7 @@ import {
   calendarDateParamsSchema,
   getLocalDateRange,
   getLocalMonthRange,
+  getReportHistoryRange,
 } from "./server-contracts";
 
 describe("calendar server contracts", () => {
@@ -28,5 +29,16 @@ describe("calendar server contracts", () => {
         timezoneOffset: -480,
       }).success,
     ).toBe(false);
+  });
+
+  it("builds two report periods of timezone-aware history", () => {
+    const range = getReportHistoryRange(
+      7,
+      -480,
+      new Date("2026-07-31T04:00:00.000Z"),
+    );
+
+    expect(range.start.toISOString()).toBe("2026-07-17T16:00:00.000Z");
+    expect(range.end.toISOString()).toBe("2026-07-31T16:00:00.000Z");
   });
 });

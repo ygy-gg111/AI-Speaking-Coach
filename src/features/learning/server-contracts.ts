@@ -18,6 +18,11 @@ export const dashboardQuerySchema = z.object({
   timezoneOffset: z.coerce.number().int().min(-840).max(840).default(0),
 });
 
+export const reportQuerySchema = z.object({
+  period: z.coerce.number().pipe(z.union([z.literal(7), z.literal(30)])),
+  timezoneOffset: z.coerce.number().int().min(-840).max(840).default(0),
+});
+
 export function getLocalMonthRange(
   year: number,
   month: number,
@@ -33,6 +38,27 @@ export function getLocalDateRange(date: string, timezoneOffset: number) {
   const [year, month, day] = date.split("-").map(Number);
   return {
     start: localMidnightToUtc(year, month, day, timezoneOffset),
+    end: localMidnightToUtc(year, month, day + 1, timezoneOffset),
+  };
+}
+
+export function getReportHistoryRange(
+  period: 7 | 30,
+  timezoneOffset: number,
+  now = new Date(),
+) {
+  const localNow = new Date(now.getTime() - timezoneOffset * 60_000);
+  const year = localNow.getUTCFullYear();
+  const month = localNow.getUTCMonth() + 1;
+  const day = localNow.getUTCDate();
+
+  return {
+    start: localMidnightToUtc(
+      year,
+      month,
+      day - (period * 2 - 1),
+      timezoneOffset,
+    ),
     end: localMidnightToUtc(year, month, day + 1, timezoneOffset),
   };
 }
