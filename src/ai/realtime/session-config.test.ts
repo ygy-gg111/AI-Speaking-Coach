@@ -38,4 +38,24 @@ describe("Realtime session configuration", () => {
     expect(config.instructions).toContain("Airport Check-in");
     expect(config.instructions).toContain("A2");
   });
+
+  it("applies learner voice, speed, language, goal, and correction preferences", () => {
+    vi.stubEnv("OPENAI_REALTIME_MODEL", "gpt-realtime-2.1");
+    vi.stubEnv("OPENAI_REALTIME_VOICE", "marin");
+
+    const config = createRealtimeSessionConfig({
+      sceneName: "Job interview",
+      learnerLevel: "B1",
+      voice: "cedar",
+      speed: 0.75,
+      correctionFrequency: "detailed",
+      learningGoal: "interview",
+      showChinese: false,
+    });
+
+    expect(config.audio.output).toEqual({ voice: "cedar", speed: 0.75 });
+    expect(config.instructions).toContain("Primary learning goal: interview");
+    expect(config.instructions).toContain("After each learner turn");
+    expect(config.instructions).toContain("Speak only in English");
+  });
 });

@@ -41,6 +41,7 @@ export default function HomePage() {
     dashboardQuery.data ??
     buildDashboardSummary(records, homeToday, timezoneOffset);
   const recentRecord = summary.recentRecord;
+  const dailyGoalMinutes = summary.dailyGoalMinutes;
   const recentScene =
     mockScenes.find((scene) => scene.id === recentRecord?.sceneId) ??
     mockScenes[1];
@@ -72,13 +73,16 @@ export default function HomePage() {
         <MetricCard
           icon={<ClockCircleOutlined />}
           label={t("dailyGoal")}
-          value={10}
+          value={dailyGoalMinutes}
           unit={t("minutes")}
           detail={t("dailyProgress", {
-            current: Math.min(summary.todayMinutes, 10),
-            total: 10,
+            current: Math.min(summary.todayMinutes, dailyGoalMinutes),
+            total: dailyGoalMinutes,
           })}
-          progress={Math.min(100, summary.todayMinutes * 10)}
+          progress={Math.min(
+            100,
+            (summary.todayMinutes / dailyGoalMinutes) * 100,
+          )}
           tone="red"
         />
         <MetricCard

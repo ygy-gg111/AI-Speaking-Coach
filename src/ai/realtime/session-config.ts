@@ -3,7 +3,18 @@ import { getServerEnv } from "../../lib/env";
 export type SessionContext = {
   sceneName: string;
   learnerLevel: string;
+  voice?: "marin" | "cedar";
+  speed?: number;
+  correctionFrequency?: "gentle" | "balanced" | "detailed";
+  learningGoal?: "travel" | "work" | "daily" | "interview";
+  showChinese?: boolean;
 };
+
+const correctionInstructions = {
+  gentle: "Only correct mistakes that make the learner difficult to understand.",
+  balanced: "Gently correct one important mistake at a time.",
+  detailed: "After each learner turn, briefly correct the important language mistakes.",
+} as const;
 
 export function createRealtimeSessionConfig(context: SessionContext) {
   const env = getServerEnv();
@@ -15,9 +26,12 @@ export function createRealtimeSessionConfig(context: SessionContext) {
       "You are a patient English speaking coach.",
       `Practice scene: ${context.sceneName}.`,
       `Learner CEFR level: ${context.learnerLevel}.`,
+      `Primary learning goal: ${context.learningGoal ?? "daily"} English.`,
       "Keep turns short, natural, and encouraging.",
-      "Speak only in English unless the learner explicitly asks for a Chinese explanation.",
-      "Gently correct one important mistake at a time.",
+      context.showChinese ?? true
+        ? "Speak in English and provide a concise Chinese explanation when it helps clarify a correction."
+        : "Speak only in English, including all corrections and explanations.",
+      correctionInstructions[context.correctionFrequency ?? "balanced"],
     ].join(" "),
     output_modalities: ["audio"] as const,
     audio: {
@@ -36,7 +50,8 @@ export function createRealtimeSessionConfig(context: SessionContext) {
         },
       },
       output: {
-        voice: env.OPENAI_REALTIME_VOICE,
+        voice: context.voice ?? env.OPENAI_REALTIME_VOICE,
+        speed: context.speed ?? 1,
       },
     },
   };

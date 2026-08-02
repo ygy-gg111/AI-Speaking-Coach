@@ -1,6 +1,8 @@
 import { z } from "zod";
 
 import { createRealtimeSessionConfig } from "@/ai/realtime/session-config";
+import { getSessionUserId } from "@/features/auth/session";
+import { getPrismaClient } from "@/infrastructure/database/prisma";
 import { reportServerError } from "@/infrastructure/observability/logger";
 import { fail, ok } from "@/lib/api-response";
 import { getServerEnv } from "@/lib/env";
@@ -53,15 +55,46 @@ export async function POST(request: Request) {
     );
   }
 
-  const session = createRealtimeSessionConfig({
-    sceneName: parsed.data.sceneName,
-    learnerLevel: parsed.data.level,
-  });
-  const formData = new FormData();
-  formData.set("sdp", sdp);
-  formData.set("session", JSON.stringify(session));
-
   try {
+    const userId = await getSessionUserId();
+    const profile = userId
+      ? await getPrismaClient().userProfile.findUnique({
+          where: { userId },
+          select: {
+            voice: true,
+            speechSpeed: true,
+            correctionFrequency: true,
+            learningGoal: true,
+            showChinese: true,
+          },
+        })
+      : null;
+    const session = createRealtimeSessionConfig({
+      sceneName: parsed.data.sceneName,
+      learnerLevel: parsed.data.level,
+      voice: profile
+        ? profile.voice === "cedar"
+          ? "cedar"
+          : "marin"
+        : undefined,
+      speed: profile?.speechSpeed,
+      correctionFrequency:
+        profile?.correctionFrequency === "gentle" ||
+        profile?.correctionFrequency === "detailed"
+          ? profile.correctionFrequency
+          : "balanced",
+      learningGoal:
+        profile?.learningGoal === "travel" ||
+        profile?.learningGoal === "work" ||
+        profile?.learningGoal === "interview"
+          ? profile.learningGoal
+          : "daily",
+      showChinese: profile?.showChinese,
+    });
+    const formData = new FormData();
+    formData.set("sdp", sdp);
+    formData.set("session", JSON.stringify(session));
+
     const response = await fetch("https://api.openai.com/v1/realtime/calls", {
       method: "POST",
       headers: {

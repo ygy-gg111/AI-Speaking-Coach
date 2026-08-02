@@ -1,6 +1,7 @@
 import type {
   AuthCredentials,
   CurrentUser,
+  PreferencesUpdateInput,
   ProfileUpdateInput,
   RegistrationInput,
 } from "./types";
@@ -62,6 +63,13 @@ export function logout() {
 
 export function updateProfile(input: ProfileUpdateInput) {
   return request<CurrentUser>("/api/v1/users/me", {
+    method: "PATCH",
+    body: JSON.stringify(input),
+  });
+}
+
+export function updatePreferences(input: PreferencesUpdateInput) {
+  return request<CurrentUser>("/api/v1/users/me/preferences", {
     method: "PATCH",
     body: JSON.stringify(input),
   });

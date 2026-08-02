@@ -36,6 +36,7 @@ describe("dashboard data", () => {
     );
 
     expect(summary).toMatchObject({
+      dailyGoalMinutes: 10,
       todayMinutes: 12,
       learnedScenes: 2,
       masteredExpressions: 8,
@@ -44,6 +45,17 @@ describe("dashboard data", () => {
       streak: 2,
     });
     expect(summary.recentRecord?.id).toBe("practice-1");
+  });
+
+  it("uses the learner's configured daily goal", () => {
+    const summary = buildDashboardSummary(
+      records,
+      new Date("2026-07-31T04:00:00.000Z"),
+      -480,
+      25,
+    );
+
+    expect(summary.dailyGoalMinutes).toBe(25);
   });
 
   it("returns an empty dashboard for a new learner", () => {

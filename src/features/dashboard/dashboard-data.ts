@@ -1,6 +1,7 @@
 import type { PracticeRecord } from "@/features/learning/types";
 
 export type DashboardSummary = {
+  dailyGoalMinutes: number;
   todayMinutes: number;
   learnedScenes: number;
   masteredExpressions: number;
@@ -14,6 +15,7 @@ export function buildDashboardSummary(
   records: PracticeRecord[],
   now = new Date(),
   timezoneOffset = now.getTimezoneOffset(),
+  dailyGoalMinutes = 10,
 ): DashboardSummary {
   const sorted = [...records].sort(
     (left, right) =>
@@ -34,6 +36,7 @@ export function buildDashboardSummary(
   );
 
   return {
+    dailyGoalMinutes,
     todayMinutes: todayRecords.reduce(
       (sum, record) => sum + record.durationMinutes,
       0,

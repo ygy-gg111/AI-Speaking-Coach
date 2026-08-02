@@ -30,11 +30,16 @@ export async function GET(request: Request) {
       new PrismaSceneRepository(prisma),
     );
     const records = await service.listHistory(userId, 1_000);
+    const profile = await prisma.userProfile.findUnique({
+      where: { userId },
+      select: { dailyGoalMinutes: true },
+    });
     return ok(
       buildDashboardSummary(
         records,
         new Date(),
         input.data.timezoneOffset,
+        profile?.dailyGoalMinutes ?? 10,
       ),
     );
   } catch (error) {

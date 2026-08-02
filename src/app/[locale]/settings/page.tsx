@@ -27,12 +27,26 @@ import {
   AuthApiError,
   getCurrentUser,
   logout,
+  updatePreferences,
   updateProfile,
+  type PreferencesUpdateInput,
   type ProfileUpdateInput,
 } from "@/features/auth";
 import { Link, useRouter } from "@/i18n/navigation";
 
 import styles from "./settings.module.css";
+
+const PREFERENCES_STORAGE_KEY = "ai-speaking-preferences";
+const defaultPreferences: PreferencesUpdateInput = {
+  voice: "marin",
+  speed: 1,
+  correctionFrequency: "balanced",
+  learningGoal: "daily",
+  showChinese: true,
+  autoPlay: true,
+  saveAudio: false,
+  saveConversation: true,
+};
 
 export default function SettingsPage() {
   const t = useTranslations("Settings");
@@ -41,16 +55,26 @@ export default function SettingsPage() {
   const queryClient = useQueryClient();
   const [form] = Form.useForm<ProfileUpdateInput>();
   const [messageApi, contextHolder] = message.useMessage();
-  const [preferences, setPreferences] = useState({
-    voice: "marin",
-    speed: 1,
-    correctionFrequency: "balanced",
-    learningGoal: "daily",
-    showChinese: true,
-    autoPlay: true,
-    saveAudio: false,
-    saveConversation: true,
+  const [cachedPreferences] = useState<PreferencesUpdateInput>(() => {
+    if (typeof window === "undefined") {
+      return defaultPreferences;
+    }
+    const stored = localStorage.getItem(PREFERENCES_STORAGE_KEY);
+    if (!stored) {
+      return defaultPreferences;
+    }
+    try {
+      return {
+        ...defaultPreferences,
+        ...(JSON.parse(stored) as Partial<PreferencesUpdateInput>),
+      };
+    } catch {
+      localStorage.removeItem(PREFERENCES_STORAGE_KEY);
+      return defaultPreferences;
+    }
   });
+  const [preferenceDraft, setPreferenceDraft] =
+    useState<PreferencesUpdateInput | null>(null);
   const userQuery = useQuery({
     queryKey: ["current-user"],
     queryFn: getCurrentUser,
@@ -63,6 +87,25 @@ export default function SettingsPage() {
       void messageApi.success(t("saved"));
     },
     onError: () => {
+      void messageApi.error(t("saveFailed"));
+    },
+  });
+  const preferencesMutation = useMutation({
+    mutationFn: updatePreferences,
+    onSuccess: (updatedUser) => {
+      queryClient.setQueryData(["current-user"], updatedUser);
+      setPreferenceDraft(null);
+      localStorage.setItem(
+        PREFERENCES_STORAGE_KEY,
+        JSON.stringify(updatedUser.profile.preferences),
+      );
+      void messageApi.success(t("preferencesSaved"));
+    },
+    onError: () => {
+      localStorage.setItem(
+        PREFERENCES_STORAGE_KEY,
+        JSON.stringify(preferences),
+      );
       void messageApi.error(t("saveFailed"));
     },
   });
@@ -129,6 +172,11 @@ export default function SettingsPage() {
   }
 
   const user = userQuery.data;
+  const preferences =
+    preferenceDraft ?? user.profile.preferences ?? cachedPreferences;
+  const changePreferences = (change: Partial<PreferencesUpdateInput>) => {
+    setPreferenceDraft({ ...preferences, ...change });
+  };
   const displayName = user.profile.displayName || user.email.split("@")[0];
 
   return (
@@ -247,10 +295,7 @@ export default function SettingsPage() {
             <Select
               value={preferences.learningGoal}
               onChange={(value) =>
-                setPreferences((current) => ({
-                  ...current,
-                  learningGoal: value,
-                }))
+                changePreferences({ learningGoal: value })
               }
               options={["travel", "work", "daily", "interview"].map(
                 (value) => ({
@@ -268,10 +313,7 @@ export default function SettingsPage() {
             <Select
               value={preferences.correctionFrequency}
               onChange={(value) =>
-                setPreferences((current) => ({
-                  ...current,
-                  correctionFrequency: value,
-                }))
+                changePreferences({ correctionFrequency: value })
               }
               options={["gentle", "balanced", "detailed"].map((value) => ({
                 value,
@@ -287,10 +329,7 @@ export default function SettingsPage() {
             <Switch
               checked={preferences.showChinese}
               onChange={(checked) =>
-                setPreferences((current) => ({
-                  ...current,
-                  showChinese: checked,
-                }))
+                changePreferences({ showChinese: checked })
               }
             />
           </div>
@@ -309,7 +348,7 @@ export default function SettingsPage() {
             <Select
               value={preferences.voice}
               onChange={(value) =>
-                setPreferences((current) => ({ ...current, voice: value }))
+                changePreferences({ voice: value })
               }
               options={[
                 { value: "marin", label: "Marin" },
@@ -329,7 +368,7 @@ export default function SettingsPage() {
               value={preferences.speed}
               marks={{ 0.75: "0.75×", 1: "1×", 1.25: "1.25×" }}
               onChange={(value) =>
-                setPreferences((current) => ({ ...current, speed: value }))
+                changePreferences({ speed: value })
               }
             />
           </div>
@@ -341,10 +380,7 @@ export default function SettingsPage() {
             <Switch
               checked={preferences.autoPlay}
               onChange={(checked) =>
-                setPreferences((current) => ({
-                  ...current,
-                  autoPlay: checked,
-                }))
+                changePreferences({ autoPlay: checked })
               }
             />
           </div>
@@ -363,10 +399,7 @@ export default function SettingsPage() {
             <Switch
               checked={preferences.saveAudio}
               onChange={(checked) =>
-                setPreferences((current) => ({
-                  ...current,
-                  saveAudio: checked,
-                }))
+                changePreferences({ saveAudio: checked })
               }
             />
           </div>
@@ -378,10 +411,7 @@ export default function SettingsPage() {
             <Switch
               checked={preferences.saveConversation}
               onChange={(checked) =>
-                setPreferences((current) => ({
-                  ...current,
-                  saveConversation: checked,
-                }))
+                changePreferences({ saveConversation: checked })
               }
             />
           </div>
@@ -396,13 +426,8 @@ export default function SettingsPage() {
         size="large"
         type="primary"
         icon={<SaveOutlined />}
-        onClick={() => {
-          localStorage.setItem(
-            "ai-speaking-preferences",
-            JSON.stringify(preferences),
-          );
-          void messageApi.success(t("preferencesSaved"));
-        }}
+        loading={preferencesMutation.isPending}
+        onClick={() => preferencesMutation.mutate(preferences)}
       >
         {t("savePreferences")}
       </Button>

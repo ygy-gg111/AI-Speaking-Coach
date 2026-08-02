@@ -1,9 +1,21 @@
+export type UserPreferences = {
+  voice: "marin" | "cedar";
+  speed: number;
+  correctionFrequency: "gentle" | "balanced" | "detailed";
+  learningGoal: "travel" | "work" | "daily" | "interview";
+  showChinese: boolean;
+  autoPlay: boolean;
+  saveAudio: boolean;
+  saveConversation: boolean;
+};
+
 export type UserProfileSummary = {
   displayName: string | null;
   level: string;
   dailyGoalMinutes: number;
   nativeLanguage: string;
   targetLanguage: string;
+  preferences: UserPreferences;
 };
 
 export type CurrentUser = {
@@ -29,3 +41,5 @@ export type ProfileUpdateInput = {
   level: string;
   dailyGoalMinutes: number;
 };
+
+export type PreferencesUpdateInput = UserPreferences;

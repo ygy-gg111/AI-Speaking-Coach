@@ -60,16 +60,24 @@ model User {
 }
 
 model UserProfile {
-  id               String   @id @default(cuid())
-  userId           String   @unique
-  displayName      String?
-  nativeLanguage   String   @default("zh-CN")
-  targetLanguage   String   @default("en")
-  level            String   @default("A2")
-  dailyGoalMinutes Int      @default(10)
-  createdAt        DateTime @default(now())
-  updatedAt        DateTime @updatedAt
-  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  displayName         String?
+  nativeLanguage      String   @default("zh-CN")
+  targetLanguage      String   @default("en")
+  level               String   @default("A2")
+  dailyGoalMinutes    Int      @default(10)
+  voice               String   @default("marin")
+  speechSpeed         Float    @default(1)
+  correctionFrequency String   @default("balanced")
+  learningGoal        String   @default("daily")
+  showChinese         Boolean  @default(true)
+  autoPlay            Boolean  @default(true)
+  saveAudio           Boolean  @default(false)
+  saveConversation    Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_profiles")
 }
