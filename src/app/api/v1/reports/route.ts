@@ -8,8 +8,10 @@ import { getPrismaClient } from "@/infrastructure/database/prisma";
 import { reportServerError } from "@/infrastructure/observability/logger";
 import { fail, ok } from "@/lib/api-response";
 import { PrismaConversationRepository } from "@/repositories/prisma-conversation.repository";
+import { PrismaMistakeRepository } from "@/repositories/mistake.repository";
 import { PrismaSceneRepository } from "@/repositories/scene.repository";
 import { ConversationService } from "@/services/conversations/conversation.service";
+import { MistakeService } from "@/services/learning/mistake.service";
 
 export const runtime = "nodejs";
 
@@ -40,10 +42,13 @@ export async function GET(request: Request) {
       new PrismaSceneRepository(prisma),
     );
     const records = await service.listHistoryBetween(userId, start, end);
+    const mistakes = await new MistakeService(
+      new PrismaMistakeRepository(prisma),
+    ).list(userId);
     return ok(
       buildLearningReport(
         records,
-        [],
+        mistakes,
         input.data.period,
         now,
         input.data.timezoneOffset,

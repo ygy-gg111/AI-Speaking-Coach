@@ -16,6 +16,10 @@ import {
   type MistakeFilter,
 } from "@/features/mistakes/mistake-data";
 import type { MistakeCategory } from "@/features/mistakes/types";
+import {
+  useCloudMistakes,
+  useReviewMistake,
+} from "@/features/mistakes/hooks/use-cloud-mistakes";
 import { mockScenes } from "@/features/scenes/mock-scenes";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
@@ -27,7 +31,8 @@ export default function MistakesPage() {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("Mistakes");
   const mistakes = useLearningStore((store) => store.mistakes);
-  const reviewMistake = useLearningStore((store) => store.reviewMistake);
+  useCloudMistakes();
+  const reviewMistake = useReviewMistake();
   const [filter, setFilter] = useState<MistakeFilter>("all");
   const [query, setQuery] = useState("");
   const visibleMistakes = useMemo(

@@ -41,9 +41,7 @@ export default function ReportsPage() {
     retry: false,
     staleTime: 60 * 1_000,
   });
-  const report = reportQuery.data
-    ? { ...reportQuery.data, weaknesses: localReport.weaknesses }
-    : localReport;
+  const report = reportQuery.data ?? localReport;
   const dateFormatter = useMemo(
     () =>
       new Intl.DateTimeFormat(locale, {

@@ -473,6 +473,12 @@ GET  /api/v1/calendar?year=&month=&timezoneOffset=
 GET  /api/v1/calendar/:date?timezoneOffset=
 GET  /api/v1/dashboard?timezoneOffset=
 GET  /api/v1/reports?period=&timezoneOffset=
+GET  /api/v1/mistakes?limit=
+POST /api/v1/mistakes
+POST /api/v1/mistakes/:mistakeId/review
+GET  /api/v1/vocabulary?limit=
+POST /api/v1/vocabulary
+PATCH /api/v1/vocabulary/:entryId
 POST /api/v1/conversations
 GET  /api/v1/conversations?limit=30
 GET  /api/v1/conversations/:conversationId

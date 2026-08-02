@@ -517,12 +517,14 @@
     "title": "Vocabulary",
     "subtitle": "Remember phrases you can use in a scene, not isolated words.",
     "search": "Search words or phrases",
+    "filterLabel": "Vocabulary filter",
     "filter": { "all": "All", "today": "New today", "review": "To review", "mastered": "Mastered", "favorite": "Saved" },
     "status": { "today": "New today", "review": "To review", "mastered": "Mastered" },
     "play": "Play {phrase}",
     "favorite": "Save {phrase}",
+    "review": "Mark {phrase} as reviewed",
     "mastered": "Mastered",
-    "scheduleReview": "Add to review",
+    "scheduleReview": "Complete review",
     "empty": "No matching phrases"
   },
   "Replay": {

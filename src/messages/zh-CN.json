@@ -517,12 +517,14 @@
     "title": "单词本",
     "subtitle": "优先记住能直接放进场景使用的短语，而不是孤立背单词。",
     "search": "搜索单词或短语",
+    "filterLabel": "单词本筛选",
     "filter": { "all": "全部", "today": "今日新词", "review": "待复习", "mastered": "已掌握", "favorite": "收藏" },
     "status": { "today": "今日新词", "review": "待复习", "mastered": "已掌握" },
     "play": "播放 {phrase}",
     "favorite": "收藏 {phrase}",
+    "review": "将 {phrase} 标记为已复习",
     "mastered": "已掌握",
-    "scheduleReview": "加入复习",
+    "scheduleReview": "完成一次复习",
     "empty": "没有找到匹配的短语"
   },
   "Replay": {

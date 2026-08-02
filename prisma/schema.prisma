@@ -32,16 +32,29 @@ enum AnalysisStatus {
   FAILED
 }
 
+enum MistakeCategory {
+  GRAMMAR
+  VOCABULARY
+  EXPRESSION
+}
+
+enum MistakeStatus {
+  LEARNING
+  MASTERED
+}
+
 model User {
-  id             String          @id @default(cuid())
-  email          String          @unique
+  id             String            @id @default(cuid())
+  email          String            @unique
   passwordHash   String
-  locale         String          @default("zh-CN")
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
+  locale         String            @default("zh-CN")
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
   profile        UserProfile?
   conversations  Conversation[]
   favoriteScenes FavoriteScene[]
+  mistakes       Mistake[]
+  vocabulary     VocabularyEntry[]
 
   @@map("users")
 }
@@ -62,8 +75,8 @@ model UserProfile {
 }
 
 model Scene {
-  id               String          @id @default(cuid())
-  slug             String          @unique
+  id               String            @id @default(cuid())
+  slug             String            @unique
   titleKey         String
   descriptionKey   String
   searchText       String
@@ -75,12 +88,14 @@ model Scene {
   estimatedMinutes Int
   lessonCount      Int
   content          Json?
-  isActive         Boolean         @default(true)
-  sortOrder        Int             @default(0)
-  createdAt        DateTime        @default(now())
-  updatedAt        DateTime        @updatedAt
+  isActive         Boolean           @default(true)
+  sortOrder        Int               @default(0)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
   conversations    Conversation[]
   favoritedBy      FavoriteScene[]
+  mistakes         Mistake[]
+  vocabulary       VocabularyEntry[]
 
   @@index([category, isActive, sortOrder])
   @@map("scenes")
@@ -118,10 +133,58 @@ model Conversation {
   messages         Message[]
   realtimeSessions RealtimeSession[]
   analysisJobs     AnalysisJob[]
+  mistake          Mistake?
+  vocabulary       VocabularyEntry[]
 
   @@index([userId, createdAt])
   @@index([sceneId])
   @@map("conversations")
+}
+
+model Mistake {
+  id             String          @id @default(cuid())
+  userId         String
+  conversationId String          @unique
+  sceneId        String
+  original       String
+  improved       String
+  reasonZh       String
+  reasonEn       String
+  category       MistakeCategory @default(EXPRESSION)
+  reviewCount    Int             @default(0)
+  status         MistakeStatus   @default(LEARNING)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation   Conversation    @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  scene          Scene           @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status, createdAt])
+  @@index([sceneId])
+  @@map("mistakes")
+}
+
+model VocabularyEntry {
+  id             String       @id @default(cuid())
+  userId         String
+  conversationId String
+  sceneId        String
+  phrase         String
+  meaningZh      String
+  meaningEn      String
+  example        String
+  favorite       Boolean      @default(false)
+  reviewCount    Int          @default(0)
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  scene          Scene        @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, phrase])
+  @@index([userId, favorite, createdAt])
+  @@index([sceneId])
+  @@map("vocabulary_entries")
 }
 
 model Message {

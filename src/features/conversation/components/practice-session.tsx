@@ -18,6 +18,9 @@ import { SceneCover } from "@/features/scenes/components/scene-cover";
 import { findScene, mockScenes } from "@/features/scenes/mock-scenes";
 import { getSceneDetail } from "@/features/scenes/scene-detail-data";
 import { createMistakeFromEvaluation } from "@/features/mistakes/mistake-data";
+import { saveMistake } from "@/features/mistakes/mistake-client";
+import { createVocabularyFromEvaluation } from "@/features/vocabulary/vocabulary-data";
+import { saveVocabulary } from "@/features/vocabulary/vocabulary-client";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { useRealtimeStore } from "@/stores/realtime-store";
@@ -56,6 +59,7 @@ export function PracticeSession({
     (store) => store.addPracticeRecord,
   );
   const addMistake = useLearningStore((store) => store.addMistake);
+  const addVocabulary = useLearningStore((store) => store.addVocabulary);
   const [hint, setHint] = useState<string | null>(null);
   const [isEnding, setIsEnding] = useState(false);
   const startedAtRef = useRef<number | null>(null);
@@ -213,6 +217,8 @@ export function PracticeSession({
           78 - evaluation.corrections * 4 + evaluation.newExpressions,
         ),
       );
+      let cloudMistake = null;
+      let cloudVocabulary = null;
       if (!isGuestConversation(conversationId)) {
         await Promise.allSettled([...pendingSavesRef.current]);
         const completed = await completeConversation(conversationId, {
@@ -223,9 +229,25 @@ export function PracticeSession({
           mastery,
         }).catch(() => null);
         if (completed) {
+          cloudMistake = await saveMistake({
+            conversationId,
+            original: evaluation.original,
+            improved: evaluation.improved,
+            reason: evaluation.reason,
+            category: "expression",
+          }).catch(() => null);
+          cloudVocabulary = await saveVocabulary({
+            conversationId,
+            phrase: evaluation.improved,
+            meaning: evaluation.reason,
+            example: evaluation.improved,
+          }).catch(() => null);
           void queryClient.invalidateQueries({
             queryKey: ["practice-history"],
           });
+          void queryClient.invalidateQueries({ queryKey: ["mistakes"] });
+          void queryClient.invalidateQueries({ queryKey: ["reports"] });
+          void queryClient.invalidateQueries({ queryKey: ["vocabulary"] });
         }
       }
       addPracticeRecord({
@@ -239,7 +261,16 @@ export function PracticeSession({
         mastery,
       });
       addMistake(
-        createMistakeFromEvaluation(conversationId, scene.id, evaluation),
+        cloudMistake ??
+          createMistakeFromEvaluation(conversationId, scene.id, evaluation),
+      );
+      addVocabulary(
+        cloudVocabulary ??
+          createVocabularyFromEvaluation(
+            conversationId,
+            scene.id,
+            evaluation,
+          ),
       );
       router.push(
         `/practice/${conversationId}/review?scene=${encodeURIComponent(scene.slug)}`,

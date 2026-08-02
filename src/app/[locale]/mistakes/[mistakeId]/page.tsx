@@ -11,6 +11,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
 import { mockScenes } from "@/features/scenes/mock-scenes";
+import {
+  useCloudMistakes,
+  useReviewMistake,
+} from "@/features/mistakes/hooks/use-cloud-mistakes";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { useLearningStore } from "@/stores/learning-store";
@@ -21,10 +25,11 @@ export default function MistakeDetailPage() {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("MistakeDetail");
   const params = useParams<{ mistakeId: string }>();
+  useCloudMistakes();
   const mistake = useLearningStore((store) =>
     store.mistakes.find((item) => item.id === params.mistakeId),
   );
-  const reviewMistake = useLearningStore((store) => store.reviewMistake);
+  const reviewMistake = useReviewMistake();
 
   if (!mistake) {
     return (
