@@ -64,6 +64,27 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
   );
   const manualCloseRef = useRef(false);
   const transcriptTextRef = useRef(new Map<string, string>());
+  const sessionIdRef = useRef<string | null>(null);
+
+  const finishRealtimeSession = useCallback(
+    async (status: "COMPLETED" | "FAILED") => {
+      const sessionId = sessionIdRef.current;
+      if (!sessionId) {
+        return;
+      }
+      sessionIdRef.current = null;
+      await fetch(
+        `/api/v1/realtime/session/${encodeURIComponent(sessionId)}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status }),
+          keepalive: true,
+        },
+      ).catch(() => undefined);
+    },
+    [],
+  );
 
   const cleanup = useCallback((stopMedia = true) => {
     if (reconnectTimerRef.current) {
@@ -239,6 +260,7 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
           }
 
           transitionTo("reconnecting");
+          void finishRealtimeSession("FAILED");
           if (
             reconnectAttemptsRef.current >= MAX_RECONNECT_ATTEMPTS ||
             reconnectTimerRef.current
@@ -266,8 +288,6 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
 
         const query = new URLSearchParams({
           conversationId: options.conversationId,
-          sceneName: options.sceneName,
-          level: options.learnerLevel,
         });
         const response = await fetch(
           `/api/v1/realtime/session?${query.toString()}`,
@@ -293,9 +313,16 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
           );
         }
 
+        const sessionId = response.headers.get("X-Realtime-Session-Id");
+        if (!sessionId) {
+          throw new Error("The realtime session identifier is missing.");
+        }
+        sessionIdRef.current = sessionId;
+
         const answer = await response.text();
         await peer.setRemoteDescription({ type: "answer", sdp: answer });
       } catch (connectError) {
+        void finishRealtimeSession("FAILED");
         cleanup();
         const permissionDenied =
           connectError instanceof DOMException &&
@@ -317,7 +344,7 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
         transitionTo("error");
       }
     },
-    [cleanup, handleServerEvent, options],
+    [cleanup, finishRealtimeSession, handleServerEvent, options],
   );
 
   useEffect(() => {
@@ -331,12 +358,13 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
 
   const disconnect = useCallback(() => {
     manualCloseRef.current = true;
+    void finishRealtimeSession("COMPLETED");
     cleanup();
     const state = useRealtimeStore.getState().state;
     if (state !== "idle" && state !== "ended") {
       transitionTo("ended");
     }
-  }, [cleanup]);
+  }, [cleanup, finishRealtimeSession]);
 
   const sendEvent = useCallback((event: Record<string, unknown>) => {
     const channel = channelRef.current;
@@ -416,9 +444,10 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
   useEffect(
     () => () => {
       manualCloseRef.current = true;
+      void finishRealtimeSession("COMPLETED");
       cleanup();
     },
-    [cleanup],
+    [cleanup, finishRealtimeSession],
   );
 
   return {

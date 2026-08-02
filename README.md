@@ -73,6 +73,8 @@ UI 原型对应的页面、公共组件和开发顺序见：
 
 浏览器通过 WebRTC 传输麦克风和模型音频，通过 RTCDataChannel 接收 VAD、回复生命周期和实时字幕事件。`POST /api/v1/realtime/session` 在服务端携带 `OPENAI_API_KEY` 与 OpenAI 交换 SDP answer，密钥不会下发到浏览器。
 
+Realtime 会话只允许登录用户为自己仍处于 `ACTIVE` 状态的练习创建。场景、学习等级与语音偏好从数据库读取，不信任浏览器传入的 Prompt 上下文；连接创建、建立、失败和结束状态会写入 `realtime_sessions`。浏览器通过 `PATCH /api/v1/realtime/session/:sessionId` 回写终态，断线重连会结束旧记录并创建新记录。
+
 本地体验真实语音前，需要在 `.env` 中配置：
 
 ```env
@@ -126,6 +128,8 @@ GET  /api/v1/conversations/:conversationId
 POST /api/v1/conversations/:conversationId/messages
 POST /api/v1/conversations/:conversationId/complete
 POST /api/v1/conversations/:conversationId/review
+POST /api/v1/realtime/session?conversationId=:conversationId
+PATCH /api/v1/realtime/session/:sessionId
 ```
 
 场景查询为公开接口；Dashboard、收藏、我的场景、学习日历、成长报告、错题本、单词本以及创建、查询、保存和完成练习需要登录。游客首页、收藏、练习历史、日历、成长报告、错题本和单词本继续使用浏览器本地数据，登录用户的数据会从 PostgreSQL 恢复。Dashboard、日历和报告接口接收浏览器时区偏移，确保今日指标与本地日期统计准确。报告接口按 7 天或 30 天聚合当前周期和上一周期的练习记录，并使用云端错题分类生成弱项分布。每个已完成会话可沉淀一条核心错题和一条自然表达；错题及词汇累计复习 3 次后自动标记为已掌握，词汇收藏和复习进度可跨设备同步。消息接口支持 `clientEventId` 幂等键，Realtime 重连或客户端重试不会重复保存同一个事件。初始化本地数据库：
