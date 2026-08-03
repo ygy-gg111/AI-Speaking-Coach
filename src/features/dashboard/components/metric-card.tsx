@@ -18,7 +18,7 @@ export function MetricCard({
   value,
   unit,
   detail,
-  progress = 0,
+  progress,
   tone,
 }: MetricCardProps) {
   return (
@@ -31,9 +31,11 @@ export function MetricCard({
         {value} <small>{unit}</small>
       </strong>
       <div className={styles.detail}>{detail}</div>
-      <div className={styles.track}>
-        <i style={{ width: `${Math.max(5, progress)}%` }} />
-      </div>
+      {progress !== undefined && (
+        <div className={styles.track}>
+          <i style={{ width: `${Math.min(100, Math.max(0, progress))}%` }} />
+        </div>
+      )}
     </article>
   );
 }

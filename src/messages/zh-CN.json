@@ -26,7 +26,9 @@
   },
   "Home": {
     "eyebrow": "每日英语口语",
-    "greeting": "早上好，Lucy！",
+    "greeting": "你好！",
+    "greetingWithName": "你好，{name}！",
+    "greetingGuest": "你好！",
     "greetingSubtitle": "每天进步一点点，英语口语更自信。",
     "quickStart": "开始练习",
     "metrics": "今日学习指标",
@@ -41,14 +43,18 @@
     "recommendedEyebrow": "为你精选",
     "recommendedTitle": "今日推荐场景",
     "refresh": "换一批",
+    "loadError": "部分首页数据加载失败，请重试。",
+    "retry": "重试",
+    "recommendedEmpty": "暂时没有可推荐的场景",
     "recentTitle": "最近学习记录",
     "viewAll": "查看全部",
+    "recentEmpty": "完成第一次练习后，记录会显示在这里",
     "recordDuration": "练习时间：{minutes} 分钟",
     "recordExpressions": "新学表达：{count} 句",
     "recordCorrections": "纠正错误：{count} 个",
     "recordTime": "今天 09:32",
     "streakDays": "连续学习 {count} 天",
-    "streakMessage": "保持节奏，完成今天的 10 分钟练习"
+    "streakMessage": "保持节奏，完成今天的 {minutes} 分钟练习"
   },
   "Scenes": {
     "eyebrow": "情景英语",

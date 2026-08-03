@@ -45,6 +45,10 @@
   margin-top: 30px;
 }
 
+.dataAlert {
+  margin-top: 22px;
+}
+
 .metricGrid b {
   color: var(--app-success);
 }
@@ -66,19 +70,49 @@
   font-size: 18px;
 }
 
-.sectionHeader > a {
+.sectionHeader > a,
+.refreshButton {
   color: #8b8999;
   font-size: 12px;
 }
 
-.sectionHeader > a:hover {
+.sectionHeader > a:hover,
+.refreshButton:hover:not(:disabled) {
   color: var(--app-primary);
+}
+
+.refreshButton {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.refreshButton:disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 
 .recommendedGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
+}
+
+.sceneSkeleton {
+  width: 100% !important;
+  height: 260px !important;
+  border-radius: 15px !important;
+}
+
+.emptyState {
+  display: grid;
+  min-height: 180px;
+  place-items: center;
+  padding: 24px;
+  border: 1px dashed var(--app-border);
+  border-radius: 15px;
+  background: var(--app-surface);
 }
 
 .mobileStreak {
