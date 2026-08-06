@@ -1,9 +1,29 @@
 import { requestApi } from "@/lib/api-client";
 
-type ConversationRecord = {
+export type ConversationMessageRecord = {
+  id: string;
+  role: "USER" | "ASSISTANT" | "SYSTEM";
+  content: string;
+  transcript: string | null;
+  sequence: number;
+  createdAt: string;
+};
+
+export type ConversationRecord = {
   id: string;
   sceneId: string | null;
   status: "ACTIVE" | "COMPLETED" | "ABANDONED";
+  startedAt: string;
+  endedAt: string | null;
+  scene: {
+    id: string;
+    slug: string;
+    titleKey: string;
+    descriptionKey: string;
+    category: string;
+    difficulty: number;
+  } | null;
+  messages: ConversationMessageRecord[];
 };
 
 type MessageInput = {
@@ -26,6 +46,12 @@ export function createConversation(sceneId: string) {
     method: "POST",
     body: JSON.stringify({ sceneId }),
   });
+}
+
+export function getConversation(conversationId: string) {
+  return requestApi<ConversationRecord>(
+    `/api/v1/conversations/${encodeURIComponent(conversationId)}`,
+  );
 }
 
 export function saveConversationMessage(

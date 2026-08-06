@@ -1,10 +1,12 @@
 "use client";
 
 import { LoadingOutlined } from "@ant-design/icons";
+import { message } from "antd";
 import type { ReactNode } from "react";
 import { useState } from "react";
 
 import { useRouter } from "@/i18n/navigation";
+import { ApiClientError } from "@/lib/api-client";
 
 import type { Scene } from "../../scenes/types";
 import { createConversation } from "../conversation-client";
@@ -34,8 +36,18 @@ export function StartPracticeButton({
     try {
       const conversation = await createConversation(scene.id);
       conversationId = conversation.id;
-    } catch {
-      conversationId = `guest-${crypto.randomUUID()}`;
+    } catch (error) {
+      if (error instanceof ApiClientError && error.status === 401) {
+        conversationId = `guest-${crypto.randomUUID()}`;
+      } else {
+        setIsStarting(false);
+        void message.error(
+          error instanceof Error
+            ? error.message
+            : "Unable to start the practice session.",
+        );
+        return;
+      }
     }
     router.push(
       `/practice/${conversationId}?scene=${encodeURIComponent(scene.slug)}`,

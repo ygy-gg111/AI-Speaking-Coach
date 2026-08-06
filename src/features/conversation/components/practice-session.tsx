@@ -7,16 +7,18 @@ import {
   SwapOutlined,
 } from "@ant-design/icons";
 import { Alert, Button } from "antd";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { CoachEvaluationPanel } from "@/features/correction/components/coach-evaluation-panel";
 import { useConversationReview } from "@/features/correction/hooks/use-conversation-review";
+import { getCurrentUser } from "@/features/auth";
 import { useRealtimeSession } from "@/features/realtime/hooks/use-realtime-session";
 import { SceneCover } from "@/features/scenes/components/scene-cover";
 import { findScene, mockScenes } from "@/features/scenes/mock-scenes";
 import { getSceneDetail } from "@/features/scenes/scene-detail-data";
+import { getScene } from "@/features/scenes/scene-client";
 import { createMistakeFromEvaluation } from "@/features/mistakes/mistake-data";
 import { saveMistake } from "@/features/mistakes/mistake-client";
 import { createVocabularyFromEvaluation } from "@/features/vocabulary/vocabulary-data";
@@ -32,6 +34,7 @@ import {
 } from "../mock-conversation";
 import {
   completeConversation,
+  getConversation,
   isGuestConversation,
   saveConversationMessage,
 } from "../conversation-client";
@@ -69,24 +72,64 @@ export function PracticeSession({
   const initialTranscriptIdsRef = useRef(
     new Set(useRealtimeStore.getState().transcript.map((item) => item.id)),
   );
-  const scene = findScene(sceneIdentifier ?? "") ?? mockScenes[1];
+  const guest = isGuestConversation(conversationId);
+  const userQuery = useQuery({
+    queryKey: ["current-user"],
+    queryFn: getCurrentUser,
+    enabled: !guest,
+    retry: false,
+  });
+  const conversationQuery = useQuery({
+    queryKey: ["conversation", conversationId],
+    queryFn: () => getConversation(conversationId),
+    enabled: !guest,
+    retry: false,
+  });
+  const authoritativeSceneIdentifier =
+    conversationQuery.data?.scene?.id ?? sceneIdentifier ?? "";
+  const sceneQuery = useQuery({
+    queryKey: ["scene", authoritativeSceneIdentifier],
+    queryFn: () => getScene(authoritativeSceneIdentifier),
+    enabled: Boolean(authoritativeSceneIdentifier),
+    retry: false,
+    staleTime: 5 * 60 * 1_000,
+  });
+  const scene =
+    sceneQuery.data ??
+    findScene(authoritativeSceneIdentifier) ??
+    mockScenes[1];
   const sceneDetail = getSceneDetail(scene.id);
   const openingExpression = sceneDetail.phrases[0].expression;
   const initialMessages = useMemo(
-    () =>
-      createMockConversationMessages({
+    () => {
+      const storedMessages = conversationQuery.data?.messages ?? [];
+      if (storedMessages.length > 0) {
+        return storedMessages
+          .filter((message) => message.role !== "SYSTEM")
+          .map((message) => ({
+            id: message.id,
+            role: message.role === "USER" ? "user" as const : "assistant" as const,
+            text: {
+              "zh-CN": message.transcript ?? message.content,
+              en: message.transcript ?? message.content,
+            },
+            audioAvailable: message.role === "ASSISTANT",
+          }));
+      }
+      return createMockConversationMessages({
         partnerName: sceneDetail.partner,
         openingExpression,
-      }),
-    [openingExpression, sceneDetail.partner],
+      });
+    },
+    [conversationQuery.data?.messages, openingExpression, sceneDetail.partner],
   );
   const realtimeOptions = useMemo(
     () => ({
       conversationId,
       sceneName: scene.title.en,
-      learnerLevel: "A2",
+      learnerLevel: userQuery.data?.profile.level ?? "A2",
     }),
-    [conversationId, scene.title.en],
+    [conversationId, scene.title.en, userQuery.data?.profile.level],
   );
   const { connect, disconnect, error, errorCode, sendText, toggleMicrophone } =
     useRealtimeSession(realtimeOptions);
@@ -109,12 +152,18 @@ export function PracticeSession({
     [initialMessages, transcript],
   );
   const reviewMessages = useMemo(
-    () =>
-      messages.map((message) => ({
-        role: message.role,
-        text: message.text.en,
-      })),
-    [messages],
+    () => [
+      ...(conversationQuery.data?.messages ?? [])
+        .filter((message) => message.role !== "SYSTEM")
+        .map((message) => ({
+          role: message.role === "USER" ? "user" as const : "assistant" as const,
+          text: message.transcript ?? message.content,
+        })),
+      ...transcript
+        .filter((item) => item.final && item.text.trim())
+        .map((item) => ({ role: item.role, text: item.text.trim() })),
+    ],
+    [conversationQuery.data?.messages, transcript],
   );
   const completedUserTurns = useMemo(
     () =>
@@ -141,6 +190,14 @@ export function PracticeSession({
     persistedMessageIdsRef.current.clear();
     resetRealtime();
   }, [resetRealtime]);
+
+  useEffect(() => {
+    if (conversationQuery.data?.status === "COMPLETED") {
+      router.replace(
+        `/practice/${conversationId}/review?scene=${encodeURIComponent(scene.slug)}`,
+      );
+    }
+  }, [conversationId, conversationQuery.data?.status, router, scene.slug]);
 
   useEffect(() => {
     if (isGuestConversation(conversationId)) {
@@ -205,6 +262,9 @@ export function PracticeSession({
       Math.min(60 * 60, Math.round((Date.now() - startedAt) / 1_000)),
     );
     try {
+      if (!guest) {
+        await Promise.allSettled([...pendingSavesRef.current]);
+      }
       finalReview = await analyzeCurrentConversation();
     } catch {
       // The review route still has the local fallback already shown in the UI.
@@ -219,8 +279,7 @@ export function PracticeSession({
       );
       let cloudMistake = null;
       let cloudVocabulary = null;
-      if (!isGuestConversation(conversationId)) {
-        await Promise.allSettled([...pendingSavesRef.current]);
+      if (!guest) {
         const completed = await completeConversation(conversationId, {
           durationSeconds,
           summary: evaluation.improved,

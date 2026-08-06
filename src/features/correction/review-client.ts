@@ -2,6 +2,8 @@ import type {
   ConversationReview,
   ReviewConversationMessage,
 } from "@/features/conversation/types";
+import { createFallbackEvaluation } from "@/ai/evaluation/conversation-review";
+import { isGuestConversation } from "@/features/conversation/conversation-client";
 
 type AnalyzeConversationInput = {
   conversationId: string;
@@ -49,6 +51,17 @@ export function storeReview(
 export async function analyzeConversation(
   input: AnalyzeConversationInput,
 ): Promise<ConversationReview> {
+  if (isGuestConversation(input.conversationId)) {
+    return {
+      evaluation: createFallbackEvaluation({
+        messages: input.messages,
+        learnerLevel: input.learnerLevel,
+        durationSeconds: input.durationSeconds,
+      }),
+      source: "fallback",
+      generatedAt: new Date().toISOString(),
+    };
+  }
   const response = await fetch(
     `/api/v1/conversations/${encodeURIComponent(input.conversationId)}/review`,
     {
