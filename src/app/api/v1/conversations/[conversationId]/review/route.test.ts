@@ -6,6 +6,8 @@ const mocks = vi.hoisted(() => ({
   findProfile: vi.fn(),
   createAnalysisJob: vi.fn(),
   findAnalysisJob: vi.fn(),
+  updateAnalysisJob: vi.fn(),
+  parseReview: vi.fn(),
 }));
 
 vi.mock("@/features/auth/session", () => ({
@@ -19,8 +21,15 @@ vi.mock("@/infrastructure/database/prisma", () => ({
     analysisJob: {
       create: mocks.createAnalysisJob,
       findFirst: mocks.findAnalysisJob,
+      update: mocks.updateAnalysisJob,
     },
   }),
+}));
+
+vi.mock("openai", () => ({
+  default: class OpenAITestDouble {
+    responses = { parse: mocks.parseReview };
+  },
 }));
 
 import { GET, POST } from "./route";
@@ -130,5 +139,35 @@ describe("POST /api/v1/conversations/:conversationId/review", () => {
 
     expect(response.status).toBe(200);
     expect(payload).toEqual({ success: true, data: review });
+  });
+
+  it("tracks a successful final AI review from processing to completed", async () => {
+    vi.stubEnv("OPENAI_API_KEY", "test-key");
+    mocks.getSessionUserId.mockResolvedValue("user-ai");
+    mocks.findConversation.mockResolvedValue({
+      id: "conversation-1", userId: "user-ai", status: "ACTIVE",
+      scene: { slug: "airport-check-in" }, messages: [],
+    });
+    mocks.findProfile.mockResolvedValue({ level: "A2" });
+    mocks.createAnalysisJob.mockResolvedValue({ id: "job-1" });
+    mocks.parseReview.mockResolvedValue({
+      output_parsed: {
+        original: "I want go", improved: "I want to go",
+        reason: { "zh-CN": "want 后接 to do", en: "Use want to + verb." },
+        difficulty: 2, newExpressions: 1, corrections: 1,
+      },
+    });
+
+    const response = await POST(createRequest(true), context);
+
+    expect(response.status).toBe(200);
+    expect(mocks.createAnalysisJob).toHaveBeenCalledWith({
+      data: { conversationId: "conversation-1", type: "conversation_review", status: "PROCESSING" },
+      select: { id: true },
+    });
+    expect(mocks.updateAnalysisJob).toHaveBeenCalledWith({
+      where: { id: "job-1" },
+      data: expect.objectContaining({ status: "COMPLETED" }),
+    });
   });
 });

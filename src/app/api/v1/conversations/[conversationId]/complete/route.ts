@@ -7,9 +7,8 @@ import {
 import { getPrismaClient } from "@/infrastructure/database/prisma";
 import { reportServerError } from "@/infrastructure/observability/logger";
 import { fail, ok } from "@/lib/api-response";
-import { PrismaConversationRepository } from "@/repositories/prisma-conversation.repository";
-import { PrismaSceneRepository } from "@/repositories/scene.repository";
-import { ConversationService } from "@/services/conversations/conversation.service";
+import { DomainError } from "@/lib/domain-error";
+import { ConversationStatus, MistakeCategory } from "@prisma/client";
 
 export const runtime = "nodejs";
 
@@ -35,10 +34,6 @@ export async function POST(request: Request, context: RouteContext) {
 
   try {
     const prisma = getPrismaClient();
-    const service = new ConversationService(
-      new PrismaConversationRepository(prisma),
-      new PrismaSceneRepository(prisma),
-    );
     const latestReview = await prisma.analysisJob.findFirst({
       where: {
         conversationId,
@@ -66,9 +61,91 @@ export async function POST(request: Request, context: RouteContext) {
           ),
         }
       : input.data;
-    return ok(
-      await service.complete(userId, conversationId, trustedInput),
-    );
+    const completed = await prisma.$transaction(async (transaction) => {
+      const conversation = await transaction.conversation.findFirst({
+        where: { id: conversationId, userId },
+        include: {
+          scene: true,
+          messages: { orderBy: { sequence: "asc" } },
+        },
+      });
+      if (!conversation) return null;
+      if (conversation.status !== ConversationStatus.COMPLETED) {
+        if (conversation.status !== ConversationStatus.ACTIVE) {
+          throw new DomainError(
+            "CONVERSATION_NOT_ACTIVE",
+            "Conversation is no longer active.",
+            409,
+          );
+        }
+        const elapsedSeconds = Math.min(
+          60 * 60,
+          Math.max(0, Math.round((Date.now() - conversation.startedAt.getTime()) / 1_000)),
+        );
+        await transaction.conversation.update({
+          where: { id: conversation.id },
+          data: {
+            status: ConversationStatus.COMPLETED,
+            endedAt: new Date(),
+            durationSeconds: elapsedSeconds,
+            summary: trustedInput.summary,
+            newExpressions: trustedInput.newExpressions,
+            corrections: trustedInput.corrections,
+            mastery: trustedInput.mastery,
+          },
+        });
+      }
+      if (evaluation.success && conversation.sceneId) {
+        await transaction.mistake.upsert({
+          where: { conversationId },
+          update: {
+            original: evaluation.data.original,
+            improved: evaluation.data.improved,
+            reasonZh: evaluation.data.reason["zh-CN"],
+            reasonEn: evaluation.data.reason.en,
+            category: MistakeCategory.EXPRESSION,
+          },
+          create: {
+            userId,
+            conversationId,
+            sceneId: conversation.sceneId,
+            original: evaluation.data.original,
+            improved: evaluation.data.improved,
+            reasonZh: evaluation.data.reason["zh-CN"],
+            reasonEn: evaluation.data.reason.en,
+            category: MistakeCategory.EXPRESSION,
+          },
+        });
+        await transaction.vocabularyEntry.upsert({
+          where: { userId_phrase: { userId, phrase: evaluation.data.improved } },
+          update: {
+            conversationId,
+            sceneId: conversation.sceneId,
+            meaningZh: evaluation.data.reason["zh-CN"],
+            meaningEn: evaluation.data.reason.en,
+            example: evaluation.data.improved,
+          },
+          create: {
+            userId,
+            conversationId,
+            sceneId: conversation.sceneId,
+            phrase: evaluation.data.improved,
+            meaningZh: evaluation.data.reason["zh-CN"],
+            meaningEn: evaluation.data.reason.en,
+            example: evaluation.data.improved,
+          },
+        });
+      }
+      return transaction.conversation.findUnique({
+        where: { id: conversationId },
+        include: {
+          scene: true,
+          messages: { orderBy: { sequence: "asc" } },
+        },
+      });
+    });
+    if (!completed) return fail("CONVERSATION_NOT_FOUND", "Conversation not found.", 404);
+    return ok(completed);
   } catch (error) {
     const domainResponse = toDomainErrorResponse(error);
     if (domainResponse) {
