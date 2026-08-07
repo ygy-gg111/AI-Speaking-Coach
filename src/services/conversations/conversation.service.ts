@@ -80,10 +80,9 @@ export class ConversationService {
       0,
       Math.round((Date.now() - conversation.startedAt.getTime()) / 1_000),
     );
-    const durationSeconds = Math.min(
-      60 * 60,
-      input.durationSeconds ?? elapsedSeconds,
-    );
+    // Duration is derived from the server-owned start time. Client duration is
+    // retained in the contract for guest/offline compatibility, but is not trusted.
+    const durationSeconds = Math.min(60 * 60, elapsedSeconds);
     const completed = await this.conversations.complete(
       conversationId,
       userId,

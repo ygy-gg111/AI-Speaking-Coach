@@ -11,6 +11,7 @@ type AnalyzeConversationInput = {
   learnerLevel: string;
   durationSeconds: number;
   messages: ReviewConversationMessage[];
+  final?: boolean;
 };
 
 type ApiResponse<T> =
@@ -72,6 +73,7 @@ export async function analyzeConversation(
         learnerLevel: input.learnerLevel,
         durationSeconds: input.durationSeconds,
         messages: input.messages,
+        final: input.final ?? false,
       }),
     },
   );
@@ -82,6 +84,25 @@ export async function analyzeConversation(
         ? "Unable to analyze the conversation."
         : payload.error.message,
     );
+  }
+  return payload.data;
+}
+
+export async function fetchConversationReview(
+  conversationId: string,
+): Promise<ConversationReview | null> {
+  if (isGuestConversation(conversationId)) {
+    return readStoredReview(conversationId);
+  }
+  const response = await fetch(
+    `/api/v1/conversations/${encodeURIComponent(conversationId)}/review`,
+  );
+  if (response.status === 404) {
+    return null;
+  }
+  const payload = (await response.json()) as ApiResponse<ConversationReview>;
+  if (!response.ok || !payload.success) {
+    throw new Error(payload.success ? "Unable to load the review." : payload.error.message);
   }
   return payload.data;
 }

@@ -1,4 +1,5 @@
 import { completeConversationSchema } from "@/features/conversation/server-contracts";
+import { conversationReviewSchema } from "@/ai/evaluation/conversation-review";
 import {
   getRequiredUserId,
   toDomainErrorResponse,
@@ -38,8 +39,35 @@ export async function POST(request: Request, context: RouteContext) {
       new PrismaConversationRepository(prisma),
       new PrismaSceneRepository(prisma),
     );
+    const latestReview = await prisma.analysisJob.findFirst({
+      where: {
+        conversationId,
+        type: "conversation_review",
+        status: "COMPLETED",
+        conversation: { userId },
+      },
+      orderBy: { createdAt: "desc" },
+      select: { result: true },
+    });
+    const stored = latestReview?.result as { evaluation?: unknown } | null;
+    const evaluation = conversationReviewSchema.safeParse(stored?.evaluation);
+    const trustedInput = evaluation.success
+      ? {
+          ...input.data,
+          summary: evaluation.data.improved,
+          newExpressions: evaluation.data.newExpressions,
+          corrections: evaluation.data.corrections,
+          mastery: Math.max(
+            35,
+            Math.min(
+              95,
+              78 - evaluation.data.corrections * 4 + evaluation.data.newExpressions,
+            ),
+          ),
+        }
+      : input.data;
     return ok(
-      await service.complete(userId, conversationId, input.data),
+      await service.complete(userId, conversationId, trustedInput),
     );
   } catch (error) {
     const domainResponse = toDomainErrorResponse(error);

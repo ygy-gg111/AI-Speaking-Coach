@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import { zodTextFormat } from "openai/helpers/zod";
 import { z } from "zod";
+import type { Prisma } from "@prisma/client";
 
 import {
   buildConversationReviewPrompt,
@@ -32,11 +33,34 @@ const requestSchema = z.object({
     )
     .min(1)
     .max(50),
+  final: z.boolean().default(false),
 });
 
 type RouteContext = {
   params: Promise<{ conversationId: string }>;
 };
+
+export async function GET(_request: Request, context: RouteContext) {
+  const userId = await getRequiredUserId();
+  if (typeof userId !== "string") return userId;
+  const { conversationId } = await context.params;
+  if (!conversationId || conversationId.length > 128) {
+    return fail("INVALID_CONVERSATION", "Invalid conversation identifier.");
+  }
+  const prisma = getPrismaClient();
+  const conversation = await prisma.conversation.findFirst({
+    where: { id: conversationId, userId },
+    select: { id: true },
+  });
+  if (!conversation) return fail("CONVERSATION_NOT_FOUND", "Conversation not found.", 404);
+  const job = await prisma.analysisJob.findFirst({
+    where: { conversationId, type: "conversation_review", status: "COMPLETED" },
+    orderBy: { createdAt: "desc" },
+    select: { result: true },
+  });
+  if (!job?.result) return fail("REVIEW_NOT_FOUND", "Conversation review not found.", 404);
+  return ok(job.result);
+}
 
 export async function POST(request: Request, context: RouteContext) {
   const userId = await getRequiredUserId();
@@ -94,8 +118,25 @@ export async function POST(request: Request, context: RouteContext) {
     );
   }
 
+  const respond = async (review: {
+    evaluation: z.infer<typeof conversationReviewSchema> & { durationMinutes: number };
+    source: "ai" | "fallback";
+    generatedAt: string;
+  }) => {
+    if (parsed.data.final) {
+      await prisma.analysisJob.create({
+        data: {
+          conversationId,
+          type: "conversation_review",
+          status: "COMPLETED",
+          result: review as unknown as Prisma.InputJsonValue,
+        },
+      });
+    }
+    return ok(review);
+  };
   const fallback = () =>
-    ok({
+    respond({
       evaluation: createFallbackEvaluation({
         messages: parsed.data.messages,
         learnerLevel,
@@ -136,7 +177,7 @@ export async function POST(request: Request, context: RouteContext) {
       return fallback();
     }
 
-    return ok({
+    return respond({
       evaluation: {
         ...response.output_parsed,
         durationMinutes: Math.max(

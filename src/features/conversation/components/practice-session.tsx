@@ -175,11 +175,12 @@ export function PracticeSession({
   );
 
   const analyzeCurrentConversation = useCallback(
-    () => {
+    (final = false) => {
       const startedAt = startedAtRef.current ?? Date.now();
       return analyze(
         reviewMessages,
         Math.max(1, Math.round((Date.now() - startedAt) / 1_000)),
+        final,
       );
     },
     [analyze, reviewMessages],
@@ -265,7 +266,7 @@ export function PracticeSession({
       if (!guest) {
         await Promise.allSettled([...pendingSavesRef.current]);
       }
-      finalReview = await analyzeCurrentConversation();
+      finalReview = await analyzeCurrentConversation(true);
     } catch {
       // The review route still has the local fallback already shown in the UI.
     } finally {
