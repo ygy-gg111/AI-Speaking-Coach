@@ -6,11 +6,14 @@ import {
   CopyOutlined,
 } from "@ant-design/icons";
 import { Button, Input, message } from "antd";
+import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useParams, useSearchParams } from "next/navigation";
 import { useMemo, useState } from "react";
 
-import { findScene, mockScenes } from "@/features/scenes/mock-scenes";
+import { getConversation, isGuestConversation } from "@/features/conversation/conversation-client";
+import { useConversationReview } from "@/features/correction/hooks/use-conversation-review";
+import { useSceneCatalog } from "@/features/scenes/hooks/use-scene-catalog";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { useLearningStore } from "@/stores/learning-store";
@@ -22,7 +25,22 @@ export default function SharePracticePage() {
   const t = useTranslations("Share");
   const params = useParams<{ conversationId: string }>();
   const searchParams = useSearchParams();
-  const scene = findScene(searchParams.get("scene") ?? "") ?? mockScenes[0];
+  const sceneIdentifier = searchParams.get("scene") ?? "";
+  const scenes = useSceneCatalog().data ?? [];
+  const scene = scenes.find(
+    (item) => item.id === sceneIdentifier || item.slug === sceneIdentifier,
+  );
+  const conversationQuery = useQuery({
+    queryKey: ["conversation", params.conversationId],
+    queryFn: () => getConversation(params.conversationId),
+    enabled: !isGuestConversation(params.conversationId),
+    retry: false,
+  });
+  const { review } = useConversationReview({
+    conversationId: params.conversationId,
+    sceneName: scene?.title.en ?? sceneIdentifier,
+    learnerLevel: "A2",
+  });
   const record = useLearningStore((store) =>
     store.records.find(
       (item) => item.conversationId === params.conversationId,
@@ -31,15 +49,21 @@ export default function SharePracticePage() {
   const [reflection, setReflection] = useState(t("defaultReflection"));
   const [copied, setCopied] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
+  const minutes = conversationQuery.data?.durationSeconds
+    ? Math.max(1, Math.round(conversationQuery.data.durationSeconds / 60))
+    : record?.durationMinutes ?? 0;
+  const expression = review?.evaluation.improved ??
+    conversationQuery.data?.summary ?? "";
+  const sceneTitle = scene?.title[locale] ?? sceneIdentifier;
   const copy = useMemo(
     () =>
       t("copyTemplate", {
-        scene: scene.title[locale],
-        minutes: record?.durationMinutes ?? 10,
-        expression: "Could I have an aisle seat?",
+        scene: sceneTitle,
+        minutes,
+        expression,
         reflection,
       }),
-    [locale, record?.durationMinutes, reflection, scene.title, t],
+    [expression, minutes, reflection, sceneTitle, t],
   );
 
   async function copyText() {
@@ -54,7 +78,7 @@ export default function SharePracticePage() {
       <header className={styles.header}>
         <div>
           <Link
-            href={`/practice/${params.conversationId}/review?scene=${scene.slug}`}
+            href={`/practice/${params.conversationId}/review?scene=${encodeURIComponent(scene?.slug ?? sceneIdentifier)}`}
           >
             <Button type="text" icon={<ArrowLeftOutlined />}>
               {t("back")}
@@ -70,9 +94,9 @@ export default function SharePracticePage() {
         <section>
           <div className={styles.poster}>
             <span>DAY 15 · AI SPEAKING</span>
-            <h2>{scene.title[locale]}</h2>
-            <p>{t("minutes", { count: record?.durationMinutes ?? 10 })}</p>
-            <blockquote>“Could I have an aisle seat?”</blockquote>
+            <h2>{sceneTitle}</h2>
+            <p>{t("minutes", { count: minutes })}</p>
+            <blockquote>“{expression}”</blockquote>
             <footer>{reflection}</footer>
           </div>
         </section>

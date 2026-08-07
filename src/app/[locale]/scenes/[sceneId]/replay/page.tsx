@@ -6,13 +6,14 @@ import {
   PauseOutlined,
   PlayCircleFilled,
 } from "@ant-design/icons";
-import { Button, Segmented, Select, Slider, Switch } from "antd";
+import { Button, Empty, Segmented, Select, Slider, Spin, Switch } from "antd";
 import { useLocale, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
-import { findScene, mockScenes } from "@/features/scenes/mock-scenes";
+import { useSceneCatalog } from "@/features/scenes/hooks/use-scene-catalog";
 import { getSceneDetail } from "@/features/scenes/scene-detail-data";
+import { scorePronunciation, type PronunciationScore } from "@/features/realtime/pronunciation-score";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 
@@ -22,12 +23,20 @@ export default function SceneReplayPage() {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("Replay");
   const params = useParams<{ sceneId: string }>();
-  const scene = findScene(params.sceneId) ?? mockScenes[0];
-  const detail = getSceneDetail(scene.id);
+  const sceneQuery = useSceneCatalog();
+  const scene = sceneQuery.data?.find(
+    (item) => item.id === params.sceneId || item.slug === params.sceneId,
+  );
   const [playing, setPlaying] = useState(false);
   const [mode, setMode] = useState("sentence");
   const [showTranslation, setShowTranslation] = useState(true);
   const [speed, setSpeed] = useState(1);
+  const [pronunciation, setPronunciation] = useState<PronunciationScore | null>(null);
+  const [isRecording, setIsRecording] = useState(false);
+
+  if (sceneQuery.isPending) return <Spin fullscreen size="large" />;
+  if (!scene) return <Empty description="Scene not found" />;
+  const detail = getSceneDetail(scene.id);
 
   function speak(text: string) {
     speechSynthesis.cancel();
@@ -46,6 +55,33 @@ export default function SceneReplayPage() {
       return;
     }
     speak(detail.phrases.map((phrase) => phrase.expression).join(" "));
+  }
+
+  function startShadowing(target: string) {
+    type RecognitionResultEvent = { results: { 0: { 0: { transcript: string } } } };
+    type Recognition = {
+      lang: string;
+      interimResults: boolean;
+      onresult: ((event: RecognitionResultEvent) => void) | null;
+      onerror: (() => void) | null;
+      onend: (() => void) | null;
+      start: () => void;
+    };
+    const RecognitionConstructor = (window as unknown as {
+      SpeechRecognition?: new () => Recognition;
+      webkitSpeechRecognition?: new () => Recognition;
+    }).SpeechRecognition ?? (window as unknown as { webkitSpeechRecognition?: new () => Recognition }).webkitSpeechRecognition;
+    if (!RecognitionConstructor) return;
+    const recognition = new RecognitionConstructor();
+    recognition.lang = "en-US";
+    recognition.interimResults = false;
+    recognition.onresult = (event) => {
+      setPronunciation(scorePronunciation(target, event.results[0][0].transcript));
+    };
+    recognition.onerror = () => setIsRecording(false);
+    recognition.onend = () => setIsRecording(false);
+    setIsRecording(true);
+    recognition.start();
   }
 
   return (
@@ -103,9 +139,21 @@ export default function SceneReplayPage() {
                 aria-label={t("playSentence", { index: index + 1 })}
                 onClick={() => speak(phrase.expression)}
               />
+              {mode === "shadow" && (
+                <Button loading={isRecording} onClick={() => startShadowing(phrase.expression)}>
+                  {t("shadowRecord")}
+                </Button>
+              )}
             </article>
           ))}
         </div>
+        {pronunciation && (
+          <div className={styles.card} role="status">
+            <h3>{t("pronunciationScore", { score: pronunciation.score })}</h3>
+            <p>{t("matchedWords")}: {pronunciation.matchedWords.join(", ") || "-"}</p>
+            <p>{t("needsPractice")}: {pronunciation.needsPractice.join(", ") || "-"}</p>
+          </div>
+        )}
         <div className={styles.player}>
           <Button
             type="primary"

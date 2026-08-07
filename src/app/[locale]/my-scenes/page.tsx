@@ -19,7 +19,7 @@ import {
 import { getSceneMastery } from "@/features/learning/learning-data";
 import { SceneCard } from "@/features/scenes/components/scene-card";
 import { SceneCover } from "@/features/scenes/components/scene-cover";
-import { mockScenes } from "@/features/scenes/mock-scenes";
+import { useSceneCatalog } from "@/features/scenes/hooks/use-scene-catalog";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { useLearningStore } from "@/stores/learning-store";
@@ -51,6 +51,8 @@ export default function MyScenesPage() {
     retry: false,
     staleTime: 60 * 1_000,
   });
+  const sceneCatalogQuery = useSceneCatalog();
+  const scenes = sceneCatalogQuery.data ?? [];
   useEffect(() => {
     if (myScenesQuery.data) {
       replaceFavoriteSceneIds(
@@ -63,9 +65,8 @@ export default function MyScenesPage() {
       replacePracticeRecords(historyQuery.data);
     }
   }, [historyQuery.data, replacePracticeRecords]);
-  const favoriteScenes = mockScenes.filter((scene) =>
-    favoriteSceneIds.includes(scene.id),
-  );
+  const favoriteScenes = myScenesQuery.data?.favorites ??
+    scenes.filter((scene) => favoriteSceneIds.includes(scene.id));
   const sortedRecords = useMemo(
     () =>
       [...records].sort(
@@ -107,7 +108,8 @@ export default function MyScenesPage() {
     <div className={styles.historyList}>
       {sortedRecords.map((record) => {
         const scene =
-          mockScenes.find((item) => item.id === record.sceneId) ?? mockScenes[0];
+          scenes.find((item) => item.id === record.sceneId);
+        if (!scene) return null;
         const mastery = getSceneMastery(records, scene.id);
         return (
           <article className={styles.historyItem} key={record.id}>
@@ -160,7 +162,7 @@ export default function MyScenesPage() {
   const completedSceneIds = new Set(records.map((record) => record.sceneId));
   const completedContent = completedSceneIds.size ? (
     <div className={styles.savedGrid}>
-      {mockScenes
+      {scenes
         .filter((scene) => completedSceneIds.has(scene.id))
         .map((scene) => (
           <SceneCard key={scene.id} scene={scene} />

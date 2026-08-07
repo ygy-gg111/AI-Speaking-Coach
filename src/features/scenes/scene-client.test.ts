@@ -24,20 +24,12 @@ describe("scene client", () => {
     expect(scene.category).toBe("daily");
   });
 
-  it("falls back to bundled localization for known scenes", () => {
-    const scene = mapSceneApiItem({
-      id: "scene-airport",
-      slug: "airport-check-in",
-      category: "travel",
-      coverTone: "airport",
-      coverMark: "A",
-      difficulty: 3,
-      estimatedMinutes: 10,
-      lessonCount: 15,
-      content: null,
-    });
-
-    expect(scene.title.en).toBe("Airport check-in");
+  it("rejects scenes whose localized content is missing", () => {
+    expect(() => mapSceneApiItem({
+      id: "scene-airport", slug: "airport-check-in", category: "travel",
+      coverTone: "airport", coverMark: "A", difficulty: 3,
+      estimatedMinutes: 10, lessonCount: 15, content: null,
+    })).toThrow("Invalid scene payload");
   });
 
   it("rejects unsupported backend presentation values", () => {

@@ -135,6 +135,9 @@
     "showTranslation": "显示中文",
     "hideTranslation": "隐藏中文",
     "needsImprovement": "这句话可以更自然",
+    "inputDevice": "输入麦克风",
+    "evaluationWaiting": "完成一次表达后，AI 会在这里给出反馈。",
+    "analysisError": "反馈暂时不可用，请在结束练习前重试。",
     "state": {
       "idle": "点击开始实时练习",
       "requesting-permission": "正在请求麦克风权限",
@@ -544,6 +547,10 @@
     "play": "播放完整对话",
     "pause": "暂停播放",
     "speed": "播放速度",
+    "shadowRecord": "录音并评分",
+    "pronunciationScore": "发音匹配度：{score}/100",
+    "matchedWords": "清晰词汇",
+    "needsPractice": "需要练习",
     "mode": { "full": "完整对话", "sentence": "逐句播放", "shadow": "跟读模式" }
   },
   "MistakeDetail": {

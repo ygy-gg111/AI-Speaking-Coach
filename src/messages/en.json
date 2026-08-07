@@ -123,6 +123,7 @@
     "inputPlaceholder": "Type what you want to say…",
     "send": "Send message",
     "microphone": "Start or pause voice practice",
+    "inputDevice": "Input microphone",
     "connectionErrorTitle": "Realtime voice is unavailable",
     "connectionErrorDetail": "Check microphone access and the server's OpenAI configuration, then retry. Text hints remain available.",
     "notConfiguredTitle": "Realtime voice is not configured",
@@ -135,6 +136,8 @@
     "showTranslation": "Show translation",
     "hideTranslation": "Hide translation",
     "needsImprovement": "This sentence can sound more natural",
+    "evaluationWaiting": "Complete a speaking turn to receive feedback.",
+    "analysisError": "Feedback is temporarily unavailable. Try again before ending practice.",
     "state": {
       "idle": "Tap to start realtime practice",
       "requesting-permission": "Requesting microphone permission",
@@ -544,6 +547,10 @@
     "play": "Play full dialogue",
     "pause": "Pause playback",
     "speed": "Playback speed",
+    "shadowRecord": "Record and score",
+    "pronunciationScore": "Pronunciation match: {score}/100",
+    "matchedWords": "Clear words",
+    "needsPractice": "Needs practice",
     "mode": { "full": "Full dialogue", "sentence": "Sentence by sentence", "shadow": "Shadowing" }
   },
   "MistakeDetail": {

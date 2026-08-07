@@ -10,7 +10,7 @@ import { Button, Empty, Tag } from "antd";
 import { useLocale, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 
-import { mockScenes } from "@/features/scenes/mock-scenes";
+import { useSceneCatalog } from "@/features/scenes/hooks/use-scene-catalog";
 import {
   useCloudMistakes,
   useReviewMistake,
@@ -25,6 +25,7 @@ export default function MistakeDetailPage() {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("MistakeDetail");
   const params = useParams<{ mistakeId: string }>();
+  const scenes = useSceneCatalog().data ?? [];
   useCloudMistakes();
   const mistake = useLearningStore((store) =>
     store.mistakes.find((item) => item.id === params.mistakeId),
@@ -43,7 +44,7 @@ export default function MistakeDetailPage() {
     );
   }
 
-  const scene = mockScenes.find((item) => item.id === mistake.sceneId);
+  const scene = scenes.find((item) => item.id === mistake.sceneId);
   const related = [
     mistake.improved.replace("I ", "We "),
     `Could you say: “${mistake.improved}”?`,

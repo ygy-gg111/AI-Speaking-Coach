@@ -15,6 +15,11 @@ export type ConversationRecord = {
   status: "ACTIVE" | "COMPLETED" | "ABANDONED";
   startedAt: string;
   endedAt: string | null;
+  durationSeconds: number | null;
+  summary: string | null;
+  newExpressions: number;
+  corrections: number;
+  mastery: number | null;
   scene: {
     id: string;
     slug: string;

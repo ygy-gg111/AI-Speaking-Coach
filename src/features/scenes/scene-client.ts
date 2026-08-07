@@ -1,6 +1,5 @@
 import { requestApi } from "@/lib/api-client";
 
-import { findScene } from "./mock-scenes";
 import type {
   LocalizedSceneText,
   Scene,
@@ -52,17 +51,16 @@ function isLocalizedText(value: unknown): value is LocalizedSceneText {
 }
 
 export function mapSceneApiItem(item: SceneApiItem): Scene {
-  const fallback = findScene(item.id) ?? findScene(item.slug);
   const content =
     item.content && typeof item.content === "object"
       ? (item.content as Record<string, unknown>)
       : {};
   const title = isLocalizedText(content.title)
     ? content.title
-    : fallback?.title;
+    : undefined;
   const subtitle = isLocalizedText(content.subtitle)
     ? content.subtitle
-    : fallback?.subtitle;
+    : undefined;
 
   if (
     !title ||
@@ -84,7 +82,7 @@ export function mapSceneApiItem(item: SceneApiItem): Scene {
     difficulty: item.difficulty,
     estimatedMinutes: item.estimatedMinutes,
     lessonCount: item.lessonCount,
-    favorite: fallback?.favorite ?? false,
+    favorite: false,
   };
 }
 

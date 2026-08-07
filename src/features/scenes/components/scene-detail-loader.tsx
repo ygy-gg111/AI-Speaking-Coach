@@ -3,16 +3,18 @@
 import { useQuery } from "@tanstack/react-query";
 
 import { getScene } from "../scene-client";
-import type { Scene } from "../types";
 import { SceneDetail } from "./scene-detail";
+import { Empty, Spin } from "antd";
 
-export function SceneDetailLoader({ fallback }: { fallback: Scene }) {
+export function SceneDetailLoader({ sceneId }: { sceneId: string }) {
   const query = useQuery({
-    queryKey: ["scene", fallback.id],
-    queryFn: () => getScene(fallback.id),
+    queryKey: ["scene", sceneId],
+    queryFn: () => getScene(sceneId),
     retry: false,
     staleTime: 5 * 60 * 1_000,
   });
 
-  return <SceneDetail scene={query.data ?? fallback} />;
+  if (query.isPending) return <Spin fullscreen size="large" />;
+  if (!query.data) return <Empty description="Scene not found" />;
+  return <SceneDetail scene={query.data} />;
 }

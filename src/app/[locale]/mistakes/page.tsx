@@ -20,7 +20,7 @@ import {
   useCloudMistakes,
   useReviewMistake,
 } from "@/features/mistakes/hooks/use-cloud-mistakes";
-import { mockScenes } from "@/features/scenes/mock-scenes";
+import { useSceneCatalog } from "@/features/scenes/hooks/use-scene-catalog";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { useLearningStore } from "@/stores/learning-store";
@@ -31,6 +31,7 @@ export default function MistakesPage() {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("Mistakes");
   const mistakes = useLearningStore((store) => store.mistakes);
+  const scenes = useSceneCatalog().data ?? [];
   useCloudMistakes();
   const reviewMistake = useReviewMistake();
   const [filter, setFilter] = useState<MistakeFilter>("all");
@@ -111,7 +112,7 @@ export default function MistakesPage() {
         {visibleMistakes.length ? (
           <div className={styles.list} aria-live="polite">
             {visibleMistakes.map((mistake) => {
-              const scene = mockScenes.find(
+              const scene = scenes.find(
                 (item) => item.id === mistake.sceneId,
               );
               const practiceHref =

@@ -14,7 +14,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 
-import { mockScenes } from "@/features/scenes/mock-scenes";
+import { useSceneCatalog } from "@/features/scenes/hooks/use-scene-catalog";
 import { buildLearningReport } from "@/features/reports/report-data";
 import { getLearningReport } from "@/features/reports/report-client";
 import type { ReportPeriod } from "@/features/reports/types";
@@ -30,6 +30,7 @@ export default function ReportsPage() {
   const records = useLearningStore((store) => store.records);
   const mistakes = useLearningStore((store) => store.mistakes);
   const [period, setPeriod] = useState<ReportPeriod>(7);
+  const scenes = useSceneCatalog().data ?? [];
   const timezoneOffset = new Date().getTimezoneOffset();
   const localReport = useMemo(
     () => buildLearningReport(records, mistakes, period),
@@ -56,7 +57,7 @@ export default function ReportsPage() {
   );
   const topScene = report.scenes[0];
   const topSceneData = topScene
-    ? mockScenes.find((scene) => scene.id === topScene.sceneId)
+    ? scenes.find((scene) => scene.id === topScene.sceneId)
     : null;
   const topWeakness = report.weaknesses[0];
 
@@ -260,7 +261,7 @@ export default function ReportsPage() {
           {report.scenes.length ? (
             <div className={styles.sceneList}>
               {report.scenes.slice(0, 5).map((scene) => {
-                const sceneData = mockScenes.find(
+                const sceneData = scenes.find(
                   (item) => item.id === scene.sceneId,
                 );
                 return (

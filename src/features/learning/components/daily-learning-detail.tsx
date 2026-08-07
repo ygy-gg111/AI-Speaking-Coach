@@ -22,7 +22,7 @@ import {
 } from "@/features/learning/learning-data";
 import { getCalendarDate } from "@/features/learning/learning-client";
 import { SceneCover } from "@/features/scenes/components/scene-cover";
-import { findScene, mockScenes } from "@/features/scenes/mock-scenes";
+import { useSceneCatalog } from "@/features/scenes/hooks/use-scene-catalog";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { useLearningStore } from "@/stores/learning-store";
@@ -39,6 +39,7 @@ export function DailyLearningDetail({ date }: DailyLearningDetailProps) {
   const locale = useLocale() as AppLocale;
   const t = useTranslations("CalendarDay");
   const localRecords = useLearningStore((store) => store.records);
+  const scenes = useSceneCatalog().data ?? [];
   const timezoneOffset = new Date().getTimezoneOffset();
   const dateQuery = useQuery({
     queryKey: ["calendar-date", date, timezoneOffset],
@@ -163,7 +164,8 @@ export function DailyLearningDetail({ date }: DailyLearningDetailProps) {
 
               <div className={styles.records}>
                 {dayRecords.map((record, index) => {
-                  const scene = findScene(record.sceneId) ?? mockScenes[0];
+                  const scene = scenes.find((item) => item.id === record.sceneId);
+                  if (!scene) return null;
                   const reviewHref =
                     `/practice/${record.conversationId}/review?scene=${encodeURIComponent(scene.slug)}` as const;
                   const retryHref =

@@ -21,7 +21,7 @@ import {
 } from "@/features/learning/learning-data";
 import { getCalendarMonth } from "@/features/learning/learning-client";
 import { SceneCover } from "@/features/scenes/components/scene-cover";
-import { mockScenes } from "@/features/scenes/mock-scenes";
+import { useSceneCatalog } from "@/features/scenes/hooks/use-scene-catalog";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { useLearningStore } from "@/stores/learning-store";
@@ -63,6 +63,7 @@ function CalendarContent() {
   const t = useTranslations("Calendar");
   const searchParams = useSearchParams();
   const localRecords = useLearningStore((store) => store.records);
+  const scenes = useSceneCatalog().data ?? [];
   const visible = parseMonth(searchParams.get("month"));
   const timezoneOffset = new Date().getTimezoneOffset();
   const calendarQuery = useQuery({
@@ -224,8 +225,8 @@ function CalendarContent() {
               <div className={styles.dailyRecords}>
                 {selectedRecords.map((record) => {
                   const scene =
-                    mockScenes.find((item) => item.id === record.sceneId) ??
-                    mockScenes[0];
+                    scenes.find((item) => item.id === record.sceneId);
+                  if (!scene) return null;
                   return (
                     <Link
                       href={`/practice/${record.conversationId}/review?scene=${encodeURIComponent(scene.slug)}`}
