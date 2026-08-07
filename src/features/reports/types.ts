@@ -20,7 +20,10 @@ export type AbilityMetricKey =
   | "expressionCompleteness"
   | "grammarAccuracy"
   | "vocabularyRichness"
-  | "sceneCompletion";
+  | "sceneCompletion"
+  | "pronunciationAccuracy"
+  | "pronunciationFluency"
+  | "pronunciationProsody";
 
 export type AbilityMetric = {
   key: AbilityMetricKey;
@@ -31,6 +34,20 @@ export type WeaknessItem = {
   category: MistakeCategory;
   count: number;
   share: number;
+};
+
+export type PronunciationReportAttempt = {
+  createdAt: Date | string;
+  score: number;
+  accuracy: number;
+  fluency: number;
+  prosody: number;
+};
+
+export type PronunciationReportSummary = {
+  attemptCount: number;
+  averageScore: number;
+  bestScore: number;
 };
 
 export type LearningReport = {
@@ -48,4 +65,5 @@ export type LearningReport = {
   scenes: SceneReportItem[];
   abilities: AbilityMetric[];
   weaknesses: WeaknessItem[];
+  pronunciation: PronunciationReportSummary;
 };

@@ -45,6 +45,19 @@ export async function GET(request: Request) {
     const mistakes = await new MistakeService(
       new PrismaMistakeRepository(prisma),
     ).list(userId);
+    const pronunciationAttempts = await prisma.pronunciationAttempt.findMany({
+      where: {
+        userId,
+        createdAt: { gte: start, lt: end },
+      },
+      select: {
+        createdAt: true,
+        score: true,
+        accuracy: true,
+        fluency: true,
+        prosody: true,
+      },
+    });
     return ok(
       buildLearningReport(
         records,
@@ -52,6 +65,7 @@ export async function GET(request: Request) {
         input.data.period,
         now,
         input.data.timezoneOffset,
+        pronunciationAttempts,
       ),
     );
   } catch (error) {

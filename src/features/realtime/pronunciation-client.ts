@@ -6,11 +6,13 @@ type ApiResponse<T> =
 
 export async function evaluatePronunciationRecording(input: {
   audio: Blob;
+  sceneId: string;
   target: string;
   signals: Required<PronunciationSignals>;
 }) {
   const form = new FormData();
   form.set("audio", input.audio, `shadow-${Date.now()}.webm`);
+  form.set("sceneId", input.sceneId);
   form.set("target", input.target);
   form.set("durationMs", String(input.signals.durationMs));
   form.set("pauseRatio", String(input.signals.pauseRatio));

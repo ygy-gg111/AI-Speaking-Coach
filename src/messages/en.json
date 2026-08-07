@@ -435,6 +435,7 @@
     "sessions": "sessions",
     "newExpressions": "New expressions",
     "expressions": "items",
+    "pronunciationSummary": "Pronunciation · {count} scores",
     "firstComparison": "First period",
     "viewCalendar": "View calendar",
     "noData": "Complete a practice to see data",
@@ -462,10 +463,13 @@
         "expressionCompleteness": "Expression completeness",
         "grammarAccuracy": "Grammar accuracy",
         "vocabularyRichness": "Vocabulary richness",
-        "sceneCompletion": "Scene completion"
+        "sceneCompletion": "Scene completion",
+        "pronunciationAccuracy": "Pronunciation accuracy",
+        "pronunciationFluency": "Speaking fluency",
+        "pronunciationProsody": "Rhythm and stress"
       },
       "metricValue": "{metric}: {value}%",
-      "source": "These estimates come only from your scene mastery, correction frequency, new expressions, and scene coverage. Pronunciation is not included yet."
+      "source": "These estimates use scene mastery, corrections, new expressions, scene coverage, and your saved pronunciation scores."
     },
     "scenes": {
       "eyebrow": "Practice distribution",
@@ -550,6 +554,7 @@
     "shadowRecord": "Record and score",
     "shadowStop": "Stop and evaluate",
     "pronunciationScore": "Pronunciation match: {score}/100",
+    "scoreSaved": "Saved to your progress report",
     "matchedWords": "Clear words",
     "needsPractice": "Needs practice",
     "transcript": "Recognized speech",

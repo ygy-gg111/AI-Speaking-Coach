@@ -8,6 +8,7 @@ import {
   CalendarOutlined,
   ClockCircleOutlined,
   RiseOutlined,
+  SoundOutlined,
 } from "@ant-design/icons";
 import { Button, Progress, Segmented } from "antd";
 import { useQuery } from "@tanstack/react-query";
@@ -135,6 +136,22 @@ export default function ReportsPage() {
             <strong>
               {report.newExpressions}
               <small>{t("expressions")}</small>
+            </strong>
+          </div>
+        </article>
+        <article>
+          <span className={styles.metricIcon}>
+            <SoundOutlined />
+          </span>
+          <div>
+            <span>
+              {t("pronunciationSummary", {
+                count: report.pronunciation.attemptCount,
+              })}
+            </span>
+            <strong>
+              {report.pronunciation.averageScore}
+              <small>/100</small>
             </strong>
           </div>
         </article>

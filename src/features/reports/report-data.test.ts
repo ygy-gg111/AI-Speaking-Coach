@@ -27,11 +27,50 @@ describe("learning report", () => {
   it("builds scene, ability, and weakness signals", () => {
     const report = buildLearningReport(records, mistakes, 30, today);
     expect(report.scenes[0].sceneId).toBe("scene-airport");
-    expect(report.abilities).toHaveLength(4);
+    expect(report.abilities).toHaveLength(7);
     expect(report.weaknesses[0]).toMatchObject({
       category: "grammar",
       count: 2,
     });
+  });
+
+  it("adds persisted pronunciation attempts to the report", () => {
+    const report = buildLearningReport(
+      records,
+      mistakes,
+      7,
+      today,
+      today.getTimezoneOffset(),
+      [
+        {
+          createdAt: new Date(2026, 6, 30, 10),
+          score: 86,
+          accuracy: 90,
+          fluency: 82,
+          prosody: 78,
+        },
+        {
+          createdAt: new Date(2026, 6, 29, 10),
+          score: 92,
+          accuracy: 94,
+          fluency: 88,
+          prosody: 84,
+        },
+      ],
+    );
+
+    expect(report.pronunciation).toEqual({
+      attemptCount: 2,
+      averageScore: 89,
+      bestScore: 92,
+    });
+    expect(report.abilities).toEqual(
+      expect.arrayContaining([
+        { key: "pronunciationAccuracy", value: 92 },
+        { key: "pronunciationFluency", value: 85 },
+        { key: "pronunciationProsody", value: 81 },
+      ]),
+    );
   });
 
   it("groups records using the learner timezone", () => {

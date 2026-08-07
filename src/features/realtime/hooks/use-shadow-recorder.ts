@@ -23,6 +23,7 @@ export function useShadowRecorder() {
   const contextRef = useRef<AudioContext | null>(null);
   const sampleTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const startedAtRef = useRef(0);
+  const sceneIdRef = useRef("");
   const targetRef = useRef("");
   const transcriptRef = useRef("");
   const energyRef = useRef<number[]>([]);
@@ -36,9 +37,10 @@ export function useShadowRecorder() {
     contextRef.current = null;
   }, []);
 
-  const start = useCallback(async (target: string) => {
+  const start = useCallback(async (sceneId: string, target: string) => {
     setError(null);
     setResult(null);
+    sceneIdRef.current = sceneId;
     targetRef.current = target;
     transcriptRef.current = "";
     energyRef.current = [];
@@ -97,7 +99,12 @@ export function useShadowRecorder() {
       const audio = new Blob(chunks, { type: recorder.mimeType || "audio/webm" });
       cleanup();
       try {
-        setResult(await evaluatePronunciationRecording({ audio, target: targetRef.current, signals }));
+        setResult(await evaluatePronunciationRecording({
+          audio,
+          sceneId: sceneIdRef.current,
+          target: targetRef.current,
+          signals,
+        }));
       } catch (evaluationError) {
         if (transcriptRef.current) {
           setResult(scorePronunciation(targetRef.current, transcriptRef.current, signals));

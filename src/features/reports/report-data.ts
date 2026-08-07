@@ -4,6 +4,7 @@ import type { MistakeRecord } from "../mistakes/types";
 import type {
   AbilityMetric,
   LearningReport,
+  PronunciationReportAttempt,
   ReportPeriod,
   ReportTrendDay,
   SceneReportItem,
@@ -93,7 +94,18 @@ function buildScenes(records: PracticeRecord[]): SceneReportItem[] {
     .sort((a, b) => b.durationMinutes - a.durationMinutes);
 }
 
-function buildAbilities(records: PracticeRecord[]): AbilityMetric[] {
+function average(
+  values: number[],
+) {
+  return values.length
+    ? Math.round(values.reduce((total, value) => total + value, 0) / values.length)
+    : 0;
+}
+
+function buildAbilities(
+  records: PracticeRecord[],
+  pronunciationAttempts: PronunciationReportAttempt[],
+): AbilityMetric[] {
   const practiceCount = records.length;
   const averageMastery = practiceCount
     ? records.reduce((total, record) => total + record.mastery, 0) /
@@ -126,6 +138,18 @@ function buildAbilities(records: PracticeRecord[]): AbilityMetric[] {
         ? clamp(averageMastery * 0.7 + Math.min(sceneCount, 5) * 6)
         : 0,
     },
+    {
+      key: "pronunciationAccuracy",
+      value: average(pronunciationAttempts.map((attempt) => attempt.accuracy)),
+    },
+    {
+      key: "pronunciationFluency",
+      value: average(pronunciationAttempts.map((attempt) => attempt.fluency)),
+    },
+    {
+      key: "pronunciationProsody",
+      value: average(pronunciationAttempts.map((attempt) => attempt.prosody)),
+    },
   ];
 }
 
@@ -157,6 +181,7 @@ export function buildLearningReport(
   period: ReportPeriod,
   today = new Date(),
   timezoneOffset = today.getTimezoneOffset(),
+  pronunciationAttempts: PronunciationReportAttempt[] = [],
 ): LearningReport {
   const endDate = toOffsetDateKey(today, timezoneOffset);
   const startDate = addDays(endDate, -(period - 1));
@@ -174,6 +199,10 @@ export function buildLearningReport(
     previousEnd,
     timezoneOffset,
   );
+  const currentPronunciationAttempts = pronunciationAttempts.filter((attempt) => {
+    const date = toOffsetDateKey(attempt.createdAt, timezoneOffset);
+    return date >= startDate && date <= endDate;
+  });
   const durationMinutes = sum(currentRecords, "durationMinutes");
   const previousDuration = sum(previousRecords, "durationMinutes");
   const averageMastery = currentRecords.length
@@ -205,7 +234,16 @@ export function buildLearningReport(
         : null,
     trend: buildTrend(currentRecords, startDate, period, timezoneOffset),
     scenes: buildScenes(currentRecords),
-    abilities: buildAbilities(currentRecords),
+    abilities: buildAbilities(currentRecords, currentPronunciationAttempts),
     weaknesses: buildWeaknesses(mistakes),
+    pronunciation: {
+      attemptCount: currentPronunciationAttempts.length,
+      averageScore: average(
+        currentPronunciationAttempts.map((attempt) => attempt.score),
+      ),
+      bestScore: currentPronunciationAttempts.length
+        ? Math.max(...currentPronunciationAttempts.map((attempt) => attempt.score))
+        : 0,
+    },
   };
 }

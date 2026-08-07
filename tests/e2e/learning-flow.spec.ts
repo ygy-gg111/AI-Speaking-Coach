@@ -70,15 +70,22 @@ test("registration through persisted conversation review", async ({ request }) =
   expect(restored.ok()).toBeTruthy();
   expect((await restored.json()).data.evaluation).toEqual(reviewData.evaluation);
 
-  const [history, mistakes, vocabulary] = await Promise.all([
+  const [history, mistakes, vocabulary, report] = await Promise.all([
     request.get("/api/v1/conversations?limit=10"),
     request.get("/api/v1/mistakes?limit=10"),
     request.get("/api/v1/vocabulary?limit=10"),
+    request.get("/api/v1/reports?period=7&timezoneOffset=-480"),
   ]);
   expect(history.ok()).toBeTruthy();
   expect(mistakes.ok()).toBeTruthy();
   expect(vocabulary.ok()).toBeTruthy();
+  expect(report.ok(), await report.text()).toBeTruthy();
   expect((await history.json()).data.some((item: { conversationId: string }) => item.conversationId === conversationId)).toBeTruthy();
   expect((await mistakes.json()).data.some((item: { conversationId: string }) => item.conversationId === conversationId)).toBeTruthy();
   expect((await vocabulary.json()).data.some((item: { conversationId: string }) => item.conversationId === conversationId)).toBeTruthy();
+  expect((await report.json()).data.pronunciation).toEqual({
+    attemptCount: 0,
+    averageScore: 0,
+    bestScore: 0,
+  });
 });

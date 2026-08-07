@@ -114,7 +114,11 @@ export default function SceneReplayPage() {
               {mode === "shadow" && (
                 <Button
                   danger={shadow.isRecording}
-                  onClick={() => shadow.isRecording ? shadow.stop() : void shadow.start(phrase.expression)}
+                  onClick={() =>
+                    shadow.isRecording
+                      ? shadow.stop()
+                      : void shadow.start(scene.id, phrase.expression)
+                  }
                 >
                   {shadow.isRecording ? t("shadowStop") : t("shadowRecord")}
                 </Button>
@@ -126,6 +130,7 @@ export default function SceneReplayPage() {
         {shadow.result && (
           <div className={styles.card} role="status">
             <h3>{t("pronunciationScore", { score: shadow.result.score })}</h3>
+            {shadow.result.savedAt && <p>{t("scoreSaved")}</p>}
             {(["accuracy", "completeness", "fluency", "prosody"] as const).map((metric) => (
               <div key={metric}>
                 <span>{t(`metric.${metric}`)}</span>

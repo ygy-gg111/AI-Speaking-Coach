@@ -7,6 +7,8 @@ export type PronunciationScore = {
   transcript: string;
   matchedWords: string[];
   needsPractice: string[];
+  attemptId?: string;
+  savedAt?: string;
 };
 
 export type PronunciationSignals = {

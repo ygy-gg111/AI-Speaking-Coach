@@ -44,17 +44,18 @@ enum MistakeStatus {
 }
 
 model User {
-  id             String            @id @default(cuid())
-  email          String            @unique
-  passwordHash   String
-  locale         String            @default("zh-CN")
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  profile        UserProfile?
-  conversations  Conversation[]
-  favoriteScenes FavoriteScene[]
-  mistakes       Mistake[]
-  vocabulary     VocabularyEntry[]
+  id                    String                 @id @default(cuid())
+  email                 String                 @unique
+  passwordHash          String
+  locale                String                 @default("zh-CN")
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  profile               UserProfile?
+  conversations         Conversation[]
+  favoriteScenes        FavoriteScene[]
+  mistakes              Mistake[]
+  vocabulary            VocabularyEntry[]
+  pronunciationAttempts PronunciationAttempt[]
 
   @@map("users")
 }
@@ -83,27 +84,28 @@ model UserProfile {
 }
 
 model Scene {
-  id               String            @id @default(cuid())
-  slug             String            @unique
-  titleKey         String
-  descriptionKey   String
-  searchText       String            @db.Text
-  systemPrompt     String            @db.Text
-  category         String
-  coverTone        String
-  coverMark        String
-  difficulty       Int
-  estimatedMinutes Int
-  lessonCount      Int
-  content          Json?
-  isActive         Boolean           @default(true)
-  sortOrder        Int               @default(0)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  conversations    Conversation[]
-  favoritedBy      FavoriteScene[]
-  mistakes         Mistake[]
-  vocabulary       VocabularyEntry[]
+  id                    String                 @id @default(cuid())
+  slug                  String                 @unique
+  titleKey              String
+  descriptionKey        String
+  searchText            String                 @db.Text
+  systemPrompt          String                 @db.Text
+  category              String
+  coverTone             String
+  coverMark             String
+  difficulty            Int
+  estimatedMinutes      Int
+  lessonCount           Int
+  content               Json?
+  isActive              Boolean                @default(true)
+  sortOrder             Int                    @default(0)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  conversations         Conversation[]
+  favoritedBy           FavoriteScene[]
+  mistakes              Mistake[]
+  vocabulary            VocabularyEntry[]
+  pronunciationAttempts PronunciationAttempt[]
 
   @@index([category, isActive, sortOrder])
   @@map("scenes")
@@ -239,4 +241,27 @@ model AnalysisJob {
 
   @@index([conversationId, status])
   @@map("analysis_jobs")
+}
+
+model PronunciationAttempt {
+  id              String   @id @default(cuid())
+  userId          String
+  sceneId         String
+  target          String   @db.Text
+  transcript      String   @db.Text
+  score           Int
+  accuracy        Int
+  completeness    Int
+  fluency         Int
+  prosody         Int
+  durationMs      Int
+  pauseRatio      Float
+  energyVariation Float
+  createdAt       DateTime @default(now())
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scene           Scene    @relation(fields: [sceneId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@index([sceneId, createdAt])
+  @@map("pronunciation_attempts")
 }

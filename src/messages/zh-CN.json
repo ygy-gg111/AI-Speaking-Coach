@@ -435,6 +435,7 @@
     "sessions": "次",
     "newExpressions": "新学表达",
     "expressions": "句",
+    "pronunciationSummary": "发音评分 · {count} 次",
     "firstComparison": "首个周期",
     "viewCalendar": "查看日历",
     "noData": "完成一次练习后即可查看",
@@ -462,10 +463,13 @@
         "expressionCompleteness": "表达完整度",
         "grammarAccuracy": "语法准确度",
         "vocabularyRichness": "词汇丰富度",
-        "sceneCompletion": "场景完成度"
+        "sceneCompletion": "场景完成度",
+        "pronunciationAccuracy": "发音准确度",
+        "pronunciationFluency": "口语流利度",
+        "pronunciationProsody": "节奏与重音"
       },
       "metricValue": "{metric}：{value}%",
-      "source": "以上估算仅来自场景熟练度、纠错频率、新表达和场景覆盖；实时发音评估尚未纳入。"
+      "source": "以上估算来自场景熟练度、纠错频率、新表达、场景覆盖和已保存的发音评分。"
     },
     "scenes": {
       "eyebrow": "练习分布",
@@ -550,6 +554,7 @@
     "shadowRecord": "录音并评分",
     "shadowStop": "停止并评分",
     "pronunciationScore": "发音匹配度：{score}/100",
+    "scoreSaved": "已保存到成长报告",
     "matchedWords": "清晰词汇",
     "needsPractice": "需要练习",
     "transcript": "识别结果",
