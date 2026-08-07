@@ -8,13 +8,14 @@ import {
   createAuthToken,
   verifyAuthToken,
 } from "./auth-token";
+import { getAuthKeyPair } from "./auth-keys";
 
-function getAuthSecret() {
-  const secret = getServerEnv().AUTH_SECRET;
-  if (!secret) {
-    throw new Error("AUTH_SECRET is required for authentication.");
-  }
-  return secret;
+function getAuthKeys() {
+  const env = getServerEnv();
+  return {
+    ...getAuthKeyPair(env.AUTH_PRIVATE_KEY, env.AUTH_PUBLIC_KEY),
+    keyId: env.AUTH_KEY_ID,
+  };
 }
 
 export async function getSessionUserId() {
@@ -23,13 +24,18 @@ export async function getSessionUserId() {
   if (!token) {
     return null;
   }
-  const payload = await verifyAuthToken(token, getAuthSecret());
+  const payload = await verifyAuthToken(token, getAuthKeys().publicKey);
   return payload?.userId ?? null;
 }
 
 export async function setSession(userId: string) {
   const cookieStore = await cookies();
-  const token = await createAuthToken({ userId }, getAuthSecret());
+  const keys = getAuthKeys();
+  const token = await createAuthToken(
+    { userId },
+    keys.privateKey,
+    keys.keyId,
+  );
   cookieStore.set(AUTH_COOKIE_NAME, token, {
     httpOnly: true,
     maxAge: AUTH_SESSION_SECONDS,

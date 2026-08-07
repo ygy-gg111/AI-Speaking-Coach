@@ -1,0 +1,62 @@
+.modal :global(.ant-modal-content) {
+  padding: 28px;
+  border: 1px solid #ebe8f7;
+  border-radius: 22px;
+  box-shadow: 0 24px 72px rgba(55, 43, 106, 0.18);
+}
+
+.modal :global(.ant-modal-title) {
+  padding-right: 30px;
+  font-size: 24px;
+  line-height: 1.25;
+}
+
+.modal :global(.ant-tabs-nav-list) {
+  width: 100%;
+}
+
+.modal :global(.ant-tabs-tab) {
+  justify-content: center;
+  flex: 1;
+}
+
+.modal :global(.ant-input-affix-wrapper) {
+  border-radius: 10px;
+}
+
+.subtitle {
+  margin: 8px 32px 16px 0;
+  color: var(--app-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.alert {
+  margin-bottom: 18px;
+}
+
+.terms {
+  margin: 18px 0 0;
+  color: var(--app-muted);
+  font-size: 10px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+@media (max-width: 520px) {
+  .modal {
+    max-width: calc(100vw - 24px);
+    margin: 12px auto;
+  }
+
+  .modal :global(.ant-modal-content) {
+    max-height: calc(100vh - 24px);
+    padding: 22px 18px;
+    overflow-y: auto;
+    border-radius: 18px;
+  }
+
+  .modal :global(.ant-modal-title) {
+    font-size: 21px;
+  }
+}

@@ -1,34 +1,40 @@
+import type { KeyObject } from "node:crypto";
+
 import { jwtVerify, SignJWT } from "jose";
 
 export const AUTH_COOKIE_NAME = "ai-speaking-session";
 export const AUTH_SESSION_SECONDS = 60 * 60 * 24 * 7;
+const AUTH_ISSUER = "ai-speaking-coach";
+const AUTH_AUDIENCE = "ai-speaking-coach-web";
 
 export type AuthTokenPayload = {
   userId: string;
 };
 
-function createKey(secret: string) {
-  return new TextEncoder().encode(secret);
-}
-
 export async function createAuthToken(
   payload: AuthTokenPayload,
-  secret: string,
+  privateKey: KeyObject,
+  keyId = "primary",
 ) {
   return new SignJWT(payload)
-    .setProtectedHeader({ alg: "HS256" })
+    .setProtectedHeader({ alg: "RS256", kid: keyId, typ: "JWT" })
+    .setIssuer(AUTH_ISSUER)
+    .setAudience(AUTH_AUDIENCE)
     .setIssuedAt()
     .setExpirationTime(`${AUTH_SESSION_SECONDS}s`)
-    .sign(createKey(secret));
+    .sign(privateKey);
 }
 
 export async function verifyAuthToken(
   token: string,
-  secret: string,
+  publicKey: KeyObject,
 ): Promise<AuthTokenPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, createKey(secret), {
-      algorithms: ["HS256"],
+    const { payload } = await jwtVerify(token, publicKey, {
+      algorithms: ["RS256"],
+      issuer: AUTH_ISSUER,
+      audience: AUTH_AUDIENCE,
+      typ: "JWT",
     });
     return typeof payload.userId === "string"
       ? { userId: payload.userId }

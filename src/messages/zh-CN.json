@@ -346,7 +346,7 @@
     "errors": {
       "userExists": "这个邮箱已经注册过了。",
       "credentials": "邮箱或密码不正确。",
-      "unavailable": "登录服务暂时不可用，请检查数据库和 AUTH_SECRET 配置。",
+      "unavailable": "登录服务暂时不可用，请检查数据库和认证公私钥配置。",
       "generic": "暂时无法完成操作，请稍后重试。"
     }
   },

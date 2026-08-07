@@ -9,7 +9,7 @@
 - next-intl（`zh-CN` / `en`）
 - TanStack Query + Zustand
 - Next.js Route Handlers + Zod
-- Prisma + PostgreSQL
+- Prisma + MySQL
 - WebRTC + OpenAI Realtime（真实音频与事件通道）
 - Vitest + ESLint
 
@@ -79,7 +79,7 @@ Realtime 会话只允许登录用户为自己仍处于 `ACTIVE` 状态的练习�
 
 ```env
 OPENAI_API_KEY="..."
-OPENAI_REALTIME_MODEL="gpt-realtime-2.1"
+OPENAI_REALTIME_MODEL="gpt-realtime"
 OPENAI_REALTIME_VOICE="marin"
 OPENAI_TEXT_MODEL="gpt-5.6-sol"
 ```
@@ -100,7 +100,7 @@ OPENAI_TEXT_MODEL="gpt-5.6-sol"
 
 ## 登录与用户资料
 
-登录、注册、退出登录和用户资料 API 已使用 Prisma、bcrypt 与 HttpOnly JWT Cookie 实现。运行认证功能前需要配置 `DATABASE_URL`、执行数据库迁移，并设置不少于 16 位的 `AUTH_SECRET`；登录令牌不会暴露给前端 JavaScript，也不会写入 `localStorage`。未登录用户仍可使用访客模式体验口语练习。
+登录、注册、退出登录和用户资料 API 已使用 Prisma、bcrypt 与 HttpOnly JWT Cookie 实现。JWT 使用 RSA `RS256` 签名：`AUTH_PRIVATE_KEY` 仅用于签发，`AUTH_PUBLIC_KEY` 用于验证。运行认证功能前需要配置 `DATABASE_URL`、执行数据库迁移，并通过 `npm run auth:keys` 生成 Base64 编码的 PKCS#8/SPKI 密钥对；登录令牌不会暴露给前端 JavaScript，也不会写入 `localStorage`。未登录用户仍可使用访客模式体验口语练习。
 
 ## 后端核心接口
 
@@ -132,7 +132,7 @@ POST /api/v1/realtime/session?conversationId=:conversationId
 PATCH /api/v1/realtime/session/:sessionId
 ```
 
-场景查询为公开接口；Dashboard、收藏、我的场景、学习日历、成长报告、错题本、单词本以及创建、查询、保存和完成练习需要登录。游客首页、收藏、练习历史、日历、成长报告、错题本和单词本继续使用浏览器本地数据，登录用户的数据会从 PostgreSQL 恢复。Dashboard、日历和报告接口接收浏览器时区偏移，确保今日指标与本地日期统计准确。报告接口按 7 天或 30 天聚合当前周期和上一周期的练习记录，并使用云端错题分类生成弱项分布。每个已完成会话可沉淀一条核心错题和一条自然表达；错题及词汇累计复习 3 次后自动标记为已掌握，词汇收藏和复习进度可跨设备同步。消息接口支持 `clientEventId` 幂等键，Realtime 重连或客户端重试不会重复保存同一个事件。初始化本地数据库：
+场景查询为公开接口；Dashboard、收藏、我的场景、学习日历、成长报告、错题本、单词本以及创建、查询、保存和完成练习需要登录。游客首页、收藏、练习历史、日历、成长报告、错题本和单词本继续使用浏览器本地数据，登录用户的数据会从 MySQL 恢复。Dashboard、日历和报告接口接收浏览器时区偏移，确保今日指标与本地日期统计准确。报告接口按 7 天或 30 天聚合当前周期和上一周期的练习记录，并使用云端错题分类生成弱项分布。每个已完成会话可沉淀一条核心错题和一条自然表达；错题及词汇累计复习 3 次后自动标记为已掌握，词汇收藏和复习进度可跨设备同步。消息接口支持 `clientEventId` 幂等键，Realtime 重连或客户端重试不会重复保存同一个事件。初始化本地数据库：
 
 ```bash
 pnpm prisma:deploy

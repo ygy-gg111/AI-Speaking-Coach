@@ -108,6 +108,69 @@
   font-size: 17px;
 }
 
+.accountArea {
+  margin-top: auto;
+  padding-top: 14px;
+}
+
+.loginButton {
+  width: 100%;
+}
+
+.accountButton {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid #ebe8f7;
+  border-radius: 12px;
+  color: #313248;
+  background: #fbfaff;
+  transition: 160ms ease;
+}
+
+.accountButton:hover {
+  border-color: #dcd5ff;
+  color: var(--app-primary-dark);
+  background: #f7f5ff;
+}
+
+.accountAvatar {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  flex: 0 0 30px;
+  border-radius: 9px;
+  color: #fff;
+  background: linear-gradient(145deg, #925bff, #6646e8);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.accountCopy {
+  min-width: 0;
+}
+
+.accountCopy strong,
+.accountCopy small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accountCopy strong {
+  font-size: 12px;
+}
+
+.accountCopy small {
+  margin-top: 2px;
+  color: var(--app-muted);
+  font-size: 9px;
+}
+
 .streakCard {
   margin-top: 10px;
   padding: 15px 14px;
@@ -123,7 +186,7 @@
   min-height: 38px;
   align-items: center;
   gap: 10px;
-  margin-top: auto;
+  margin-top: 8px;
   padding: 0 12px;
   border-radius: 10px;
   color: var(--app-muted);
@@ -209,6 +272,12 @@
   display: none;
 }
 
+.mobileActions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
 @media (max-width: 1199px) {
   :global(:root) {
     --app-sidebar-width: 82px;
@@ -226,8 +295,21 @@
   .logo > span:last-child,
   .navItem span,
   .streakCard,
-  .languageLink strong {
+  .languageLink strong,
+  .accountCopy,
+  .loginLabel {
     display: none;
+  }
+
+  .accountArea {
+    width: 48px;
+  }
+
+  .loginButton,
+  .accountButton {
+    width: 48px;
+    justify-content: center;
+    padding-inline: 0;
   }
 
   .languageLink {

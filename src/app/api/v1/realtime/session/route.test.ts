@@ -19,7 +19,7 @@ describe("GET /api/v1/realtime/session", () => {
       success: true,
       data: {
         configured: false,
-        model: "gpt-realtime-2.1",
+        model: "gpt-realtime",
         voice: "marin",
       },
     });
@@ -27,7 +27,7 @@ describe("GET /api/v1/realtime/session", () => {
 
   it("reports readiness without exposing the API key", async () => {
     vi.stubEnv("OPENAI_API_KEY", "test-secret-that-must-not-leak");
-    vi.stubEnv("OPENAI_REALTIME_MODEL", "gpt-realtime-2.1");
+    vi.stubEnv("OPENAI_REALTIME_MODEL", "gpt-realtime");
     vi.stubEnv("OPENAI_REALTIME_VOICE", "marin");
 
     const response = GET();
@@ -37,7 +37,7 @@ describe("GET /api/v1/realtime/session", () => {
       success: true,
       data: {
         configured: true,
-        model: "gpt-realtime-2.1",
+        model: "gpt-realtime",
         voice: "marin",
       },
     });

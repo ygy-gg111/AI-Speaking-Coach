@@ -1,21 +1,33 @@
+import { generateKeyPairSync } from "node:crypto";
+
 import { describe, expect, it } from "vitest";
 
 import { createAuthToken, verifyAuthToken } from "./auth-token";
 
 describe("auth token", () => {
-  const secret = "a-secure-test-secret-with-enough-length";
+  const keys = generateKeyPairSync("rsa", { modulusLength: 2048 });
+  const otherKeys = generateKeyPairSync("rsa", { modulusLength: 2048 });
 
   it("creates and verifies a user session", async () => {
-    const token = await createAuthToken({ userId: "user-1" }, secret);
-    await expect(verifyAuthToken(token, secret)).resolves.toEqual({
+    const token = await createAuthToken(
+      { userId: "user-1" },
+      keys.privateKey,
+      "test-key",
+    );
+    await expect(verifyAuthToken(token, keys.publicKey)).resolves.toEqual({
       userId: "user-1",
     });
+    expect(JSON.parse(Buffer.from(token.split(".")[0], "base64url").toString()))
+      .toMatchObject({ alg: "RS256", kid: "test-key", typ: "JWT" });
   });
 
-  it("rejects a token signed by another secret", async () => {
-    const token = await createAuthToken({ userId: "user-1" }, secret);
+  it("rejects a token verified by another public key", async () => {
+    const token = await createAuthToken(
+      { userId: "user-1" },
+      keys.privateKey,
+    );
     await expect(
-      verifyAuthToken(token, "another-secure-secret-with-enough-length"),
+      verifyAuthToken(token, otherKeys.publicKey),
     ).resolves.toBeNull();
   });
 });

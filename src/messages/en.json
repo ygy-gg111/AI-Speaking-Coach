@@ -346,7 +346,7 @@
     "errors": {
       "userExists": "An account with this email already exists.",
       "credentials": "Email or password is incorrect.",
-      "unavailable": "Login is temporarily unavailable. Check the database and AUTH_SECRET configuration.",
+      "unavailable": "Login is temporarily unavailable. Check the database and authentication key-pair configuration.",
       "generic": "Unable to complete the request. Please try again."
     }
   },

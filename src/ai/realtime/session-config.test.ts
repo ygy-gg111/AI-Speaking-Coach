@@ -8,7 +8,7 @@ describe("Realtime session configuration", () => {
   });
 
   it("builds an audio session with transcription and server VAD", () => {
-    vi.stubEnv("OPENAI_REALTIME_MODEL", "gpt-realtime-2.1");
+    vi.stubEnv("OPENAI_REALTIME_MODEL", "gpt-realtime");
     vi.stubEnv("OPENAI_REALTIME_VOICE", "marin");
 
     const config = createRealtimeSessionConfig({
@@ -18,7 +18,7 @@ describe("Realtime session configuration", () => {
 
     expect(config).toMatchObject({
       type: "realtime",
-      model: "gpt-realtime-2.1",
+      model: "gpt-realtime",
       output_modalities: ["audio"],
       audio: {
         input: {
@@ -40,7 +40,7 @@ describe("Realtime session configuration", () => {
   });
 
   it("applies learner voice, speed, language, goal, and correction preferences", () => {
-    vi.stubEnv("OPENAI_REALTIME_MODEL", "gpt-realtime-2.1");
+    vi.stubEnv("OPENAI_REALTIME_MODEL", "gpt-realtime");
     vi.stubEnv("OPENAI_REALTIME_VOICE", "marin");
 
     const config = createRealtimeSessionConfig({

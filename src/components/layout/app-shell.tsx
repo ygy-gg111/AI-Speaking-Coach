@@ -9,17 +9,20 @@ import {
   HomeFilled,
   HomeOutlined,
   LineChartOutlined,
+  LoginOutlined,
   ReadOutlined,
   SettingOutlined,
   SoundFilled,
   StarOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import { Button, Tooltip } from "antd";
 import { useLocale, useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 
-import { Link, usePathname } from "@/i18n/navigation";
+import { AuthModal, getCurrentUser } from "@/features/auth";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
 
 import styles from "./app-shell.module.css";
 
@@ -55,14 +58,34 @@ function isActivePath(pathname: string, href: string) {
 
 export function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const locale = useLocale();
   const t = useTranslations("Navigation");
+  const authT = useTranslations("Auth");
+  const [authOpen, setAuthOpen] = useState(false);
+  const userQuery = useQuery({
+    queryKey: ["current-user"],
+    queryFn: getCurrentUser,
+    retry: false,
+  });
   const isDocsPage = pathname === "/docs";
   const isAuthPage = pathname === "/login" || pathname === "/onboarding";
 
   if (isDocsPage || isAuthPage) {
     return <>{children}</>;
   }
+
+  const user = userQuery.data;
+  const displayName = user?.profile.displayName || user?.email.split("@")[0];
+  const languageLabel = locale === "zh-CN" ? "EN" : "中";
+
+  const finishAuthentication = () => {
+    if (pathname.startsWith("/practice/guest-")) {
+      router.replace("/practice");
+    } else {
+      router.refresh();
+    }
+  };
 
   return (
     <div className={styles.shell}>
@@ -98,13 +121,39 @@ export function AppShell({ children }: AppShellProps) {
           })}
         </nav>
 
+        <div className={styles.accountArea}>
+          {user ? (
+            <Link href="/settings" className={styles.accountButton}>
+              <span className={styles.accountAvatar}>
+                {displayName?.slice(0, 1).toUpperCase()}
+              </span>
+              <span className={styles.accountCopy}>
+                <strong>{displayName}</strong>
+                <small>{user.email}</small>
+              </span>
+            </Link>
+          ) : (
+            <Button
+              type="primary"
+              icon={<LoginOutlined />}
+              className={styles.loginButton}
+              loading={userQuery.isPending}
+              onClick={() => setAuthOpen(true)}
+            >
+              <span className={styles.loginLabel}>
+                {authT("loginTab")} / {authT("registerTab")}
+              </span>
+            </Button>
+          )}
+        </div>
+
         <Link
           href={pathname}
           locale={locale === "zh-CN" ? "en" : "zh-CN"}
           className={styles.languageLink}
           aria-label={t("switchLanguage")}
         >
-          <span>{locale === "zh-CN" ? "EN" : "中"}</span>
+          <span>{languageLabel}</span>
           <strong>{t("switchLanguage")}</strong>
         </Link>
 
@@ -138,17 +187,36 @@ export function AppShell({ children }: AppShellProps) {
             </span>
             <strong>AI Coach</strong>
           </Link>
-          <Tooltip title={t("switchLanguage")}>
-            <Link
-              href={pathname}
-              locale={locale === "zh-CN" ? "en" : "zh-CN"}
-              aria-label={t("switchLanguage")}
-            >
-              <Button type="text" size="small">
-                {locale === "zh-CN" ? "EN" : "中"}
+          <div className={styles.mobileActions}>
+            {user ? (
+              <Tooltip title={user.email}>
+                <Link href="/settings" aria-label={user.email}>
+                  <Button type="text" shape="circle" icon={<UserOutlined />} />
+                </Link>
+              </Tooltip>
+            ) : (
+              <Button
+                type="primary"
+                size="small"
+                icon={<LoginOutlined />}
+                loading={userQuery.isPending}
+                onClick={() => setAuthOpen(true)}
+              >
+                {authT("loginTab")}
               </Button>
-            </Link>
-          </Tooltip>
+            )}
+            <Tooltip title={t("switchLanguage")}>
+              <Link
+                href={pathname}
+                locale={locale === "zh-CN" ? "en" : "zh-CN"}
+                aria-label={t("switchLanguage")}
+              >
+                <Button type="text" size="small">
+                  {languageLabel}
+                </Button>
+              </Link>
+            </Tooltip>
+          </div>
         </header>
 
         <div id="main-content" className={styles.content} tabIndex={-1}>
@@ -175,6 +243,12 @@ export function AppShell({ children }: AppShellProps) {
           );
         })}
       </nav>
+
+      <AuthModal
+        open={authOpen}
+        onClose={() => setAuthOpen(false)}
+        onAuthenticated={finishAuthentication}
+      />
     </div>
   );
 }

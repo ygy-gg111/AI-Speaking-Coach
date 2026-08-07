@@ -1,5 +1,10 @@
 import { z } from "zod";
 import type { Prisma } from "@prisma/client";
+import {
+  fetch as undiciFetch,
+  FormData as UndiciFormData,
+  ProxyAgent,
+} from "undici";
 
 import { createRealtimeSessionConfig } from "@/ai/realtime/session-config";
 import { getSessionUserId } from "@/features/auth/session";
@@ -14,6 +19,8 @@ import { RealtimeSessionService } from "@/services/realtime/realtime-session.ser
 const requestSchema = z.object({
   conversationId: z.string().min(1),
 });
+
+const proxyAgents = new Map<string, ProxyAgent>();
 
 export function GET() {
   const env = getServerEnv();
@@ -95,19 +102,22 @@ export async function POST(request: Request) {
       JSON.parse(JSON.stringify(session)) as Prisma.InputJsonValue,
     );
     lifecycleSessionId = persistedSession.id;
-    const formData = new FormData();
+    const formData = new UndiciFormData();
     formData.set("sdp", sdp);
     formData.set("session", JSON.stringify(session));
 
-    const response = await fetch("https://api.openai.com/v1/realtime/calls", {
+    const response = await undiciFetch(
+      "https://api.openai.com/v1/realtime/calls",
+      {
       method: "POST",
       headers: {
         Authorization: `Bearer ${env.OPENAI_API_KEY}`,
       },
       body: formData,
       signal: AbortSignal.timeout(20_000),
-      cache: "no-store",
-    });
+        dispatcher: getProxyAgent(env.OPENAI_PROXY_URL),
+      },
+    );
 
     const body = await response.text();
     if (!response.ok) {
@@ -172,4 +182,17 @@ export async function POST(request: Request) {
 function getProviderSessionId(location: string | null) {
   const id = location?.split("/").filter(Boolean).at(-1);
   return id && id.length <= 200 ? id : undefined;
+}
+
+function getProxyAgent(proxyUrl: string | undefined) {
+  if (!proxyUrl) {
+    return undefined;
+  }
+  const existing = proxyAgents.get(proxyUrl);
+  if (existing) {
+    return existing;
+  }
+  const agent = new ProxyAgent(proxyUrl);
+  proxyAgents.set(proxyUrl, agent);
+  return agent;
 }
