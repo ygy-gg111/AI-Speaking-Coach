@@ -548,9 +548,12 @@
     "pause": "暂停播放",
     "speed": "播放速度",
     "shadowRecord": "录音并评分",
+    "shadowStop": "停止并评分",
     "pronunciationScore": "发音匹配度：{score}/100",
     "matchedWords": "清晰词汇",
     "needsPractice": "需要练习",
+    "transcript": "识别结果",
+    "metric": { "accuracy": "准确度", "completeness": "完整度", "fluency": "流利度", "prosody": "节奏与重音" },
     "mode": { "full": "完整对话", "sentence": "逐句播放", "shadow": "跟读模式" }
   },
   "MistakeDetail": {

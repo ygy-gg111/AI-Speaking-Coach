@@ -19,4 +19,13 @@ describe("realtime connection state", () => {
   it("rejects an invalid direct transition", () => {
     expect(canTransitionRealtimeState("idle", "connected")).toBe(false);
   });
+
+  it("allows text-only practice without a voice connection", () => {
+    expect(canTransitionRealtimeState("idle", "ai-thinking")).toBe(true);
+    expect(canTransitionRealtimeState("ai-thinking", "listening")).toBe(true);
+  });
+
+  it("accepts an assistant audio delta when response.created is delayed", () => {
+    expect(canTransitionRealtimeState("listening", "ai-speaking")).toBe(true);
+  });
 });

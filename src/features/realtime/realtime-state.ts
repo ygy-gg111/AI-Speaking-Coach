@@ -4,11 +4,19 @@ const allowedTransitions: Record<
   RealtimeConnectionState,
   RealtimeConnectionState[]
 > = {
-  idle: ["requesting-permission", "connecting"],
+  idle: ["requesting-permission", "connecting", "ai-thinking"],
   "requesting-permission": ["connecting", "error", "ended"],
   connecting: ["connected", "error", "ended"],
   connected: ["listening", "ai-thinking", "reconnecting", "ended", "error"],
-  listening: ["connected", "user-speaking", "ai-thinking", "reconnecting", "ended", "error"],
+  listening: [
+    "connected",
+    "user-speaking",
+    "ai-thinking",
+    "ai-speaking",
+    "reconnecting",
+    "ended",
+    "error",
+  ],
   "user-speaking": ["listening", "ai-thinking", "reconnecting", "ended", "error"],
   "ai-thinking": ["ai-speaking", "listening", "reconnecting", "ended", "error"],
   "ai-speaking": [

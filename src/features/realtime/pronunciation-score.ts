@@ -1,14 +1,29 @@
 export type PronunciationScore = {
   score: number;
+  accuracy: number;
+  completeness: number;
+  fluency: number;
+  prosody: number;
+  transcript: string;
   matchedWords: string[];
   needsPractice: string[];
+};
+
+export type PronunciationSignals = {
+  durationMs?: number;
+  pauseRatio?: number;
+  energyVariation?: number;
 };
 
 function words(value: string) {
   return value.toLowerCase().match(/[a-z']+/g) ?? [];
 }
 
-export function scorePronunciation(target: string, transcript: string): PronunciationScore {
+export function scorePronunciation(
+  target: string,
+  transcript: string,
+  signals: PronunciationSignals = {},
+): PronunciationScore {
   const expected = words(target);
   const actual = words(transcript);
   const rows = expected.length + 1;
@@ -28,8 +43,35 @@ export function scorePronunciation(target: string, transcript: string): Pronunci
   const actualSet = new Set(actual);
   const matchedWords = expected.filter((word) => actualSet.has(word));
   const needsPractice = expected.filter((word) => !actualSet.has(word));
-  const score = expected.length
+  const accuracy = expected.length
     ? Math.max(0, Math.round((1 - distance[expected.length][actual.length] / expected.length) * 100))
     : 0;
-  return { score, matchedWords: [...new Set(matchedWords)], needsPractice: [...new Set(needsPractice)] };
+  const completeness = expected.length
+    ? Math.round((matchedWords.length / expected.length) * 100)
+    : 0;
+  const durationMinutes = Math.max(1 / 60, (signals.durationMs ?? 0) / 60_000);
+  const wordsPerMinute = actual.length / durationMinutes;
+  const paceScore = signals.durationMs
+    ? Math.max(0, 100 - Math.round(Math.abs(wordsPerMinute - 125) * 0.8))
+    : accuracy;
+  const pauseScore = signals.pauseRatio === undefined
+    ? accuracy
+    : Math.max(0, Math.round(100 - Math.abs(signals.pauseRatio - 0.18) * 180));
+  const fluency = Math.round(paceScore * 0.6 + pauseScore * 0.4);
+  const prosody = signals.energyVariation === undefined
+    ? accuracy
+    : Math.max(0, Math.min(100, Math.round(45 + signals.energyVariation * 220)));
+  const score = Math.round(
+    accuracy * 0.45 + completeness * 0.2 + fluency * 0.25 + prosody * 0.1,
+  );
+  return {
+    score,
+    accuracy,
+    completeness,
+    fluency,
+    prosody,
+    transcript,
+    matchedWords: [...new Set(matchedWords)],
+    needsPractice: [...new Set(needsPractice)],
+  };
 }

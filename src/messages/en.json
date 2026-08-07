@@ -548,9 +548,12 @@
     "pause": "Pause playback",
     "speed": "Playback speed",
     "shadowRecord": "Record and score",
+    "shadowStop": "Stop and evaluate",
     "pronunciationScore": "Pronunciation match: {score}/100",
     "matchedWords": "Clear words",
     "needsPractice": "Needs practice",
+    "transcript": "Recognized speech",
+    "metric": { "accuracy": "Accuracy", "completeness": "Completeness", "fluency": "Fluency", "prosody": "Rhythm and stress" },
     "mode": { "full": "Full dialogue", "sentence": "Sentence by sentence", "shadow": "Shadowing" }
   },
   "MistakeDetail": {

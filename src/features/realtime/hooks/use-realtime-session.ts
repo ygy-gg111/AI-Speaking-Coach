@@ -401,8 +401,10 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
   const sendText = useCallback(
     (text: string) => {
       const id = `text-${crypto.randomUUID()}`;
-      if (
-        !sendEvent({
+      const channel = channelRef.current;
+      const sentRealtime = channel?.readyState === "open";
+      if (sentRealtime) {
+        sendEvent({
           event_id: id,
           type: "conversation.item.create",
           item: {
@@ -410,9 +412,7 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
             role: "user",
             content: [{ type: "input_text", text }],
           },
-        })
-      ) {
-        return false;
+        });
       }
 
       useRealtimeStore.getState().upsertTranscript({
@@ -422,14 +422,50 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
         final: true,
         createdAt: new Date().toISOString(),
       });
-      sendEvent({
-        type: "response.create",
-        response: { output_modalities: ["audio"] },
-      });
+      if (sentRealtime) {
+        sendEvent({
+          type: "response.create",
+          response: { output_modalities: ["audio"] },
+        });
+      } else {
+        setError(null);
+        setErrorCode(null);
+        void fetch(
+          `/api/v1/conversations/${encodeURIComponent(options.conversationId)}/respond`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text }),
+          },
+        )
+          .then(async (response) => {
+            const payload = await response.json() as {
+              success?: boolean;
+              data?: { text?: string };
+              error?: { message?: string };
+            };
+            if (!response.ok || !payload.success || !payload.data?.text) {
+              throw new Error(payload.error?.message ?? "Unable to continue text practice.");
+            }
+            useRealtimeStore.getState().upsertTranscript({
+              id: `assistant-${id}`,
+              role: "assistant",
+              text: payload.data.text,
+              final: true,
+              createdAt: new Date().toISOString(),
+            });
+            transitionTo("listening");
+          })
+          .catch((fallbackError) => {
+            setError(fallbackError instanceof Error ? fallbackError.message : "Unable to continue text practice.");
+            setErrorCode("connection-failed");
+            transitionTo("error");
+          });
+      }
       transitionTo("ai-thinking");
       return true;
     },
-    [sendEvent],
+    [options.conversationId, sendEvent],
   );
 
   const interrupt = useCallback(() => {

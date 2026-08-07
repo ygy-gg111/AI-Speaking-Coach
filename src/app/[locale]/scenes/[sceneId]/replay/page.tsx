@@ -6,14 +6,14 @@ import {
   PauseOutlined,
   PlayCircleFilled,
 } from "@ant-design/icons";
-import { Button, Empty, Segmented, Select, Slider, Spin, Switch } from "antd";
+import { Alert, Button, Empty, Progress, Segmented, Select, Slider, Spin, Switch } from "antd";
 import { useLocale, useTranslations } from "next-intl";
 import { useParams } from "next/navigation";
 import { useState } from "react";
 
 import { useSceneCatalog } from "@/features/scenes/hooks/use-scene-catalog";
 import { getSceneDetail } from "@/features/scenes/scene-detail-data";
-import { scorePronunciation, type PronunciationScore } from "@/features/realtime/pronunciation-score";
+import { useShadowRecorder } from "@/features/realtime/hooks/use-shadow-recorder";
 import { Link } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 
@@ -31,8 +31,7 @@ export default function SceneReplayPage() {
   const [mode, setMode] = useState("sentence");
   const [showTranslation, setShowTranslation] = useState(true);
   const [speed, setSpeed] = useState(1);
-  const [pronunciation, setPronunciation] = useState<PronunciationScore | null>(null);
-  const [isRecording, setIsRecording] = useState(false);
+  const shadow = useShadowRecorder();
 
   if (sceneQuery.isPending) return <Spin fullscreen size="large" />;
   if (!scene) return <Empty description="Scene not found" />;
@@ -55,33 +54,6 @@ export default function SceneReplayPage() {
       return;
     }
     speak(detail.phrases.map((phrase) => phrase.expression).join(" "));
-  }
-
-  function startShadowing(target: string) {
-    type RecognitionResultEvent = { results: { 0: { 0: { transcript: string } } } };
-    type Recognition = {
-      lang: string;
-      interimResults: boolean;
-      onresult: ((event: RecognitionResultEvent) => void) | null;
-      onerror: (() => void) | null;
-      onend: (() => void) | null;
-      start: () => void;
-    };
-    const RecognitionConstructor = (window as unknown as {
-      SpeechRecognition?: new () => Recognition;
-      webkitSpeechRecognition?: new () => Recognition;
-    }).SpeechRecognition ?? (window as unknown as { webkitSpeechRecognition?: new () => Recognition }).webkitSpeechRecognition;
-    if (!RecognitionConstructor) return;
-    const recognition = new RecognitionConstructor();
-    recognition.lang = "en-US";
-    recognition.interimResults = false;
-    recognition.onresult = (event) => {
-      setPronunciation(scorePronunciation(target, event.results[0][0].transcript));
-    };
-    recognition.onerror = () => setIsRecording(false);
-    recognition.onend = () => setIsRecording(false);
-    setIsRecording(true);
-    recognition.start();
   }
 
   return (
@@ -140,18 +112,29 @@ export default function SceneReplayPage() {
                 onClick={() => speak(phrase.expression)}
               />
               {mode === "shadow" && (
-                <Button loading={isRecording} onClick={() => startShadowing(phrase.expression)}>
-                  {t("shadowRecord")}
+                <Button
+                  danger={shadow.isRecording}
+                  onClick={() => shadow.isRecording ? shadow.stop() : void shadow.start(phrase.expression)}
+                >
+                  {shadow.isRecording ? t("shadowStop") : t("shadowRecord")}
                 </Button>
               )}
             </article>
           ))}
         </div>
-        {pronunciation && (
+        {shadow.error && <Alert type="warning" showIcon message={shadow.error} />}
+        {shadow.result && (
           <div className={styles.card} role="status">
-            <h3>{t("pronunciationScore", { score: pronunciation.score })}</h3>
-            <p>{t("matchedWords")}: {pronunciation.matchedWords.join(", ") || "-"}</p>
-            <p>{t("needsPractice")}: {pronunciation.needsPractice.join(", ") || "-"}</p>
+            <h3>{t("pronunciationScore", { score: shadow.result.score })}</h3>
+            {(["accuracy", "completeness", "fluency", "prosody"] as const).map((metric) => (
+              <div key={metric}>
+                <span>{t(`metric.${metric}`)}</span>
+                <Progress percent={shadow.result![metric]} size="small" />
+              </div>
+            ))}
+            <p>{t("transcript")}: {shadow.result.transcript}</p>
+            <p>{t("matchedWords")}: {shadow.result.matchedWords.join(", ") || "-"}</p>
+            <p>{t("needsPractice")}: {shadow.result.needsPractice.join(", ") || "-"}</p>
           </div>
         )}
         <div className={styles.player}>
