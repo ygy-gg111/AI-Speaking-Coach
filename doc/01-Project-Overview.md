@@ -446,7 +446,7 @@ Next FullStack
 
 Prisma
 
-PostgreSQL
+MySQL
 
 AI：
 
@@ -462,13 +462,13 @@ Realtime Model
 
 Vercel
 
-Supabase
+云数据库服务
 
 Cloudflare R2
 
 Github Action
 
-MVP 不引入 Redis 和 BullMQ。Realtime 会话的媒体状态由 WebRTC 与 Realtime API 管理，长期业务数据写入 PostgreSQL。
+MVP 不引入 Redis 和 BullMQ。Realtime 会话的媒体状态由 WebRTC 与 Realtime API 管理，长期业务数据写入 MySQL。
 
 ---
 

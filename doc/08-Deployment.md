@@ -23,9 +23,9 @@
 部署方案需要满足：
 
 - Next.js 应用运行
-- PostgreSQL 数据库存储
+- MySQL 数据库存储
 - Realtime WebRTC
-- PostgreSQL任务与额度控制
+- MySQL任务与额度控制
 - AI API 调用
 - 文件存储
 - HTTPS
@@ -45,7 +45,7 @@ Browser
 ├── HTTPS → Vercel Next.js
 │          ├── Auth/API
 │          ├── Realtime Session Endpoint
-│          ├── Supabase PostgreSQL
+│          ├── 云 MySQL
 │          └── Cloudflare R2
 │
 └── WebRTC → OpenAI Realtime API
@@ -62,7 +62,7 @@ Browser
 | 服务    | 作用         | 推荐                |
 | ------- | ------------ | ------------------- |
 | Web应用 | 前端+API     | Vercel              |
-| 数据库  | 用户数据     | Supabase PostgreSQL |
+| 数据库  | 用户数据     | 云 MySQL |
 | 缓存    | MVP不使用    | 后续可选 Redis      |
 | 文件    | 可选录音/图片| Cloudflare R2       |
 | AI      | 实时语音/分析| OpenAI Realtime API + Text Model |
@@ -95,7 +95,7 @@ Vercel
 
 +
 
-Supabase
+云数据库服务
 
 +
 
@@ -149,7 +149,7 @@ Cloudflare R2
 
         |
 
- PostgreSQL
+ MySQL
 
         |
 
@@ -165,7 +165,7 @@ Cloudflare R2
 | 服务     | 选择                |
 | -------- | ------------------- |
 | 服务器   | 腾讯云轻量/阿里云   |
-| 数据库   | 云数据库 PostgreSQL |
+| 数据库   | 云数据库 MySQL |
 | 缓存     | Redis               |
 | 对象存储 | COS                 |
 | 反向代理 | Nginx               |
@@ -235,7 +235,7 @@ Node.js >= 20
 
 pnpm >= 9
 
-PostgreSQL >= 16
+MySQL >= 8.0
 
 Redis >= 7
 
@@ -377,7 +377,7 @@ DATABASE_URL=
 格式：
 
 ```text
-postgresql://user:password@host:port/database
+mysql://user:password@host:port/database
 ```
 
 ------
@@ -412,7 +412,7 @@ REALTIME_DAILY_MINUTES_PER_USER=30
 REALTIME_MAX_ACTIVE_SESSIONS_PER_USER=1
 ```
 
-MVP 不配置 `REDIS_URL`。Realtime 会话媒体状态由 WebRTC 和 Realtime API 管理，业务记录与任务状态写入 PostgreSQL。
+MVP 不配置 `REDIS_URL`。Realtime 会话媒体状态由 WebRTC 和 Realtime API 管理，业务记录与任务状态写入 MySQL。
 
 ------
 
@@ -547,19 +547,25 @@ services:
 
 
 
- postgres:
+ mysql:
 
-  image: postgres:16
+  image: mysql:8.4
 
 
   environment:
 
-   POSTGRES_PASSWORD: password
+   MYSQL_ROOT_PASSWORD: root-password
+
+   MYSQL_DATABASE: english_speaking
+
+   MYSQL_USER: english_app
+
+   MYSQL_PASSWORD: password
 
 
   ports:
 
-   - "5432:5432"
+   - "3306:3306"
 
 
 
@@ -673,7 +679,7 @@ Nginx配置
 MVP：
 
 ```text
-Supabase PostgreSQL
+云 MySQL
 ```
 
 ------
@@ -681,7 +687,7 @@ Supabase PostgreSQL
 生产：
 
 ```text
-云数据库 PostgreSQL
+云数据库 MySQL
 ```
 
 ------
@@ -735,7 +741,7 @@ messages:[]
 
 ## 12.3 后续 AI 任务队列
 
-MVP 使用 PostgreSQL `AnalysisJob` 表和定时任务处理纠错重试、总结与学习数据聚合。未来才升级为：
+MVP 使用 MySQL `AnalysisJob` 表和定时任务处理纠错重试、总结与学习数据聚合。未来才升级为：
 
 ```text
 用户请求
@@ -1120,7 +1126,7 @@ Vercel
 
 ↓
 
-Supabase
+云数据库服务
 
 ↓
 
@@ -1156,7 +1162,7 @@ Nginx
 
 ↓
 
-PostgreSQL
+MySQL
 
 ↓
 
@@ -1208,7 +1214,7 @@ AI Worker
 
       |              |
 
- PostgreSQL       AI API
+ MySQL       AI API
 
       |
 

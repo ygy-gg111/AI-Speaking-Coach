@@ -1720,7 +1720,7 @@ AI练习
 内容：
 
 - Vercel 部署
-- Supabase PostgreSQL
+- 云 MySQL
 - Realtime Session Endpoint
 - WebRTC 生产环境要求
 - Cloudflare R2

@@ -817,7 +817,7 @@ next-intl
 
 +
 
-PostgreSQL
+MySQL
 
 +
 

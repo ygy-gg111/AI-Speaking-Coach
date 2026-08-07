@@ -52,7 +52,7 @@ TypeScript
 +
 Prisma
 +
-PostgreSQL
+MySQL
 +
 Object Storage
 ```
@@ -91,7 +91,7 @@ Object Storage
 
              |
 
-        PostgreSQL
+        MySQL
 ```
 
 ------
@@ -704,9 +704,11 @@ POST
 {
 "email":"test@test.com",
 
-"password":"123456",
+"password":"test-password-123",
 
-"nickname":"Tom"
+"displayName":"Tom",
+
+"locale":"zh-CN"
 }
 ```
 
@@ -1440,7 +1442,7 @@ Vercel
 
 +
 
-Supabase PostgreSQL
+云 MySQL
 
 +
 
@@ -1463,7 +1465,7 @@ Vercel
 ↓
 
 Next.js API
-├── Supabase PostgreSQL
+├── 云 MySQL
 ├── Cloudflare R2
 └── OpenAI Realtime API / Text Model
 ```
@@ -1543,7 +1545,7 @@ Prisma
 
 ↓
 
-PostgreSQL
+MySQL
 ```
 
 核心原则：

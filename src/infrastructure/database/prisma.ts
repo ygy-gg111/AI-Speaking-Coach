@@ -1,4 +1,4 @@
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "@prisma/client";
 
 const globalForPrisma = globalThis as unknown as {
@@ -16,10 +16,29 @@ export function getPrismaClient() {
   }
 
   const prisma = new PrismaClient({
-    adapter: new PrismaPg({ connectionString }),
+    adapter: createMySqlAdapter(connectionString),
   });
   if (process.env.NODE_ENV !== "production") {
     globalForPrisma.prisma = prisma;
   }
   return prisma;
+}
+
+function createMySqlAdapter(connectionString: string) {
+  const url = new URL(connectionString);
+  if (url.protocol !== "mysql:") {
+    throw new Error("DATABASE_URL must use the mysql:// protocol.");
+  }
+  const database = decodeURIComponent(url.pathname.replace(/^\//, ""));
+  if (!database) {
+    throw new Error("DATABASE_URL must include a database name.");
+  }
+  return new PrismaMariaDb({
+    host: url.hostname,
+    port: Number(url.port || 3306),
+    user: decodeURIComponent(url.username),
+    password: decodeURIComponent(url.password),
+    database,
+    connectionLimit: Number(url.searchParams.get("connection_limit") || 5),
+  });
 }

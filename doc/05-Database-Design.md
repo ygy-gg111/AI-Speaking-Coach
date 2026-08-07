@@ -43,7 +43,7 @@
 
 ## 推荐方案
 
-### PostgreSQL + Prisma
+### MySQL + Prisma
 
 架构：
 
@@ -54,7 +54,7 @@ Next.js
 Prisma ORM
    |
    |
-PostgreSQL
+MySQL
 ```
 
 原因：
@@ -96,7 +96,7 @@ AI 输出结构复杂。
 }
 ```
 
-PostgreSQL JSONB 可以保存。
+MySQL JSON 可以保存。
 
 ------
 
@@ -1796,7 +1796,7 @@ enum RealtimeSessionStatus {
 
 # 6.31 AnalysisJob
 
-MVP 不使用 Redis/BullMQ。最终字幕的纠错、总结和学习数据处理使用 PostgreSQL 任务表。
+MVP 不使用 Redis/BullMQ。最终字幕的纠错、总结和学习数据处理使用 MySQL 任务表。
 
 ```prisma
 model AnalysisJob {

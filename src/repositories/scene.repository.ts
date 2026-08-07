@@ -42,13 +42,11 @@ export class PrismaSceneRepository implements SceneRepository {
                 {
                   slug: {
                     contains: filters.query,
-                    mode: "insensitive" as const,
                   },
                 },
                 {
                   searchText: {
                     contains: filters.query,
-                    mode: "insensitive" as const,
                   },
                 },
               ],

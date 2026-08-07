@@ -21,7 +21,7 @@ const sensitiveKeyPattern =
 function sanitizeText(value: string) {
   return value
     .replace(
-      /(postgres(?:ql)?:\/\/[^:\s]+:)[^@\s]+@/gi,
+      /((?:postgres(?:ql)?|mysql|mariadb):\/\/[^:\s]+:)[^@\s]+@/gi,
       "$1[REDACTED]@",
     )
     .replace(/(Bearer\s+)[A-Za-z0-9._-]+/gi, "$1[REDACTED]")

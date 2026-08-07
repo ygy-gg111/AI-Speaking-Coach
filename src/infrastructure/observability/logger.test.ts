@@ -29,6 +29,14 @@ describe("structured logger", () => {
     expect(event.error?.message).not.toContain("password");
     expect(event.error?.message).not.toContain("abc.def");
     expect(event.error?.message).not.toContain("sk-1234567890abcdef");
+
+    const mysqlEvent = createStructuredLog(
+      "error",
+      "database.connection",
+      "Unable to connect",
+      new Error("mysql://english_app:database-password@localhost/app"),
+    );
+    expect(mysqlEvent.error?.message).not.toContain("database-password");
   });
 
   it("limits deeply nested and oversized values", () => {

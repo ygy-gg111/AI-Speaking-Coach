@@ -1,24 +1,13 @@
-CREATE TABLE "favorite_scenes" (
-    "id" TEXT NOT NULL,
-    "userId" TEXT NOT NULL,
-    "sceneId" TEXT NOT NULL,
-    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE `favorite_scenes` (
+    `id` VARCHAR(191) NOT NULL,
+    `userId` VARCHAR(191) NOT NULL,
+    `sceneId` VARCHAR(191) NOT NULL,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-    CONSTRAINT "favorite_scenes_pkey" PRIMARY KEY ("id")
-);
+CREATE UNIQUE INDEX `favorite_scenes_userId_sceneId_key` ON `favorite_scenes`(`userId`, `sceneId`);
+CREATE INDEX `favorite_scenes_userId_createdAt_idx` ON `favorite_scenes`(`userId`, `createdAt`);
 
-CREATE UNIQUE INDEX "favorite_scenes_userId_sceneId_key"
-ON "favorite_scenes"("userId", "sceneId");
-
-CREATE INDEX "favorite_scenes_userId_createdAt_idx"
-ON "favorite_scenes"("userId", "createdAt");
-
-ALTER TABLE "favorite_scenes"
-ADD CONSTRAINT "favorite_scenes_userId_fkey"
-FOREIGN KEY ("userId") REFERENCES "users"("id")
-ON DELETE CASCADE ON UPDATE CASCADE;
-
-ALTER TABLE "favorite_scenes"
-ADD CONSTRAINT "favorite_scenes_sceneId_fkey"
-FOREIGN KEY ("sceneId") REFERENCES "scenes"("id")
-ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `favorite_scenes` ADD CONSTRAINT `favorite_scenes_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `favorite_scenes` ADD CONSTRAINT `favorite_scenes_sceneId_fkey` FOREIGN KEY (`sceneId`) REFERENCES `scenes`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

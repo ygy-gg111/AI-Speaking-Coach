@@ -20,7 +20,7 @@ MVP 推荐采用：
 ```text
 Next.js 全栈应用
 +
-PostgreSQL
+MySQL
 +
 Prisma
 +
@@ -100,7 +100,7 @@ WebRTC Realtime
 ┌──────────────────────────────────────────────────────────────┐
 │                         数据存储层                            │
 │                                                              │
-│  PostgreSQL                           Object Storage         │
+│  MySQL                           Object Storage         │
 │  业务数据与会话记录                    可选录音与分享图片         │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -289,7 +289,7 @@ src/ai/
 使用：
 
 ```text
-PostgreSQL
+MySQL
 +
 Prisma ORM
 ```
@@ -1186,7 +1186,7 @@ AI回复
 - 复杂能力分析
 - 过期音频清理
 
-MVP 阶段不使用 Redis 和 BullMQ。短任务可在请求内处理；耗时任务写入 PostgreSQL 任务表，由定时任务领取、重试并记录结果。
+MVP 阶段不使用 Redis 和 BullMQ。短任务可在请求内处理；耗时任务写入 MySQL 任务表，由定时任务领取、重试并记录结果。
 
 用户量增加后引入队列。
 
@@ -1216,7 +1216,7 @@ Generate Checkin Record
 
 ## 2.19 缓存设计
 
-MVP 阶段明确不引入 Redis。Realtime 音频缓冲和连接状态由 WebRTC 与 Realtime API 管理，业务持久状态由 PostgreSQL 管理。
+MVP 阶段明确不引入 Redis。Realtime 音频缓冲和连接状态由 WebRTC 与 Realtime API 管理，业务持久状态由 MySQL 管理。
 
 当用户量增加后，可以缓存以下内容：
 
@@ -1267,7 +1267,7 @@ Realtime API 执行 VAD、实时理解和 Speech-to-Speech
 ↓
 用户插话时取消当前回复并截断未播放音频
 ↓
-每轮最终转写写入 PostgreSQL，触发结构化纠错
+每轮最终转写写入 MySQL，触发结构化纠错
 ```
 
 OpenAI 正式 API Key 只允许保存在服务端，浏览器只能获得短期客户端凭证。Realtime 主链路不依赖文件上传，也不把音频分片写入数据库。
@@ -1498,7 +1498,7 @@ AI老师刚刚走神了，请重新发送一次。
 
 ```text
 Next.js
-PostgreSQL
+MySQL
 对象存储
 ```
 
@@ -1515,7 +1515,7 @@ PostgreSQL
 
 ```text
 Next.js
-PostgreSQL
+MySQL
 Redis
 BullMQ
 对象存储
@@ -1537,7 +1537,7 @@ Web Application
 Business API
 AI Service
 Worker Service
-PostgreSQL
+MySQL
 Redis
 Object Storage
 ```
@@ -1592,7 +1592,7 @@ Vercel
   ├── Server Actions
   └── Realtime Session Endpoint
   │
-  ├── Supabase PostgreSQL
+  ├── 云 MySQL
   ├── Cloudflare R2
   └── OpenAI API（Realtime WebRTC + Text Model）
 ```
@@ -1611,7 +1611,7 @@ Nginx
  ▼
 Next.js Node Service
  │
- ├── PostgreSQL
+ ├── MySQL
  ├── Redis
  ├── COS
  └── AI Gateway
@@ -1802,7 +1802,7 @@ AI Speaking Coach 第一阶段采用：
 ```text
 Next.js 模块化单体
 +
-PostgreSQL
+MySQL
 +
 Prisma
 +

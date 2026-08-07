@@ -1,4 +1,4 @@
-import { PrismaPg } from "@prisma/adapter-pg";
+import { PrismaMariaDb } from "@prisma/adapter-mariadb";
 import { PrismaClient } from "@prisma/client";
 
 const connectionString = process.env.DATABASE_URL;
@@ -7,8 +7,27 @@ if (!connectionString) {
 }
 
 const prisma = new PrismaClient({
-  adapter: new PrismaPg({ connectionString }),
+  adapter: createMySqlAdapter(connectionString),
 });
+
+function createMySqlAdapter(value) {
+  const url = new URL(value);
+  if (url.protocol !== "mysql:") {
+    throw new Error("DATABASE_URL must use the mysql:// protocol.");
+  }
+  const database = decodeURIComponent(url.pathname.replace(/^\//, ""));
+  if (!database) {
+    throw new Error("DATABASE_URL must include a database name.");
+  }
+  return new PrismaMariaDb({
+    host: url.hostname,
+    port: Number(url.port || 3306),
+    user: decodeURIComponent(url.username),
+    password: decodeURIComponent(url.password),
+    database,
+    connectionLimit: Number(url.searchParams.get("connection_limit") || 5),
+  });
+}
 
 const scenes = [
   ["scene-coffee", "coffee-order", "daily", "coffee", "☕", 2, 8, 10],

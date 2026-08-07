@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
 }
 
 enum ConversationStatus {
@@ -87,8 +87,8 @@ model Scene {
   slug             String            @unique
   titleKey         String
   descriptionKey   String
-  searchText       String
-  systemPrompt     String
+  searchText       String            @db.Text
+  systemPrompt     String            @db.Text
   category         String
   coverTone        String
   coverMark        String
@@ -130,7 +130,7 @@ model Conversation {
   startedAt        DateTime           @default(now())
   endedAt          DateTime?
   durationSeconds  Int?
-  summary          String?
+  summary          String?            @db.Text
   newExpressions   Int                @default(0)
   corrections      Int                @default(0)
   mastery          Int?
@@ -154,10 +154,10 @@ model Mistake {
   userId         String
   conversationId String          @unique
   sceneId        String
-  original       String
-  improved       String
-  reasonZh       String
-  reasonEn       String
+  original       String          @db.Text
+  improved       String          @db.Text
+  reasonZh       String          @db.Text
+  reasonEn       String          @db.Text
   category       MistakeCategory @default(EXPRESSION)
   reviewCount    Int             @default(0)
   status         MistakeStatus   @default(LEARNING)
@@ -178,9 +178,9 @@ model VocabularyEntry {
   conversationId String
   sceneId        String
   phrase         String
-  meaningZh      String
-  meaningEn      String
-  example        String
+  meaningZh      String       @db.Text
+  meaningEn      String       @db.Text
+  example        String       @db.Text
   favorite       Boolean      @default(false)
   reviewCount    Int          @default(0)
   createdAt      DateTime     @default(now())
@@ -200,8 +200,8 @@ model Message {
   conversationId String
   clientEventId  String?
   role           MessageRole
-  content        String
-  transcript     String?
+  content        String       @db.Text
+  transcript     String?      @db.Text
   sequence       Int
   createdAt      DateTime     @default(now())
   conversation   Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
@@ -232,7 +232,7 @@ model AnalysisJob {
   type           String
   status         AnalysisStatus @default(PENDING)
   result         Json?
-  errorMessage   String?
+  errorMessage   String?        @db.Text
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
   conversation   Conversation   @relation(fields: [conversationId], references: [id], onDelete: Cascade)
