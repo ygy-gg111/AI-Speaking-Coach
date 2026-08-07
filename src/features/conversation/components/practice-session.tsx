@@ -6,7 +6,7 @@ import {
   CustomerServiceOutlined,
   SwapOutlined,
 } from "@ant-design/icons";
-import { Alert, Button } from "antd";
+import { Alert, Button, Empty, Spin } from "antd";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale, useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -20,9 +20,7 @@ import { findScene, mockScenes } from "@/features/scenes/mock-scenes";
 import { getSceneDetail } from "@/features/scenes/scene-detail-data";
 import { getScene } from "@/features/scenes/scene-client";
 import { createMistakeFromEvaluation } from "@/features/mistakes/mistake-data";
-import { saveMistake } from "@/features/mistakes/mistake-client";
 import { createVocabularyFromEvaluation } from "@/features/vocabulary/vocabulary-data";
-import { saveVocabulary } from "@/features/vocabulary/vocabulary-client";
 import { Link, useRouter } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { useRealtimeStore } from "@/stores/realtime-store";
@@ -30,7 +28,6 @@ import { useLearningStore } from "@/stores/learning-store";
 
 import {
   createMockConversationMessages,
-  mockEvaluation,
 } from "../mock-conversation";
 import {
   completeConversation,
@@ -96,7 +93,7 @@ export function PracticeSession({
   });
   const scene =
     sceneQuery.data ??
-    findScene(authoritativeSceneIdentifier) ??
+    (guest ? findScene(authoritativeSceneIdentifier) : undefined) ??
     mockScenes[1];
   const sceneDetail = getSceneDetail(scene.id);
   const openingExpression = sceneDetail.phrases[0].expression;
@@ -116,12 +113,13 @@ export function PracticeSession({
             audioAvailable: message.role === "ASSISTANT",
           }));
       }
+      if (!guest) return [];
       return createMockConversationMessages({
         partnerName: sceneDetail.partner,
         openingExpression,
       });
     },
-    [conversationQuery.data?.messages, openingExpression, sceneDetail.partner],
+    [conversationQuery.data?.messages, guest, openingExpression, sceneDetail.partner],
   );
   const realtimeOptions = useMemo(
     () => ({
@@ -131,8 +129,10 @@ export function PracticeSession({
     }),
     [conversationId, scene.title.en, userQuery.data?.profile.level],
   );
-  const { connect, disconnect, error, errorCode, sendText, toggleMicrophone } =
-    useRealtimeSession(realtimeOptions);
+  const {
+    connect, disconnect, error, errorCode, sendText, toggleMicrophone,
+    inputDevices, selectedInputDeviceId, selectInputDevice,
+  } = useRealtimeSession(realtimeOptions);
   const {
     analyze,
     error: analysisError,
@@ -270,7 +270,11 @@ export function PracticeSession({
     } catch {
       // The review route still has the local fallback already shown in the UI.
     } finally {
-      const evaluation = finalReview?.evaluation ?? mockEvaluation;
+      if (!finalReview) {
+        setIsEnding(false);
+        return;
+      }
+      const evaluation = finalReview.evaluation;
       const mastery = Math.max(
         35,
         Math.min(
@@ -278,8 +282,6 @@ export function PracticeSession({
           78 - evaluation.corrections * 4 + evaluation.newExpressions,
         ),
       );
-      let cloudMistake = null;
-      let cloudVocabulary = null;
       if (!guest) {
         const completed = await completeConversation(conversationId, {
           durationSeconds,
@@ -289,19 +291,6 @@ export function PracticeSession({
           mastery,
         }).catch(() => null);
         if (completed) {
-          cloudMistake = await saveMistake({
-            conversationId,
-            original: evaluation.original,
-            improved: evaluation.improved,
-            reason: evaluation.reason,
-            category: "expression",
-          }).catch(() => null);
-          cloudVocabulary = await saveVocabulary({
-            conversationId,
-            phrase: evaluation.improved,
-            meaning: evaluation.reason,
-            example: evaluation.improved,
-          }).catch(() => null);
           void queryClient.invalidateQueries({
             queryKey: ["practice-history"],
           });
@@ -321,21 +310,19 @@ export function PracticeSession({
         mastery,
       });
       addMistake(
-        cloudMistake ??
-          createMistakeFromEvaluation(conversationId, scene.id, evaluation),
+        createMistakeFromEvaluation(conversationId, scene.id, evaluation),
       );
       addVocabulary(
-        cloudVocabulary ??
-          createVocabularyFromEvaluation(
-            conversationId,
-            scene.id,
-            evaluation,
-          ),
+        createVocabularyFromEvaluation(conversationId, scene.id, evaluation),
       );
       router.push(
         `/practice/${conversationId}/review?scene=${encodeURIComponent(scene.slug)}`,
       );
     }
+  }
+
+  if (!sceneQuery.data && !guest) {
+    return <Spin fullscreen size="large" />;
   }
 
   return (
@@ -437,28 +424,28 @@ export function PracticeSession({
             onCantSay={() => setHint(openingExpression)}
             onHint={() => setHint(sceneDetail.phrases[1].expression)}
             onSend={handleSend}
+            inputDevices={inputDevices}
+            selectedInputDeviceId={selectedInputDeviceId}
+            deviceLabel={t("inputDevice")}
+            onDeviceChange={(deviceId) => void selectInputDevice(deviceId)}
           />
         </section>
 
         <aside className={styles.evaluationColumn}>
-          <CoachEvaluationPanel
-            evaluation={review?.evaluation ?? mockEvaluation}
-            analysisStatus={
-              isAnalyzing
-                ? "loading"
-                : analysisError
-                  ? "error"
-                  : review?.source === "ai"
-                    ? "ready"
-                    : review
-                      ? "fallback"
-                      : "idle"
-            }
-            onAnalysisRetry={() =>
-              void analyzeCurrentConversation().catch(() => undefined)
-            }
-            onRetry={() => setHint("I want to go to Japan.")}
-          />
+          {review ? (
+            <CoachEvaluationPanel
+              evaluation={review.evaluation}
+              analysisStatus={review.source === "ai" ? "ready" : "fallback"}
+              onAnalysisRetry={() =>
+                void analyzeCurrentConversation().catch(() => undefined)
+              }
+              onRetry={() => setHint(openingExpression)}
+            />
+          ) : isAnalyzing ? (
+            <Spin size="large" />
+          ) : (
+            <Empty description={analysisError ? t("analysisError") : t("evaluationWaiting")} />
+          )}
         </aside>
       </div>
     </main>

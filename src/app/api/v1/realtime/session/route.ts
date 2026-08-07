@@ -13,6 +13,7 @@ import { reportServerError } from "@/infrastructure/observability/logger";
 import { fail, ok } from "@/lib/api-response";
 import { DomainError } from "@/lib/domain-error";
 import { getServerEnv } from "@/lib/env";
+import { consumeRateLimit } from "@/lib/rate-limit";
 import { PrismaRealtimeSessionRepository } from "@/repositories/realtime-session.repository";
 import { RealtimeSessionService } from "@/services/realtime/realtime-session.service";
 
@@ -73,6 +74,34 @@ export async function POST(request: Request) {
     userId = await getSessionUserId();
     if (!userId) {
       return fail("AUTH_UNAUTHORIZED", "Please log in to continue.", 401);
+    }
+    if (!consumeRateLimit(`realtime:${userId}`, 6, 60_000).allowed) {
+      return fail("REALTIME_RATE_LIMIT", "Too many realtime connection attempts.", 429);
+    }
+    const [activeSessions, todaySessions] = await Promise.all([
+      prisma.realtimeSession.count({
+        where: {
+          status: { in: ["CREATED", "CONNECTED"] },
+          conversation: { userId },
+        },
+      }),
+      prisma.realtimeSession.findMany({
+        where: {
+          conversation: { userId },
+          startedAt: { gte: new Date(new Date().setUTCHours(0, 0, 0, 0)) },
+        },
+        select: { startedAt: true, endedAt: true },
+      }),
+    ]);
+    if (activeSessions >= env.REALTIME_MAX_CONCURRENT_SESSIONS) {
+      return fail("REALTIME_CONCURRENCY_LIMIT", "Finish the active voice session before starting another one.", 429);
+    }
+    const usedMinutes = todaySessions.reduce((total, session) => {
+      const end = session.endedAt ?? new Date();
+      return total + Math.max(0, (end.getTime() - session.startedAt.getTime()) / 60_000);
+    }, 0);
+    if (usedMinutes >= env.REALTIME_DAILY_MINUTES) {
+      return fail("REALTIME_DAILY_LIMIT", "The daily voice practice limit has been reached.", 429);
     }
     const context = await lifecycle.getContext(
       userId,

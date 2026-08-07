@@ -53,6 +53,8 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
   const [errorCode, setErrorCode] =
     useState<RealtimeSessionErrorCode | null>(null);
   const [isMuted, setIsMuted] = useState(false);
+  const [inputDevices, setInputDevices] = useState<MediaDeviceInfo[]>([]);
+  const [selectedInputDeviceId, setSelectedInputDeviceId] = useState("");
   const peerRef = useRef<RTCPeerConnection | null>(null);
   const channelRef = useRef<RTCDataChannel | null>(null);
   const mediaRef = useRef<MediaStream | null>(null);
@@ -201,12 +203,18 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
 
         const media = await navigator.mediaDevices.getUserMedia({
           audio: {
+            ...(selectedInputDeviceId
+              ? { deviceId: { exact: selectedInputDeviceId } }
+              : {}),
             echoCancellation: true,
             noiseSuppression: true,
             autoGainControl: true,
           },
         });
         mediaRef.current = media;
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        setInputDevices(devices.filter((device) => device.kind === "audioinput"));
+        setSelectedInputDeviceId(media.getAudioTracks()[0]?.getSettings().deviceId ?? "");
         setIsMuted(false);
         transitionTo("connecting");
 
@@ -344,8 +352,21 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
         transitionTo("error");
       }
     },
-    [cleanup, finishRealtimeSession, handleServerEvent, options],
+    [cleanup, finishRealtimeSession, handleServerEvent, options, selectedInputDeviceId],
   );
+
+  const selectInputDevice = useCallback(async (deviceId: string) => {
+    setSelectedInputDeviceId(deviceId);
+    if (!mediaRef.current || !peerRef.current) return;
+    const replacement = await navigator.mediaDevices.getUserMedia({
+      audio: { deviceId: { exact: deviceId }, echoCancellation: true, noiseSuppression: true },
+    });
+    const nextTrack = replacement.getAudioTracks()[0];
+    const sender = peerRef.current.getSenders().find((item) => item.track?.kind === "audio");
+    if (nextTrack && sender) await sender.replaceTrack(nextTrack);
+    mediaRef.current.getTracks().forEach((track) => track.stop());
+    mediaRef.current = replacement;
+  }, []);
 
   useEffect(() => {
     connectRef.current = connectInternal;
@@ -457,6 +478,9 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
     errorCode,
     interrupt,
     isMuted,
+    inputDevices,
+    selectedInputDeviceId,
+    selectInputDevice,
     sendText,
     toggleMicrophone,
   };

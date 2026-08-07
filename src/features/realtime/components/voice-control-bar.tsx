@@ -7,7 +7,7 @@ import {
   QuestionCircleOutlined,
   SendOutlined,
 } from "@ant-design/icons";
-import { Input } from "antd";
+import { Input, Select } from "antd";
 import { FormEvent, useState } from "react";
 
 import type { RealtimeConnectionState } from "../types";
@@ -25,6 +25,10 @@ type VoiceControlBarProps = {
   onHint: () => void;
   onCantSay: () => void;
   onSend: (text: string) => void;
+  inputDevices?: MediaDeviceInfo[];
+  selectedInputDeviceId?: string;
+  deviceLabel?: string;
+  onDeviceChange?: (deviceId: string) => void;
 };
 
 export function VoiceControlBar({
@@ -39,6 +43,10 @@ export function VoiceControlBar({
   onHint,
   onCantSay,
   onSend,
+  inputDevices = [],
+  selectedInputDeviceId,
+  deviceLabel,
+  onDeviceChange,
 }: VoiceControlBarProps) {
   const [text, setText] = useState("");
   const isLive = [
@@ -114,6 +122,17 @@ export function VoiceControlBar({
           <SendOutlined />
         </button>
       </form>
+      {inputDevices.length > 1 && onDeviceChange && (
+        <Select
+          value={selectedInputDeviceId}
+          aria-label={deviceLabel}
+          onChange={onDeviceChange}
+          options={inputDevices.map((device, index) => ({
+            value: device.deviceId,
+            label: device.label || `${deviceLabel ?? "Microphone"} ${index + 1}`,
+          }))}
+        />
+      )}
     </section>
   );
 }

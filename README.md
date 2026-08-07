@@ -37,6 +37,7 @@ pnpm dev
 pnpm lint
 pnpm typecheck
 pnpm test
+pnpm test:e2e
 pnpm build
 pnpm prisma:validate
 pnpm prisma:generate
@@ -82,6 +83,8 @@ OPENAI_API_KEY="..."
 OPENAI_REALTIME_MODEL="gpt-realtime"
 OPENAI_REALTIME_VOICE="marin"
 OPENAI_TEXT_MODEL="gpt-5.6-sol"
+REALTIME_MAX_CONCURRENT_SESSIONS="1"
+REALTIME_DAILY_MINUTES="60"
 ```
 
 未配置密钥或麦克风权限被拒绝时，练习页会展示可重试的降级提示。生产环境必须使用 HTTPS，并为 Realtime 会话补充用户身份、分钟数配额和并发限制。
