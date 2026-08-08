@@ -5,6 +5,13 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRealtimeStore } from "@/stores/realtime-store";
 
 import { getRealtimeEventUpdate, parseRealtimeEvent } from "../events";
+import {
+  assertRealtimeAvailable,
+  createMicrophoneConstraints,
+  exchangeRealtimeOffer,
+  RealtimeClientError,
+  updateRealtimeSessionStatus,
+} from "../realtime-client";
 import type {
   RealtimeConnectionState,
   RealtimeSessionErrorCode,
@@ -15,29 +22,6 @@ type RealtimeSessionOptions = {
   sceneName: string;
   learnerLevel: string;
 };
-
-type RealtimeApiError = {
-  error?: {
-    code?: string;
-    message?: string;
-  };
-};
-
-type RealtimeAvailabilityResponse = {
-  success?: boolean;
-  data?: {
-    configured?: boolean;
-  };
-};
-
-class RealtimeClientError extends Error {
-  constructor(
-    readonly code: RealtimeSessionErrorCode,
-    message: string,
-  ) {
-    super(message);
-  }
-}
 
 const MAX_RECONNECT_ATTEMPTS = 2;
 
@@ -75,15 +59,9 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
         return;
       }
       sessionIdRef.current = null;
-      await fetch(
-        `/api/v1/realtime/session/${encodeURIComponent(sessionId)}`,
-        {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ status }),
-          keepalive: true,
-        },
-      ).catch(() => undefined);
+      await updateRealtimeSessionStatus(sessionId, status).catch(
+        () => undefined,
+      );
     },
     [],
   );
@@ -176,40 +154,13 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
           }
           transitionTo("requesting-permission");
 
-          const availabilityResponse = await fetch(
-            "/api/v1/realtime/session",
-            {
-              method: "GET",
-              cache: "no-store",
-            },
-          );
-          const availability =
-            (await availabilityResponse.json().catch(() => null)) as
-              | RealtimeAvailabilityResponse
-              | null;
-          if (
-            !availabilityResponse.ok ||
-            !availability?.success ||
-            !availability.data?.configured
-          ) {
-            throw new RealtimeClientError(
-              "not-configured",
-              "Realtime voice is not configured. Add OPENAI_API_KEY on the server.",
-            );
-          }
+          await assertRealtimeAvailable();
         } else {
           transitionTo("connecting");
         }
 
         const media = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            ...(selectedInputDeviceId
-              ? { deviceId: { exact: selectedInputDeviceId } }
-              : {}),
-            echoCancellation: true,
-            noiseSuppression: true,
-            autoGainControl: true,
-          },
+          audio: createMicrophoneConstraints(selectedInputDeviceId),
         });
         mediaRef.current = media;
         const devices = await navigator.mediaDevices.enumerateDevices();
@@ -294,41 +245,12 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
           throw new Error("The browser did not create an SDP offer.");
         }
 
-        const query = new URLSearchParams({
-          conversationId: options.conversationId,
-        });
-        const response = await fetch(
-          `/api/v1/realtime/session?${query.toString()}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/sdp" },
-            body: offer.sdp,
-          },
+        const { answerSdp, sessionId } = await exchangeRealtimeOffer(
+          options.conversationId,
+          offer.sdp,
         );
-
-        if (!response.ok) {
-          const payload = (await response.json().catch(() => null)) as
-            | RealtimeApiError
-            | null;
-          throw new RealtimeClientError(
-            payload?.error?.code === "REALTIME_NOT_CONFIGURED"
-              ? "not-configured"
-              : "connection-failed",
-            payload?.error?.code === "REALTIME_NOT_CONFIGURED"
-              ? "Realtime voice is not configured. Add OPENAI_API_KEY on the server."
-              : (payload?.error?.message ??
-                  "Unable to start the realtime voice session."),
-          );
-        }
-
-        const sessionId = response.headers.get("X-Realtime-Session-Id");
-        if (!sessionId) {
-          throw new Error("The realtime session identifier is missing.");
-        }
         sessionIdRef.current = sessionId;
-
-        const answer = await response.text();
-        await peer.setRemoteDescription({ type: "answer", sdp: answer });
+        await peer.setRemoteDescription({ type: "answer", sdp: answerSdp });
       } catch (connectError) {
         void finishRealtimeSession("FAILED");
         cleanup();
@@ -358,14 +280,33 @@ export function useRealtimeSession(options: RealtimeSessionOptions) {
   const selectInputDevice = useCallback(async (deviceId: string) => {
     setSelectedInputDeviceId(deviceId);
     if (!mediaRef.current || !peerRef.current) return;
+    const previous = mediaRef.current;
     const replacement = await navigator.mediaDevices.getUserMedia({
-      audio: { deviceId: { exact: deviceId }, echoCancellation: true, noiseSuppression: true },
+      audio: createMicrophoneConstraints(deviceId),
     });
-    const nextTrack = replacement.getAudioTracks()[0];
-    const sender = peerRef.current.getSenders().find((item) => item.track?.kind === "audio");
-    if (nextTrack && sender) await sender.replaceTrack(nextTrack);
-    mediaRef.current.getTracks().forEach((track) => track.stop());
-    mediaRef.current = replacement;
+    try {
+      const nextTrack = replacement.getAudioTracks()[0];
+      const sender = peerRef.current
+        .getSenders()
+        .find((item) => item.track?.kind === "audio");
+      if (!nextTrack || !sender) {
+        throw new Error("Unable to switch the active microphone.");
+      }
+      await sender.replaceTrack(nextTrack);
+      previous.getTracks().forEach((track) => track.stop());
+      mediaRef.current = replacement;
+    } catch (deviceError) {
+      replacement.getTracks().forEach((track) => track.stop());
+      setSelectedInputDeviceId(
+        previous.getAudioTracks()[0]?.getSettings().deviceId ?? "",
+      );
+      setError(
+        deviceError instanceof Error
+          ? deviceError.message
+          : "Unable to switch the active microphone.",
+      );
+      setErrorCode("connection-failed");
+    }
   }, []);
 
   useEffect(() => {
