@@ -105,6 +105,10 @@ REALTIME_DAILY_MINUTES="60"
 
 登录、注册、退出登录和用户资料 API 已使用 Prisma、bcrypt 与 HttpOnly JWT Cookie 实现。JWT 使用 RSA `RS256` 签名：`AUTH_PRIVATE_KEY` 仅用于签发，`AUTH_PUBLIC_KEY` 用于验证。运行认证功能前需要配置 `DATABASE_URL`、执行数据库迁移，并通过 `npm run auth:keys` 生成 Base64 编码的 PKCS#8/SPKI 密钥对；登录令牌不会暴露给前端 JavaScript，也不会写入 `localStorage`。未登录用户仍可使用访客模式体验口语练习。
 
+## 免费部署
+
+测试阶段复用 `Vercel + TiDB Cloud Starter`：本地以 `DATABASE_DRIVER=mariadb` 连接 MariaDB，Vercel 以 `DATABASE_DRIVER=tidb-cloud` 通过 TiDB Serverless Adapter 查询数据库。部署配置见 [`doc/12-TiDB-Vercel-Deployment.md`](doc/12-TiDB-Vercel-Deployment.md)。当前仅保存发音评分、不保存原始录音，因此暂不需要对象存储。
+
 ## 后端核心接口
 
 当前已提供第一批数据库业务接口：
