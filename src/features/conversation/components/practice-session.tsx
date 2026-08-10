@@ -30,6 +30,12 @@ import {
   createMockConversationMessages,
 } from "../mock-conversation";
 import {
+  getCompletedUserTurnKey,
+  toLiveTimelineMessages,
+  toReviewMessages,
+  toStoredTimelineMessages,
+} from "../practice-message-adapters";
+import {
   completeConversation,
   getConversation,
   isGuestConversation,
@@ -87,7 +93,7 @@ export function PracticeSession({
   const sceneQuery = useQuery({
     queryKey: ["scene", authoritativeSceneIdentifier],
     queryFn: () => getScene(authoritativeSceneIdentifier),
-    enabled: Boolean(authoritativeSceneIdentifier),
+    enabled: !guest && Boolean(authoritativeSceneIdentifier),
     retry: false,
     staleTime: 5 * 60 * 1_000,
   });
@@ -101,17 +107,7 @@ export function PracticeSession({
     () => {
       const storedMessages = conversationQuery.data?.messages ?? [];
       if (storedMessages.length > 0) {
-        return storedMessages
-          .filter((message) => message.role !== "SYSTEM")
-          .map((message) => ({
-            id: message.id,
-            role: message.role === "USER" ? "user" as const : "assistant" as const,
-            text: {
-              "zh-CN": message.transcript ?? message.content,
-              en: message.transcript ?? message.content,
-            },
-            audioAvailable: message.role === "ASSISTANT",
-          }));
+        return toStoredTimelineMessages(storedMessages);
       }
       if (!guest) return [];
       return createMockConversationMessages({
@@ -142,35 +138,17 @@ export function PracticeSession({
   const messages = useMemo(
     () => [
       ...initialMessages,
-      ...transcript.map((item) => ({
-        id: item.id,
-        role: item.role,
-        text: { "zh-CN": item.text, en: item.text },
-        audioAvailable: item.role === "assistant",
-      })),
+      ...toLiveTimelineMessages(transcript),
     ],
     [initialMessages, transcript],
   );
   const reviewMessages = useMemo(
-    () => [
-      ...(conversationQuery.data?.messages ?? [])
-        .filter((message) => message.role !== "SYSTEM")
-        .map((message) => ({
-          role: message.role === "USER" ? "user" as const : "assistant" as const,
-          text: message.transcript ?? message.content,
-        })),
-      ...transcript
-        .filter((item) => item.final && item.text.trim())
-        .map((item) => ({ role: item.role, text: item.text.trim() })),
-    ],
+    () =>
+      toReviewMessages(conversationQuery.data?.messages ?? [], transcript),
     [conversationQuery.data?.messages, transcript],
   );
   const completedUserTurns = useMemo(
-    () =>
-      transcript
-        .filter((item) => item.role === "user" && item.final)
-        .map((item) => `${item.id}:${item.text}`)
-        .join("|"),
+    () => getCompletedUserTurnKey(transcript),
     [transcript],
   );
 

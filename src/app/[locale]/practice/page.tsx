@@ -1,6 +1,12 @@
 "use client";
 
-import { ArrowRightOutlined, AudioOutlined } from "@ant-design/icons";
+import {
+  ArrowRightOutlined,
+  AudioOutlined,
+  CommentOutlined,
+  FormOutlined,
+  SoundOutlined,
+} from "@ant-design/icons";
 import { useQuery } from "@tanstack/react-query";
 import { Empty, Skeleton } from "antd";
 import { useLocale, useTranslations } from "next-intl";
@@ -77,6 +83,62 @@ export default function PracticePage() {
         </section>
       ) : (
         <Empty description={t("allScenes")} />
+      )}
+
+      {currentScene && (
+        <section className={styles.trainingModes}>
+          <div className={styles.trainingHeading}>
+            <div>
+              <span>{t("trainingEyebrow")}</span>
+              <h2>{t("trainingModes")}</h2>
+            </div>
+            <p>{t("trainingModesSubtitle")}</p>
+          </div>
+
+          <div className={styles.trainingGrid}>
+            <article className={`${styles.trainingCard} ${styles.conversationMode}`}>
+              <div className={styles.trainingIcon}>
+                <CommentOutlined />
+              </div>
+              <span>{t("modeConversationTag")}</span>
+              <h3>{t("modeConversationTitle")}</h3>
+              <p>{t("modeConversationDescription")}</p>
+              <StartPracticeButton
+                scene={currentScene}
+                className={styles.trainingAction}
+              >
+                {t("modeConversationAction")} <ArrowRightOutlined />
+              </StartPracticeButton>
+            </article>
+
+            <article className={`${styles.trainingCard} ${styles.shadowingMode}`}>
+              <div className={styles.trainingIcon}>
+                <SoundOutlined />
+              </div>
+              <span>{t("modeShadowingTag")}</span>
+              <h3>{t("modeShadowingTitle")}</h3>
+              <p>{t("modeShadowingDescription")}</p>
+              <Link
+                href={`/scenes/${currentScene.id}/replay`}
+                className={styles.trainingAction}
+              >
+                {t("modeShadowingAction")} <ArrowRightOutlined />
+              </Link>
+            </article>
+
+            <article className={`${styles.trainingCard} ${styles.reviewMode}`}>
+              <div className={styles.trainingIcon}>
+                <FormOutlined />
+              </div>
+              <span>{t("modeReviewTag")}</span>
+              <h3>{t("modeReviewTitle")}</h3>
+              <p>{t("modeReviewDescription")}</p>
+              <Link href="/mistakes" className={styles.trainingAction}>
+                {t("modeReviewAction")} <ArrowRightOutlined />
+              </Link>
+            </article>
+          </div>
+        </section>
       )}
 
       <section className={styles.quickScenes}>

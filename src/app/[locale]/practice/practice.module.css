@@ -108,6 +108,145 @@
   opacity: 0.72;
 }
 
+.trainingModes {
+  margin-top: 34px;
+}
+
+.trainingHeading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 28px;
+  margin-bottom: 14px;
+}
+
+.trainingHeading span {
+  color: var(--app-primary);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.trainingHeading h2 {
+  margin: 4px 0 0;
+  font-size: 18px;
+}
+
+.trainingHeading p {
+  max-width: 430px;
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 11px;
+  line-height: 1.6;
+  text-align: right;
+}
+
+.trainingGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.trainingCard {
+  position: relative;
+  min-height: 222px;
+  overflow: hidden;
+  padding: 20px;
+  border: 1px solid var(--app-border);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgb(48 43 79 / 5%);
+}
+
+.trainingCard::after {
+  position: absolute;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  content: "";
+  inset: -45px -35px auto auto;
+  opacity: 0.55;
+}
+
+.conversationMode::after {
+  background: #e9e2ff;
+}
+
+.shadowingMode::after {
+  background: #dff5ff;
+}
+
+.reviewMode::after {
+  background: #fff0cf;
+}
+
+.trainingIcon {
+  display: inline-flex;
+  width: 38px;
+  height: 38px;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 17px;
+  border-radius: 11px;
+  color: var(--app-primary);
+  background: #f0ecff;
+  font-size: 18px;
+}
+
+.shadowingMode .trainingIcon {
+  color: #1687b8;
+  background: #e7f7ff;
+}
+
+.reviewMode .trainingIcon {
+  color: #b77910;
+  background: #fff5dc;
+}
+
+.trainingCard > span {
+  display: block;
+  color: var(--app-muted);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.trainingCard h3 {
+  margin: 5px 0 7px;
+  font-size: 16px;
+}
+
+.trainingCard p {
+  min-height: 44px;
+  margin: 0 0 16px;
+  color: var(--app-muted);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.trainingAction {
+  display: inline-flex;
+  min-height: 32px;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  color: var(--app-primary);
+  background: transparent;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.trainingAction:hover {
+  color: var(--app-primary-dark);
+}
+
+.trainingAction:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 .quickScenes {
   margin-top: 34px;
 }
@@ -155,5 +294,26 @@
 
   .sceneList {
     grid-template-columns: 1fr;
+  }
+
+  .trainingHeading {
+    display: block;
+  }
+
+  .trainingHeading p {
+    margin-top: 6px;
+    text-align: left;
+  }
+
+  .trainingGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .trainingCard {
+    min-height: 0;
+  }
+
+  .trainingCard p {
+    min-height: 0;
   }
 }
